@@ -1,0 +1,25 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Categorias", "version": "1.0.0" },
+  "paths": {
+    "/categorias": {
+      "post": {
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Categoria" } } } },
+        "responses": { "201": { "description": "ok" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Categoria": {
+        "type": "object",
+        "required": ["nome"],
+        "properties": {
+          "nome": { "type": ["string", "null"], "maxLength": 50 },
+          "codigo": { "type": "integer", "exclusiveMinimum": 0, "maximum": 10 },
+          "filhas": { "type": "array", "items": { "$ref": "#/components/schemas/Categoria" } }
+        }
+      }
+    }
+  }
+}

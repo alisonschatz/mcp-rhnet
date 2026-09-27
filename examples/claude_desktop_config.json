@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "apis-time-local": {
+      "command": "node",
+      "args": ["C:/caminho/para/mcp-apis-time/src/stdio.js"]
+    }
+  }
+}
