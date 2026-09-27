@@ -45,8 +45,10 @@ test('token no header ou na query -> 200', async () => {
 });
 
 test('health é público e não expõe os ids das APIs', async () => {
+  const { listApiIds } = await import('../src/specs.js');
   const body = await (await fetch(`${base}/mcp/health`)).json();
-  assert.deepEqual(body, { status: 'ok', apis: 1, autenticacao: true });
+  assert.deepEqual(body, { status: 'ok', apis: listApiIds().length, autenticacao: true });
+  assert.ok(body.apis >= 1);
 });
 
 test('cliente MCP real via HTTP lê as specs do bundle', async () => {
