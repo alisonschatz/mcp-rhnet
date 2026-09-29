@@ -134,7 +134,7 @@
                     "Admissões"
                 ],
                 "summary": "Atualiza admissão",
-                "description": "Substitui todos os dados de um funcionário ou contribuinte existente. O recurso é completamente substituído pelos dados enviados. Campos ausentes na requisição serão definidos como null no banco de dados.<br><br>⚠️ Envie sempre o recurso completo para evitar perda de dados.<br><br><strong>Campos iniciais</strong><br>Podem ser alterados no PUT somente enquanto `v_funcionario_contribuinte_id` estiver nulo no registro. Colaborador já integrado: enviar valor diferente do persistido retorna erro 400; reenviar o mesmo valor é permitido.<br>• `funcao_id` - cargo inicial<br>• `salario_base` - salário inicial<br>• `v_quadro_horario_id` - quadro de horário inicial<br>• `horario_noturno` - horário noturno inicial<br>• `tipo_jornada_id` - tipo de jornada inicial<br>• `regime_jornada_trabalho_id` - regime de jornada de trabalho inicial<br>• `tipo_escala_id` - tipo de escala inicial<br><br><strong>Informações relevantes</strong><br>• `funcionario_contribuinte_id`: identifica o registro a ser atualizado. Obrigatório e deve existir; caso contrário, retorna erro de validação.<br>• `v_funcionario_contribuinte_id`: código no sistema de origem. Obrigatório apenas com token de sistema (desktop). Enviado como null ou omitido nesse cenário, retorna erro de validação.<br>• `empresa_id`: deve corresponder à empresa do registro informado em `funcionario_contribuinte_id`.<br>• `tipo`: imutável - envie sempre o valor atual do registro.<br>• `cpf`: formato XXX.XXX.XXX-XX com pontuação.",
+                "description": "Substitui todos os dados de um funcionário ou contribuinte existente. O recurso é completamente substituído pelos dados enviados. Campos ausentes na requisição serão definidos como null no banco de dados.<br><br>⚠️ Envie sempre o recurso completo para evitar perda de dados.<br><br><strong>Campos iniciais</strong><br>Podem ser alterados no PUT somente enquanto `v_funcionario_contribuinte_id` estiver nulo no registro. Colaborador já integrado: enviar valor diferente do persistido retorna erro 400; reenviar o mesmo valor é permitido.<br>• `admissao_data` - data de admissão inicial<br>• `funcao_id` - cargo inicial<br>• `salario_base` - salário inicial<br>• `classe_id` - classe inicial<br>• `categoria_esocial_id` - categoria eSocial inicial<br>• `admissao_tipo_id` - tipo de admissão inicial<br>• `contrato_tipo_id` - tipo de contrato inicial<br>• `v_quadro_horario_id` - quadro de horário inicial<br>• `horario_noturno` - horário noturno inicial<br>• `tipo_jornada_id` - tipo de jornada inicial<br>• `regime_jornada_trabalho_id` - regime de jornada de trabalho inicial<br>• `tipo_escala_id` - tipo de escala inicial<br><br><strong>Informações Relevantes</strong><br><br>• `funcionario_contribuinte_id`: identifica o registro a ser atualizado. Obrigatório e deve existir; caso contrário, retorna erro de validação.<br>• `v_funcionario_contribuinte_id`: código no sistema de origem. Obrigatório apenas com token de sistema (desktop). Enviado como null ou omitido nesse cenário, retorna erro de validação.<br>• `empresa_id`: deve corresponder à empresa do registro informado em `funcionario_contribuinte_id`.<br>• `tipo`: imutável - envie sempre o valor atual do registro.<br>• `cpf`: formato XXX.XXX.XXX-XX com pontuação.<br>• `ocupacao_natureza_id`: quando o tipo do token é de parceiro e tipo de colaborador é 'funcionario', preenche o campo automaticamente com '0 - Empregado em Empresa do setor privado'.<br>• `regime_trabalhista`: quando o tipo do token é de parceiro e tipo de colaborador é 'funcionario', preenche o campo automaticamente com '1 - CLT - Consolidação das Leis de Trabalho e legislações trabalhistas específicas'.<br>• `regime_previdenciario_id`: quando o tipo do token é de parceiro, preenche o campo automaticamente com '1 - RGPS - Regime Geral da Previdência Social'",
                 "operationId": "ed87bbc2fc5ec49edecd9c01d1698643",
                 "requestBody": {
                     "required": true,
@@ -353,7 +353,7 @@
                     "Admissões"
                 ],
                 "summary": "Cadastra admissão",
-                "description": "Cadastra um novo funcionário ou contribuinte com todos os dados cadastrais, profissionais e documentais. O recurso de admissão completa é destinado a criar um registro de funcionário ou contribuinte com o máximo de detalhes possível. Ele inclui campos para informações pessoais, dados profissionais, documentos e outros detalhes relevantes para a admissão.<br><br>Campos obrigatórios mínimos: `empresa_id`, `tipo`, `nome`, `cpf` e `admissao_data` (funcionário) ou `entrada_data` (contribuinte). O `email` é opcional, salvo quando `habilita_acesso_modulo_colaborador=true`. O `tipo` aceita `funcionario` ou `contribuinte`.<br><br><strong>⚠️ Revise o recurso antes de enviar e garanta que todos os campos necessários estejam preenchidos corretamente. Campos não enviados serão considerados nulos</strong>",
+                "description": "Cadastra um novo funcionário ou contribuinte com todos os dados cadastrais, profissionais e documentais. O recurso de admissão completa é destinado a criar um registro de funcionário ou contribuinte com o máximo de detalhes possível. Ele inclui campos para informações pessoais, dados profissionais, documentos e outros detalhes relevantes para a admissão.<br><br>Campos obrigatórios mínimos: `empresa_id`, `tipo`, `nome`, `cpf` e `admissao_data` (funcionário) ou `entrada_data` (contribuinte). O `email` é opcional, salvo quando `habilita_acesso_modulo_colaborador=true`. O `tipo` aceita `funcionario` ou `contribuinte`. <br><br> <strong>Informações Relevantes</strong><br><br>• `ocupacao_natureza_id`: quando o tipo do token é de parceiro e tipo de colaborador é 'funcionario', preenche o campo automaticamente com '0 - Empregado em Empresa do setor privado'.<br>• `regime_trabalhista`: quando o tipo do token é de parceiro e tipo de colaborador é 'funcionario', preenche o campo automaticamente com '1 - CLT - Consolidação das Leis de Trabalho e legislações trabalhistas específicas'.<br>• `regime_previdenciario_id`: quando o tipo do token é de parceiro, preenche o campo automaticamente com '1 - RGPS - Regime Geral da Previdência Social'. <br><br><strong>⚠️ Revise o recurso antes de enviar e garanta que todos os campos necessários estejam preenchidos corretamente. Campos não enviados serão considerados nulos</strong>",
                 "operationId": "cb44c425554b6add139a74504b1415f7",
                 "requestBody": {
                     "description": "Utilize os exemplos abaixo para verificar os campos e adicione os campos específicos conforme o tipo selecionado. Fique atento e envie sempre o recurso completo para evitar perda de dados. Para campos opcionais, envie null ou omita o campo.",
@@ -3862,7 +3862,8 @@
                     {
                         "bearerAuth": []
                     }
-                ]
+                ],
+                "x-internal": true
             }
         },
         "/api/v1/autonomos/tipos-servico": {
@@ -7929,6 +7930,961 @@
                 "x-internal": true
             }
         },
+        "/api/v1/planilhas-lancamentos/{tipo}": {
+            "get": {
+                "tags": [
+                    "Planilha de Lançamentos"
+                ],
+                "summary": "Lista lançamentos de planilha paginados",
+                "description": "Retorna lista paginada de lançamentos da planilha (normais, intermitentes ou centros de custo), ordenados pela competência em ordem decrescente. Filtros opcionais por lancamento_id, funcionario_contribuinte_id, verba_id, competencia, alterado_data e situacao. Acesso permitido para usuários PESSOA/EMPRESA.",
+                "operationId": "4ecad1e7b75143775a828f2b9c64cdbb",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "path",
+                        "description": "Tipo de planilha de lançamento",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "normais",
+                                "intermitentes",
+                                "centros-custos"
+                            ]
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/empresa_id"
+                    },
+                    {
+                        "name": "lancamento_id",
+                        "in": "query",
+                        "description": "Filtra pelo ID exato do lançamento",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    },
+                    {
+                        "name": "funcionario_contribuinte_id",
+                        "in": "query",
+                        "description": "Filtra pelo ID do colaborador",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "verba_id",
+                        "in": "query",
+                        "description": "Filtra pelo ID da verba",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 7
+                        }
+                    },
+                    {
+                        "name": "competencia",
+                        "in": "query",
+                        "description": "Filtra pela competência exata (Y-m-d, normalizada para o dia 1 do mês)",
+                        "required": false,
+                        "schema": {
+                            "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-06-01"
+                        }
+                    },
+                    {
+                        "name": "situacao",
+                        "in": "query",
+                        "description": "Filtra pela situação de liberação do lançamento",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/EnumeracaoSituacao"
+                        }
+                    },
+                    {
+                        "name": "contrato_intermitente_id",
+                        "in": "query",
+                        "description": "Filtra pelo ID do contrato de intermitente do lançamento, quando tipo for 'intermitentes'",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "centro_custo_id",
+                        "in": "query",
+                        "description": "Filtra pelo ID do centro de custo do lançamento, quando tipo for 'centros-custos'",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    },
+                    {
+                        "name": "alterado_data",
+                        "in": "query",
+                        "description": "Retorna registros alterados a partir desta data/hora (YYYY-MM-DD / YYYY-MM-DD HH:MM:SS)",
+                        "required": false,
+                        "schema": {
+                            "description": "Data e hora no formato AAAA-MM-DD HH:MM:SS. Exemplo: 2024-01-15 14:30:00",
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2025-01-01 00:00:00"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/per_page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de lançamentos de planilha",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoListResponse"
+                                },
+                                "examples": {
+                                    "normal": {
+                                        "summary": "Planilha de Lançamento Normal",
+                                        "description": "Lançamento do tipo 'normais'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "paginacao": {
+                                                "total": 1,
+                                                "por_pagina": 15,
+                                                "pagina_atual": 1,
+                                                "ultima_pagina": 1
+                                            },
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "intermitente": {
+                                        "summary": "Planilha de Lançamento de Intermitente",
+                                        "description": "Lançamento do tipo 'intermitentes'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "paginacao": {
+                                                "total": 1,
+                                                "por_pagina": 15,
+                                                "pagina_atual": 1,
+                                                "ultima_pagina": 1
+                                            },
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "contrato_intermitente_id": 3,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "centro_custo": {
+                                        "summary": "Planilha de Lançamento de Centro de Custo",
+                                        "description": "Lançamento do tipo 'centros-custos'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "paginacao": {
+                                                "total": 1,
+                                                "por_pagina": 15,
+                                                "pagina_atual": 1,
+                                                "ultima_pagina": 1
+                                            },
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "centro_custo_id": 1,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Planilha de Lançamentos"
+                ],
+                "summary": "Atualiza um lançamento de planilha",
+                "description": "Atualiza um lançamento de planilha. A chave lancamento_id é usada para localizar o registro. Os demais lançamentos do mesmo colaborador e competência têm a situação alterada automaticamente para 'nao_liberado'. Essa alteração automática de status só ocorre se não houver nenhum lançamento com situação 'aguardando_integração' para esse colaborador nessa competência. ATENÇÃO: DEVE SER ENVIADO TODOS OS CAMPOS DO REGISTRO, OS VALORES ENVIADOS VAZIOS SERÃO LIMPOS.",
+                "operationId": "bfff2565dfbfd839d704994db7a55609",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "path",
+                        "description": "Tipo de planilha de lançamento",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "normais",
+                                "intermitentes",
+                                "centros-custos"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Utilize os exemplos abaixo conforme o tipo selecionado no path.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoUpdatePayload"
+                            },
+                            "examples": {
+                                "normal": {
+                                    "summary": "Planilha de Lançamento Normal",
+                                    "description": "Lançamento do tipo 'normais'",
+                                    "value": {
+                                        "empresa_id": 900001,
+                                        "lancamento_id": 42,
+                                        "funcionario_contribuinte_id": 15,
+                                        "verba_id": 7,
+                                        "competencia": "2026-06-01",
+                                        "valor": 1500,
+                                        "referencia": null
+                                    }
+                                },
+                                "intermitente": {
+                                    "summary": "Planilha de Lançamento de Intermitente",
+                                    "description": "Lançamento do tipo 'intermitentes'",
+                                    "value": {
+                                        "empresa_id": 900001,
+                                        "lancamento_id": 42,
+                                        "funcionario_contribuinte_id": 15,
+                                        "verba_id": 7,
+                                        "competencia": "2026-06-01",
+                                        "valor": 1500,
+                                        "referencia": null,
+                                        "contrato_intermitente_id": 3
+                                    }
+                                },
+                                "centro_custo": {
+                                    "summary": "Planilha de Lançamento de Centro de Custo",
+                                    "description": "Lançamento do tipo 'centros-custos'",
+                                    "value": {
+                                        "empresa_id": 900001,
+                                        "lancamento_id": 42,
+                                        "funcionario_contribuinte_id": 15,
+                                        "verba_id": 7,
+                                        "competencia": "2026-06-01",
+                                        "valor": 1500,
+                                        "referencia": null,
+                                        "centro_custo_id": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lançamento atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoUpdateResponse"
+                                },
+                                "examples": {
+                                    "normal": {
+                                        "summary": "Planilha de Lançamento Normal",
+                                        "description": "Lançamento do tipo 'normais'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": {
+                                                "cliente_id": 1234,
+                                                "empresa_id": 900001,
+                                                "lancamento_id": 42,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null,
+                                                "situacao": "nao_liberado",
+                                                "observacao_liberacao": null,
+                                                "log_cadastro_data": "2026-06-10 10:00:00",
+                                                "log_alterado_data": "2026-06-10 12:00:00"
+                                            }
+                                        }
+                                    },
+                                    "intermitente": {
+                                        "summary": "Planilha de Lançamento de Intermitente",
+                                        "description": "Lançamento do tipo 'intermitentes'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": {
+                                                "cliente_id": 1234,
+                                                "empresa_id": 900001,
+                                                "lancamento_id": 42,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null,
+                                                "situacao": "nao_liberado",
+                                                "observacao_liberacao": null,
+                                                "contrato_intermitente_id": 3,
+                                                "log_cadastro_data": "2026-06-10 10:00:00",
+                                                "log_alterado_data": "2026-06-10 12:00:00"
+                                            }
+                                        }
+                                    },
+                                    "centro_custo": {
+                                        "summary": "Planilha de Lançamento de Centro de Custo",
+                                        "description": "Lançamento do tipo 'centros-custos'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 200,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": {
+                                                "cliente_id": 1234,
+                                                "empresa_id": 900001,
+                                                "lancamento_id": 42,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null,
+                                                "situacao": "nao_liberado",
+                                                "observacao_liberacao": null,
+                                                "centro_custo_id": 1,
+                                                "log_cadastro_data": "2026-06-10 10:00:00",
+                                                "log_alterado_data": "2026-06-10 12:00:00"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Planilha de Lançamentos"
+                ],
+                "summary": "Cadastra novos lançamentos de planilha",
+                "description": "Permite cadastrar múltiplos lançamentos de uma só vez através de um array de dados. O lancamento_id é gerado automaticamente. É obrigatório informar 'valor' ou 'referencia'. Os demais lançamentos do mesmo colaborador e competência têm a situação alterada automaticamente para 'nao_liberado'. Essa alteração automática de status só ocorre se não houver nenhum lançamento com situação 'aguardando_integração' para esse colaborador nessa competência.",
+                "operationId": "74d75aa3deb3b67b8ac370020e383305",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "path",
+                        "description": "Tipo de planilha de lançamento",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "normais",
+                                "intermitentes",
+                                "centros-custos"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Utilize os exemplos abaixo conforme o tipo selecionado no path.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoCreatePayload"
+                            },
+                            "examples": {
+                                "normal": {
+                                    "summary": "Planilha de Lançamento Normal",
+                                    "description": "Lançamento do tipo 'normais'",
+                                    "value": {
+                                        "dados": [
+                                            {
+                                                "empresa_id": 900001,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null
+                                            }
+                                        ]
+                                    }
+                                },
+                                "intermitente": {
+                                    "summary": "Planilha de Lançamento de Intermitente",
+                                    "description": "Lançamento do tipo 'intermitentes'",
+                                    "value": {
+                                        "dados": [
+                                            {
+                                                "empresa_id": 900001,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null,
+                                                "contrato_intermitente_id": 3
+                                            }
+                                        ]
+                                    }
+                                },
+                                "centro_custo": {
+                                    "summary": "Planilha de Lançamento de Centro de Custo",
+                                    "description": "Lançamento do tipo 'centros-custos'",
+                                    "value": {
+                                        "dados": [
+                                            {
+                                                "empresa_id": 900001,
+                                                "funcionario_contribuinte_id": 15,
+                                                "verba_id": 7,
+                                                "competencia": "2026-06-01",
+                                                "valor": 1500,
+                                                "referencia": null,
+                                                "centro_custo_id": 1
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Lançamentos cadastrados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoCreateResponse"
+                                },
+                                "examples": {
+                                    "normal": {
+                                        "summary": "Planilha de Lançamento Normal",
+                                        "description": "Lançamento do tipo 'normais'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 201,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "intermitente": {
+                                        "summary": "Planilha de Lançamento de Intermitente",
+                                        "description": "Lançamento do tipo 'intermitentes'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 201,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "contrato_intermitente_id": 3,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "centro_custo": {
+                                        "summary": "Planilha de Lançamento de Centro de Custo",
+                                        "description": "Lançamento do tipo 'centros-custos'",
+                                        "value": {
+                                            "sucesso": true,
+                                            "status": 201,
+                                            "mensagem": "Operação realizada com sucesso",
+                                            "retorno": [
+                                                {
+                                                    "cliente_id": 1234,
+                                                    "empresa_id": 900001,
+                                                    "lancamento_id": 42,
+                                                    "funcionario_contribuinte_id": 15,
+                                                    "verba_id": 7,
+                                                    "competencia": "2026-06-01",
+                                                    "valor": 1500,
+                                                    "referencia": null,
+                                                    "situacao": "nao_liberado",
+                                                    "observacao_liberacao": null,
+                                                    "centro_custo_id": 1,
+                                                    "log_cadastro_data": "2026-06-10 10:00:00",
+                                                    "log_alterado_data": "2026-06-10 12:00:00"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Planilha de Lançamentos"
+                ],
+                "summary": "Remove um lançamento de planilha",
+                "description": "Remove um lançamento de planilha do sistema. O lançamento deve existir dentro do cliente/empresa informados e estar com situação 'nao_liberado', 'recusado' ou 'integrado' (exceto via sistema desktop, que não possui essa restrição), caso contrário retorna Status Code 400. Os demais lançamentos do mesmo colaborador e competência têm a situação alterada automaticamente para 'nao_liberado'. Essa alteração automática de status só ocorre se não houver nenhum lançamento com situação 'aguardando_integração' para esse colaborador nessa competência. ATENÇÃO: Essa ação não poderá ser desfeita.",
+                "operationId": "3712c4a702d0b9b7c3a79e2667c7d231",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "path",
+                        "description": "Tipo de planilha de lançamento",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "normais",
+                                "intermitentes",
+                                "centros-custos"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoDeletePayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Exclusão realizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoDeleteResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/liberacoes/planilhas-lancamentos-normais": {
+            "post": {
+                "tags": [
+                    "Liberações"
+                ],
+                "summary": "Libera lançamentos normais de planilha em lote",
+                "description": "Atualiza a situação e a observação de liberação de todos os lançamentos do tipo 'normais' que casam com a competência informada e, opcionalmente, com o colaborador informado em funcionario_contribuinte_id. <br><br> Sem funcionario_contribuinte_id, todos os colaboradores da competência são afetados; informando o campo, a liberação fica restrita a esse colaborador. <br><br> Quando a situação informada for 'integrado' ou 'recusado', a liberação é aplicada apenas aos registros que estiverem com situação 'aguardando_integração'. <br><br> Lançamentos que já estão na situação informada não são alterados nem entram na notificação por e-mail. <br><br> ⚠️ Verifique as informações antes de realizar a liberação",
+                "operationId": "ba682be152a72180d90819fd748f40ab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoLiberacaoPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Liberação atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LiberacaoCreateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/liberacoes/planilhas-lancamentos-intermitentes": {
+            "post": {
+                "tags": [
+                    "Liberações"
+                ],
+                "summary": "Libera lançamentos intermitentes de planilha em lote",
+                "description": "Atualiza a situação e a observação de liberação de todos os lançamentos do tipo 'intermitentes' que casam com a competência informada e, opcionalmente, com o colaborador informado em funcionario_contribuinte_id. <br><br> Sem funcionario_contribuinte_id, todos os colaboradores da competência são afetados; informando o campo, a liberação fica restrita a esse colaborador. <br><br> Quando a situação informada for 'integrado' ou 'recusado', a liberação é aplicada apenas aos registros que estiverem com situação 'aguardando_integração'. <br><br> Lançamentos que já estão na situação informada não são alterados nem entram na notificação por e-mail. <br><br> ⚠️ Verifique as informações antes de realizar a liberação",
+                "operationId": "501508909516094de93a09827a8e5a1e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoLiberacaoPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Liberação atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LiberacaoCreateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/liberacoes/planilhas-lancamentos-centros-custo": {
+            "post": {
+                "tags": [
+                    "Liberações"
+                ],
+                "summary": "Libera lançamentos de centro de custo de planilha em lote",
+                "description": "Atualiza a situação e a observação de liberação de todos os lançamentos do tipo 'centros-custos' que casam com a competência informada e, opcionalmente, com o colaborador informado em funcionario_contribuinte_id. <br><br> Sem funcionario_contribuinte_id, todos os colaboradores da competência são afetados; informando o campo, a liberação fica restrita a esse colaborador. <br><br> Quando a situação informada for 'integrado' ou 'recusado', a liberação é aplicada apenas aos registros que estiverem com situação 'aguardando_integração'. <br><br> Lançamentos que já estão na situação informada não são alterados nem entram na notificação por e-mail. <br><br> ⚠️ Verifique as informações antes de realizar a liberação",
+                "operationId": "cef515b8248b09865b5a7948076f5289",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanilhaLancamentoLiberacaoPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Liberação atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LiberacaoCreateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado — token ausente, inválido ou expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroToken"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Não autorizado — usuário sem permissão para executar esta ação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErroPermissao"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro de validação, violação de regra de negócio ou registro não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/quadros-horarios": {
             "get": {
                 "tags": [
@@ -9966,7 +10922,7 @@
                             }
                         ],
                         "nullable": true,
-                        "description": "Horário noturno.",
+                        "description": "Horário noturno. Editável no PUT apenas com colaborador não integrado (v_funcionario_contribuinte_id nulo)",
                         "example": "nao"
                     },
                     "funcionario_tipo_id": {
@@ -10161,6 +11117,15 @@
                         "format": "float",
                         "example": 8500,
                         "nullable": true
+                    },
+                    "ocupacao_natureza_id": {
+                        "$ref": "#/components/schemas/EnumeracaoOcupacaoNatureza"
+                    },
+                    "regime_trabalhista_id": {
+                        "$ref": "#/components/schemas/EnumeracaoRegimeTrabalhista"
+                    },
+                    "regime_previdenciario_id": {
+                        "$ref": "#/components/schemas/EnumeracaoRegimePrevidenciario"
                     }
                 },
                 "type": "object"
@@ -11173,6 +12138,15 @@
                                 "type": "integer",
                                 "example": 0,
                                 "nullable": true
+                            },
+                            "ocupacao_natureza_id": {
+                                "$ref": "#/components/schemas/EnumeracaoOcupacaoNatureza"
+                            },
+                            "regime_trabalhista_id": {
+                                "$ref": "#/components/schemas/EnumeracaoRegimeTrabalhista"
+                            },
+                            "regime_previdenciario_id": {
+                                "$ref": "#/components/schemas/EnumeracaoRegimePrevidenciario"
                             }
                         },
                         "type": "object"
@@ -11240,7 +12214,7 @@
                 ]
             },
             "AdmissaoCompletaUpdatePayload": {
-                "description": "Payload para atualização completa de admissão. Comportamento de substituição total: o recurso é completamente sobrescrito com os dados enviados. Campos não enviados ou enviados como null serão gravados como null no banco de dados. ATENÇÃO: Envie sempre o recurso completo para evitar perda de dados. O campo cadastro_data não é aceito do cliente.\n *\n * **Campos iniciais**<br>\n * Editáveis no PUT somente enquanto `v_funcionario_contribuinte_id` estiver nulo no registro. Após a integração, alterações nesses campos retornam erro 400; reenviar os mesmos valores permanece permitido:<br>\n * • `funcao_id` - cargo inicial<br>\n * • `salario_base` - salário inicial<br>\n * • `v_quadro_horario_id` - quadro de horário inicial<br>\n * • `horario_noturno` - horário noturno inicial<br>\n * • `tipo_jornada_id` - tipo de jornada inicial<br>\n * • `regime_jornada_trabalho_id` - regime de jornada de trabalho inicial<br>\n * • `tipo_escala_id` - tipo de escala inicial",
+                "description": "Payload para atualização completa de admissão. Comportamento de substituição total: o recurso é completamente sobrescrito com os dados enviados. Campos não enviados ou enviados como null serão gravados como null no banco de dados. ATENÇÃO: Envie sempre o recurso completo para evitar perda de dados. O campo cadastro_data não é aceito do cliente.\n *\n * **Campos iniciais**<br>\n * Editáveis no PUT somente enquanto `v_funcionario_contribuinte_id` estiver nulo no registro. Após a integração, alterações nesses campos retornam erro 400; reenviar os mesmos valores permanece permitido:<br>\n * • `admissao_data` - data de admissão inicial<br>\n * • `funcao_id` - cargo inicial<br>\n * • `salario_base` - salário inicial<br>\n * • `classe_id` - classe inicial<br>\n * • `categoria_esocial_id` - categoria eSocial inicial<br>\n * • `admissao_tipo_id` - tipo de admissão inicial<br>\n * • `contrato_tipo_id` - tipo de contrato inicial<br>\n * • `v_quadro_horario_id` - quadro de horário inicial<br>\n * • `horario_noturno` - horário noturno inicial<br>\n * • `tipo_jornada_id` - tipo de jornada inicial<br>\n * • `regime_jornada_trabalho_id` - regime de jornada de trabalho inicial<br>\n * • `tipo_escala_id` - tipo de escala inicial",
                 "required": [
                     "empresa_id",
                     "funcionario_contribuinte_id",
@@ -21145,51 +22119,6 @@
                     }
                 ]
             },
-            "EnumeracaoTipoReferencia": {
-                "title": "Enumeração Tipo Referência",
-                "description": "Tipo de referência para verbas",
-                "type": "integer",
-                "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4
-                ],
-                "example": 3,
-                "oneOf": [
-                    {
-                        "title": "0 - Valor",
-                        "enum": [
-                            0
-                        ]
-                    },
-                    {
-                        "title": "1 - Hora",
-                        "enum": [
-                            1
-                        ]
-                    },
-                    {
-                        "title": "2 - Dia",
-                        "enum": [
-                            2
-                        ]
-                    },
-                    {
-                        "title": "3 - Quantidade",
-                        "enum": [
-                            3
-                        ]
-                    },
-                    {
-                        "title": "4 - Percentual",
-                        "enum": [
-                            4
-                        ]
-                    }
-                ]
-            },
             "EnumeracaoTipoJornada": {
                 "title": "Enumeração Tipo Jornada",
                 "description": "Tipo Jornada",
@@ -21422,6 +22351,51 @@
                         "title": "7 - Plano de saúde/Salário Família/IR",
                         "enum": [
                             7
+                        ]
+                    }
+                ]
+            },
+            "EnumeracaoTipoReferencia": {
+                "title": "Enumeração Tipo Referência",
+                "description": "Tipo de referência para verbas",
+                "type": "integer",
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "example": 3,
+                "oneOf": [
+                    {
+                        "title": "0 - Valor",
+                        "enum": [
+                            0
+                        ]
+                    },
+                    {
+                        "title": "1 - Hora",
+                        "enum": [
+                            1
+                        ]
+                    },
+                    {
+                        "title": "2 - Dia",
+                        "enum": [
+                            2
+                        ]
+                    },
+                    {
+                        "title": "3 - Quantidade",
+                        "enum": [
+                            3
+                        ]
+                    },
+                    {
+                        "title": "4 - Percentual",
+                        "enum": [
+                            4
                         ]
                     }
                 ]
@@ -22067,6 +23041,451 @@
                 },
                 "type": "object"
             },
+            "PlanilhaLancamento": {
+                "properties": {
+                    "cliente_id": {
+                        "type": "integer",
+                        "example": 1234
+                    },
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "lancamento_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "funcionario_contribuinte_id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "verba_id": {
+                        "description": "ID da verba. Os IDs disponíveis variam por empresa - consulte o endpoint de Verbas para listar as opções válidas.",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "competencia": {
+                        "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "valor": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500,
+                        "nullable": true
+                    },
+                    "referencia": {
+                        "type": "number",
+                        "format": "float",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "situacao": {
+                        "$ref": "#/components/schemas/EnumeracaoSituacao"
+                    },
+                    "observacao_liberacao": {
+                        "type": "string",
+                        "example": "Liberado após conferência.",
+                        "nullable": true
+                    },
+                    "contrato_intermitente_id": {
+                        "description": "ID do contratro de intermitente. Os IDs disponíveis variam por empresa - consulte o endpoint de Contratro de Intermitente para listar as opções válidas.",
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "centro_custo_id": {
+                        "description": "Presente apenas no tipo 'centros-custos'",
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "log_cadastro_data": {
+                        "description": "Data e hora no formato AAAA-MM-DD HH:MM:SS. Exemplo: 2024-01-15 14:30:00",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-06-10 10:00:00"
+                    },
+                    "log_alterado_data": {
+                        "description": "Data e hora no formato AAAA-MM-DD HH:MM:SS. Exemplo: 2024-01-15 14:30:00",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-06-10 12:00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoNormalStorePayload": {
+                "description": "Deve ser enviado obrigatoriamente um valor em 'valor' ou 'referencia'.",
+                "required": [
+                    "empresa_id",
+                    "funcionario_contribuinte_id",
+                    "verba_id",
+                    "competencia"
+                ],
+                "properties": {
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "funcionario_contribuinte_id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "verba_id": {
+                        "description": "ID da verba. Os IDs disponíveis variam por empresa - consulte o endpoint de Verbas para listar as opções válidas.",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "competencia": {
+                        "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "valor": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500,
+                        "nullable": true
+                    },
+                    "referencia": {
+                        "type": "number",
+                        "format": "float",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoIntermitenteStorePayload": {
+                "description": "Deve ser enviado obrigatoriamente um valor em 'valor' ou 'referencia' e 'contrato_intermitente_id'.",
+                "required": [
+                    "empresa_id",
+                    "funcionario_contribuinte_id",
+                    "verba_id",
+                    "competencia",
+                    "contrato_intermitente_id"
+                ],
+                "properties": {
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "funcionario_contribuinte_id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "verba_id": {
+                        "description": "ID da verba. Os IDs disponíveis variam por empresa - consulte o endpoint de Verbas para listar as opções válidas.",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "competencia": {
+                        "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "valor": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500,
+                        "nullable": true
+                    },
+                    "referencia": {
+                        "type": "number",
+                        "format": "float",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "contrato_intermitente_id": {
+                        "description": "ID do contratro de intermitente. Os IDs disponíveis variam por empresa - consulte o endpoint de Contratro de Intermitente para listar as opções válidas.",
+                        "type": "integer",
+                        "nullable": false
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoCentroCustoStorePayload": {
+                "description": "Deve ser enviado obrigatoriamente um valor em 'valor' ou 'referencia' e 'centro_custo_id'.",
+                "required": [
+                    "empresa_id",
+                    "funcionario_contribuinte_id",
+                    "verba_id",
+                    "competencia",
+                    "centro_custo_id"
+                ],
+                "properties": {
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "funcionario_contribuinte_id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "verba_id": {
+                        "description": "ID da verba. Os IDs disponíveis variam por empresa - consulte o endpoint de Verbas para listar as opções válidas.",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "competencia": {
+                        "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "valor": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500,
+                        "nullable": true
+                    },
+                    "referencia": {
+                        "type": "number",
+                        "format": "float",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "centro_custo_id": {
+                        "description": "ID do centro de custo. Os IDs disponíveis variam por empresa - consulte o endpoint de Centros de Custo para listar as opções válidas.",
+                        "type": "integer",
+                        "nullable": false
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoCreatePayload": {
+                "required": [
+                    "dados"
+                ],
+                "properties": {
+                    "dados": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoNormalStorePayload"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoIntermitenteStorePayload"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/PlanilhaLancamentoCentroCustoStorePayload"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoUpdatePayload": {
+                "required": [
+                    "empresa_id",
+                    "lancamento_id",
+                    "funcionario_contribuinte_id",
+                    "verba_id",
+                    "competencia"
+                ],
+                "properties": {
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "lancamento_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "funcionario_contribuinte_id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "verba_id": {
+                        "description": "ID da verba. Os IDs disponíveis variam por empresa - consulte o endpoint de Verbas para listar as opções válidas.",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "competencia": {
+                        "description": "Data no formato AAAA-MM-DD (ISO 8601). Exemplo: 2024-01-15",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "valor": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500,
+                        "nullable": true
+                    },
+                    "referencia": {
+                        "type": "number",
+                        "format": "float",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "contrato_intermitente_id": {
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "centro_custo_id": {
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoDeletePayload": {
+                "required": [
+                    "empresa_id",
+                    "lancamento_id"
+                ],
+                "properties": {
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "lancamento_id": {
+                        "type": "integer",
+                        "example": 42
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoLiberacaoPayload": {
+                "required": [
+                    "cliente_id",
+                    "empresa_id",
+                    "competencia",
+                    "situacao"
+                ],
+                "properties": {
+                    "cliente_id": {
+                        "type": "integer",
+                        "example": 1234
+                    },
+                    "empresa_id": {
+                        "type": "integer",
+                        "example": 900001
+                    },
+                    "competencia": {
+                        "description": "Competência dos lançamentos a liberar (normalizada para o primeiro dia do mês). Todos os lançamentos do cliente/empresa/tipo nessa competência serão afetados.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-06-01"
+                    },
+                    "funcionario_contribuinte_id": {
+                        "description": "Opcional. Quando informado, restringe a liberação aos lançamentos desse colaborador dentro da competência; quando omitido, todos os colaboradores da competência são afetados.",
+                        "type": "integer",
+                        "example": 15,
+                        "nullable": true
+                    },
+                    "situacao": {
+                        "$ref": "#/components/schemas/EnumeracaoSituacao"
+                    },
+                    "observacao_liberacao": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "example": "Liberado após conferência.",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoListResponse": {
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Operação realizada com sucesso"
+                    },
+                    "paginacao": {
+                        "$ref": "#/components/schemas/Paginacao"
+                    },
+                    "retorno": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanilhaLancamento"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoCreateResponse": {
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 201
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Operação realizada com sucesso"
+                    },
+                    "retorno": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanilhaLancamento"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoUpdateResponse": {
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Operação realizada com sucesso"
+                    },
+                    "retorno": {
+                        "$ref": "#/components/schemas/PlanilhaLancamento"
+                    }
+                },
+                "type": "object"
+            },
+            "PlanilhaLancamentoDeleteResponse": {
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Registro excluído com sucesso"
+                    },
+                    "retorno": {
+                        "type": "object",
+                        "example": []
+                    }
+                },
+                "type": "object"
+            },
             "QuadroHorarioDia": {
                 "properties": {
                     "entrada_1": {
@@ -22511,6 +23930,54 @@
                 "items": {
                     "type": "string"
                 }
+            },
+            "InternalError": {
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 500
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Ocorreu um erro interno no servidor."
+                    }
+                },
+                "type": "object"
+            },
+            "ConflictError": {
+                "title": "Erro de Conflito",
+                "description": "Erro retornado quando ocorre um conflito de dados.",
+                "properties": {
+                    "sucesso": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 409
+                    },
+                    "mensagem": {
+                        "type": "string",
+                        "example": "Ocorreu um conflito de dados."
+                    },
+                    "erros": {
+                        "properties": {
+                            "dados.0.campo": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "Ocorreu um conflito de dados em dados.0.campo."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
             },
             "ErroPermissao": {
                 "title": "Erro de Permissão",
@@ -25013,6 +26480,10 @@
         {
             "name": "Liberações",
             "description": "Permite gerenciar liberações."
+        },
+        {
+            "name": "Planilha de Lançamentos",
+            "description": "Permite gerenciar lançamentos de planilha (normais, intermitentes e centros de custo)."
         },
         {
             "name": "Quadros de Horário",
