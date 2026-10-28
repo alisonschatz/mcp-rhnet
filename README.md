@@ -4,6 +4,7 @@ Servidor MCP que expõe as specs OpenAPI do time para uma IA (Claude, Copilot, C
 
 As specs ficam versionadas no próprio repositório, em `specs/`. Não há build: o servidor lê os JSON direto da pasta e recarrega automaticamente quando um arquivo muda.
 
+
 ## Estrutura
 
 ```
