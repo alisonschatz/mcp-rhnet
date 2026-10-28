@@ -138,6 +138,8 @@ export function typeInfo(schema) {
   return { type: type || null, nullable };
 }
 
+const isNullSchema = (s) => Boolean(s) && (s.type === 'null' || (Array.isArray(s.type) && s.type.length === 1 && s.type[0] === 'null'));
+
 const CONSTRAINT_KEYS = [
   'format', 'enum', 'const', 'pattern', 'minLength', 'maxLength', 'minimum', 'maximum',
   'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf', 'minItems', 'maxItems', 'uniqueItems',
@@ -150,32 +152,78 @@ export function describeSchema(schema) {
   const d = { tipo: type };
   if (nullable) d.nullable = true;
   for (const key of CONSTRAINT_KEYS) if (schema?.[key] !== undefined) d[key] = schema[key];
+  const rotulos = enumLabels(schema);
+  if (rotulos) {
+    if (d.enum === undefined) d.enum = (schema.oneOf || schema.anyOf).filter((v) => !isNullSchema(v)).map((v) => singleValue(v)[0]);
+    d.rotulos = rotulos;
+    if (d.tipo === 'oneOf') d.tipo = typeof d.enum[0] === 'number' ? (Number.isInteger(d.enum[0]) ? 'integer' : 'number') : typeof d.enum[0];
+  }
   if (schema?._schema) d.schema = schema._schema;
   if (schema?.description) d.descricao = schema.description;
   return d;
+}
+
+const singleValue = (v) => (v?.const !== undefined ? [v.const] : Array.isArray(v?.enum) && v.enum.length === 1 ? v.enum : null);
+
+/**
+ * "Enum rotulado": oneOf/anyOf em que cada variante é um único valor com title
+ * (ex.: { title: "0 - Empregado...", enum: [0] }). Devolve { valor: rótulo } ou null.
+ */
+export function enumLabels(schema) {
+  const list = (schema?.oneOf || schema?.anyOf || []).filter((v) => !isNullSchema(v));
+  if (list.length < 2 || !list.every((v) => singleValue(v) && !v.properties)) return null;
+  return Object.fromEntries(list.map((v) => [String(singleValue(v)[0]), v.title || v.description || null]));
+}
+
+/** Variantes relevantes de um oneOf/anyOf (ignora a variante só-null de OpenAPI 3.1 e enums rotulados). */
+export function schemaVariants(schema) {
+  if (!schema || schema.properties || enumLabels(schema)) return [];
+  const list = schema.oneOf || schema.anyOf;
+  return Array.isArray(list) ? list.filter((v) => !isNullSchema(v)) : [];
+}
+
+/**
+ * Se o schema raiz é oneOf/anyOf, devolve a variante escolhida (padrão 0) e a lista
+ * de variantes para informar à IA; senão devolve o próprio schema.
+ */
+export function selectVariant(schema, index = 0) {
+  const variants = schemaVariants(schema);
+  if (!variants.length) return { schema, variantes: [], indice: null };
+  const i = Number.isInteger(index) && index >= 0 && index < variants.length ? index : 0;
+  const { oneOf, anyOf, ...rest } = schema;
+  return {
+    schema: { ...rest, ...variants[i] },
+    variantes: variants.map((v, n) => ({ indice: n, schema: v._schema || v.title || `variante ${n}`, ...(v.description ? { descricao: v.description } : {}) })),
+    indice: i,
+  };
 }
 
 /**
  * Achata um schema em uma lista de campos com caminho ("cliente.endereco.cep", "itens[].sku"),
  * obrigatoriedade e restrições — o formato mais útil para montar casos de teste.
  * Em contexto "request" ignora readOnly; em "response" ignora writeOnly.
+ * oneOf/anyOf aninhados usam a primeira variante e são sinalizados só no campo pai.
  */
 export function flattenFields(schema, { context = 'request', maxDepth = 5 } = {}) {
   const fields = [];
-  const walk = (node, prefix, depth) => {
-    if (!node || depth > maxDepth) return;
-    const variant = node.oneOf?.[0] || node.anyOf?.[0];
-    if (!node.properties && variant) {
-      walk({ ...variant, _variantes: (node.oneOf || node.anyOf).length }, prefix, depth);
-      return;
-    }
+  const unwrap = (node) => {
+    const variants = schemaVariants(node);
+    if (!variants.length) return { node, total: 0 };
+    const { oneOf, anyOf, ...rest } = node;
+    return { node: { ...rest, ...variants[0] }, total: variants.length };
+  };
+  const walk = (raw, prefix, depth) => {
+    if (!raw || depth > maxDepth) return;
+    const { node } = unwrap(raw);
     const required = new Set(node.required || []);
-    for (const [name, prop] of Object.entries(node.properties || {})) {
+    for (const [name, rawProp] of Object.entries(node.properties || {})) {
+      const { node: prop, total } = unwrap(rawProp);
       if (context === 'request' && prop.readOnly) continue;
       if (context === 'response' && prop.writeOnly) continue;
       const campo = prefix ? `${prefix}.${name}` : name;
       const d = { campo, obrigatorio: required.has(name), ...describeSchema(prop) };
-      if (node._variantes) d.observacao = `schema com ${node._variantes} variantes (oneOf/anyOf); listada a primeira`;
+      if (rawProp.nullable || isNullSchema((rawProp.oneOf || rawProp.anyOf || []).find(isNullSchema))) d.nullable = true;
+      if (total > 1) d.observacao = `${total} variantes (oneOf/anyOf); listada a primeira`;
       if (prop._corte) {
         d.tipo = 'object';
         d.observacao = `${prop._corte}: detalhe com get_schema_definition("${prop.$ref}")`;
@@ -184,9 +232,9 @@ export function flattenFields(schema, { context = 'request', maxDepth = 5 } = {}
       const { type } = typeInfo(prop);
       if (type === 'object') walk(prop, campo, depth + 1);
       if (type === 'array' && prop.items) {
-        const itemType = typeInfo(prop.items).type;
-        if (itemType === 'object') walk(prop.items, `${campo}[]`, depth + 1);
-        else d.itens = describeSchema(prop.items);
+        const { node: items } = unwrap(prop.items);
+        if (typeInfo(items).type === 'object') walk(items, `${campo}[]`, depth + 1);
+        else d.itens = describeSchema(items);
       }
     }
   };
@@ -248,12 +296,12 @@ export function pickContent(content) {
     types[0];
   if (!preferred) return null;
   const entry = content[preferred] || {};
-  let example = entry.example;
-  if (example === undefined && entry.examples && typeof entry.examples === 'object') {
-    const first = Object.values(entry.examples)[0];
-    example = first?.value;
-  }
-  return { mediaType: preferred, schema: entry.schema, example, mediaTypes: types };
+  const examples =
+    entry.examples && typeof entry.examples === 'object'
+      ? Object.entries(entry.examples).map(([nome, ex]) => ({ nome, resumo: ex?.summary || null, value: ex?.value }))
+      : [];
+  const example = entry.example !== undefined ? entry.example : examples[0]?.value;
+  return { mediaType: preferred, schema: entry.schema, example, examples, mediaTypes: types };
 }
 
 /** Corpo da requisição (OpenAPI 3 requestBody ou Swagger 2 parâmetro in: body). */
@@ -268,6 +316,7 @@ export function requestBodyInfo(spec, op) {
       mediaTypes: c?.mediaTypes || [],
       schema: c?.schema,
       example: c?.example,
+      examples: c?.examples || [],
     };
   }
   const bodyParam = operationParameters(spec, op.pathItem, op.operation).find((p) => p.in === 'body');
@@ -280,6 +329,7 @@ export function requestBodyInfo(spec, op) {
       mediaTypes: consumes,
       schema: bodyParam.schema,
       example: bodyParam['x-example'],
+      examples: [],
     };
   }
   return null;

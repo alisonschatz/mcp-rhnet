@@ -1,7 +1,4 @@
 {
-  "inputs": [
-    { "type": "promptString", "id": "mcp-token", "description": "Token do MCP das APIs", "password": true }
-  ],
   "servers": {
     "apis-time-local": {
       "type": "stdio",
@@ -10,8 +7,7 @@
     },
     "apis-time-vercel": {
       "type": "http",
-      "url": "https://SEU-PROJETO.vercel.app/mcp",
-      "headers": { "Authorization": "Bearer ${input:mcp-token}" }
+      "url": "https://SEU-PROJETO.vercel.app/mcp"
     }
   }
 }

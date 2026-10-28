@@ -66,3 +66,46 @@ test('prompt monta instruções com a operação', async () => {
   assert.match(p.messages[0].content.text, /POST \/pedidos/);
   assert.match(p.messages[0].content.text, /jest/);
 });
+
+test('get_operation_test_context nunca devolve JSON truncado nas operações do RH Net', async () => {
+  const { totalPages } = (await call('list_operations', { apiId: 'rhnet', pageSize: 50 })).json;
+  for (let page = 1; page <= totalPages; page++) {
+    for (const op of (await call('list_operations', { apiId: 'rhnet', pageSize: 50, page })).json.operations) {
+      const r = await call('get_operation_test_context', { apiId: 'rhnet', method: op.method, path: op.path });
+      assert.ok(r.json, `${op.method} ${op.path} devolveu JSON inválido`);
+    }
+  }
+});
+
+test('operação grande vem resumida e navega por seção/página', async () => {
+  const args = { apiId: 'rhnet', method: 'POST', path: '/api/v1/admissoes' };
+  const resumo = (await call('get_operation_test_context', args)).json;
+  assert.match(resumo.aviso, /secao/);
+  assert.ok(resumo.corpo.totalCampos > 60);
+  assert.equal(resumo.corpo.variantes.opcoes.length, 2);
+
+  const req = (await call('get_operation_test_context', { ...args, secao: 'requisicao' })).json;
+  assert.equal(req.totalItems, resumo.corpo.totalCampos);
+  assert.ok(req.hasNextPage);
+  assert.ok(req.campos.every((c) => !/variantes/.test(c.observacao || '')), 'aviso de variante não deve repetir em todo campo');
+
+  const resp = (await call('get_operation_test_context', { ...args, secao: 'respostas', status: '400' })).json;
+  assert.ok(resp.campos.every((c) => c.status === '400'));
+  const semStatus = await call('get_operation_test_context', { ...args, secao: 'respostas', status: '418' });
+  assert.equal(semStatus.isError, true);
+});
+
+test('variante e exemplos nomeados no corpo', async () => {
+  const args = { apiId: 'rhnet', method: 'POST', path: '/api/v1/admissoes' };
+  const v0 = (await call('get_operation_test_context', { ...args, secao: 'requisicao', pageSize: 120 })).json;
+  const v1 = (await call('get_operation_test_context', { ...args, secao: 'requisicao', pageSize: 120, variante: 1 })).json;
+  assert.notEqual(v0.corpo.schema, v1.corpo.schema);
+
+  const padrao = (await call('generate_example_payload', args)).json;
+  assert.ok(padrao.exemplosDisponiveis.some((e) => e.nome === 'contribuinte_estrangeiro'));
+  const escolhido = (await call('generate_example_payload', { ...args, exemplo: 'contribuinte_estrangeiro' })).json;
+  assert.match(escolhido.origemCorpo, /contribuinte_estrangeiro/);
+  assert.equal(escolhido.corpo.tipo, 'contribuinte');
+  const gerado = (await call('generate_example_payload', { ...args, modo: 'minimo', variante: 1 })).json;
+  assert.equal(gerado.variantes.usada, 1);
+});

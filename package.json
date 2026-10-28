@@ -1,6 +1,6 @@
 {
   "name": "mcp-apis-time",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Servidor MCP com as specs OpenAPI do time, para documentação e criação de casos de teste",
   "type": "module",
   "private": true,

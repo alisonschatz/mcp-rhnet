@@ -15,7 +15,7 @@ src/
   openapi.js            ← resolução de $ref, allOf, parâmetros, respostas, segurança
   testing.js            ← payloads de exemplo e cenários de teste derivados da spec
   mcp.js                ← tools, prompts e resources do MCP
-  web.js                ← rotas HTTP + autenticação por token
+  web.js                ← rotas HTTP (endpoint /mcp público)
   app.js                ← entrypoint da Vercel
   http.js               ← servidor HTTP de longa duração (local, Docker, Render...)
   stdio.js              ← transporte stdio (Claude Desktop, VS Code, Cursor, Claude Code)
@@ -60,17 +60,16 @@ Quanto mais rica a spec, melhores os testes: `required`, `enum`, `minLength`/`ma
 
 | Cliente | Como conectar |
 |---|---|
-| claude.ai (conector personalizado) | URL `https://SEU-PROJETO.vercel.app/mcp?token=SEU_TOKEN` (o formulário só aceita URL) |
-| Claude Code | `claude mcp add --transport http apis-time https://SEU-PROJETO.vercel.app/mcp --header "Authorization: Bearer SEU_TOKEN"` |
-| Claude Desktop / VS Code / Cursor | `url` + `headers: { "Authorization": "Bearer SEU_TOKEN" }` (ver `examples/`) |
+| claude.ai (conector personalizado) | URL `https://SEU-PROJETO.vercel.app/mcp` — sem OAuth, sem token |
+| Claude Code | `claude mcp add --transport http apis-time https://SEU-PROJETO.vercel.app/mcp` |
+| Claude Desktop / VS Code / Cursor | só a `url` (ver `examples/vscode-mcp.json`) |
 
 ## Deploy
 
 ### Vercel
 
 1. Suba o repositório no GitHub e importe em [vercel.com/new](https://vercel.com/new). O Express é detectado sozinho (`src/app.js`), e o `vercel.json` manda rodar `npm run build`, que valida e empacota as specs.
-2. Em **Settings → Environment Variables**, crie `MCP_AUTH_TOKEN` com um valor longo e aleatório (ex.: `openssl rand -hex 32`) e faça redeploy.
-3. Teste: `https://SEU-PROJETO.vercel.app/mcp/health`.
+2. Não há variável obrigatória. Teste: `https://SEU-PROJETO.vercel.app/mcp/health`.
 
 Cada push na `main` com spec nova gera deploy automático. Se o build falhar, é spec inválida — rode `npm run validate` local.
 
@@ -80,18 +79,16 @@ Use a URL de produção: as URLs de *preview* da Vercel ficam atrás do login da
 
 ```bash
 docker build -t mcp-apis-time .
-docker run -p 3001:3001 -e MCP_AUTH_TOKEN=seu-token mcp-apis-time
+docker run -p 3001:3001 mcp-apis-time
 ```
 
 Ou, sem Docker, comando de start `npm start` — a porta vem de `PORT`, que essas plataformas já definem.
 
-### Segurança
+### Acesso
 
-As specs descrevem endpoints e campos internos, então em hospedagem o servidor **recusa requisições sem `MCP_AUTH_TOKEN` configurado** (responde 503). Para acesso aberto de propósito, defina `MCP_ALLOW_ANONYMOUS=1`.
+O endpoint `/mcp` é **público, sem autenticação**: quem tiver a URL consegue ler as specs. Isso é intencional (o servidor só lê documentação, não chama as APIs), mas lembre que as specs descrevem endpoints e campos internos. Se um dia precisar restringir, hospede só na rede interna/VPN ou coloque um proxy com autenticação na frente.
 
-O token aceito em `?token=` existe por causa do claude.ai; ele pode aparecer em logs de acesso, então prefira o header nos clientes que suportam e troque o token se ele vazar. Para restringir de verdade, a alternativa é hospedar só na rede interna (VPN), sabendo que aí o claude.ai não alcança o servidor.
-
-Variáveis de ambiente: `MCP_AUTH_TOKEN`, `MCP_ALLOW_ANONYMOUS`, `SPECS_DIR`, `PORT`/`MCP_PORT` (3001), `MCP_HOST` (127.0.0.1 local, 0.0.0.0 quando `PORT` existe), `MCP_MAX_RESPONSE_CHARS` (16000).
+Variáveis de ambiente (todas opcionais): `SPECS_DIR`, `PORT`/`MCP_PORT` (3001), `MCP_HOST` (127.0.0.1 local, 0.0.0.0 quando `PORT` existe), `MCP_MAX_RESPONSE_CHARS` (16000).
 
 ## Ferramentas
 
@@ -111,8 +108,8 @@ Testes:
 
 | Tool | Para quê |
 |---|---|
-| `get_operation_test_context` | visão achatada: cada campo com caminho (`cliente.endereco.cep`, `itens[].sku`), obrigatoriedade e restrições; segurança; campos das respostas |
-| `generate_example_payload` | payload válido (modo `completo` ou `minimo`) usando exemplos da spec ou gerando pelo schema; já conhece CPF, CNPJ, CEP e telefone |
+| `get_operation_test_context` | visão achatada: cada campo com caminho (`cliente.endereco.cep`, `itens[].sku`), obrigatoriedade, restrições e rótulos de enum; segurança; campos das respostas. Em operações grandes vem resumida — navegue com `secao` (`requisicao`/`respostas`), `status`, `prefixo` e `page` |
+| `generate_example_payload` | payload válido (modo `completo` ou `minimo`) usando exemplos da spec ou gerando pelo schema; já conhece CPF, CNPJ, CEP e telefone. Escolha um exemplo nomeado com `exemplo` ou a variante do corpo (oneOf) com `variante` |
 | `suggest_test_scenarios` | checklist determinístico de cenários: positivos, segurança, recurso inexistente, validação, valores-limite, erros documentados, idempotência — com status esperado e **lacunas da spec** |
 
 Prompts prontos (aparecem como comandos `/` em vários clientes):
@@ -138,11 +135,12 @@ Os cenários de `suggest_test_scenarios` descrevem uma **alteração** sobre o p
 - Resolve `$ref` em parâmetros, requestBodies e responses (não só em schemas) e mescla `allOf`.
 - Parâmetros declarados no path-item são herdados pelas operações.
 - Respostas grandes são compactadas antes de truncar, para continuarem JSON válido.
-- Transporte stdio além do HTTP, deploy na Vercel e autenticação por token.
+- Transporte stdio além do HTTP e deploy na Vercel.
+- Respostas grandes nunca chegam truncadas: são resumidas ou paginadas automaticamente.
 
 ## Limitações
 
 - Somente JSON e `$ref` locais (`#/...`). Refs para outros arquivos aparecem como aviso no `validate`.
 - Swagger 2.0 funciona parcialmente; converta com `npx swagger2openapi entrada.json -o specs/saida.json`.
-- Em `oneOf`/`anyOf` o gerador usa a primeira variante e avisa.
+- Em `oneOf`/`anyOf` no corpo, as ferramentas listam as variantes e usam a 0 por padrão (escolha com `variante`); em campos aninhados usa a primeira e sinaliza no campo. Enums no formato `oneOf` de valores com `title` são tratados como enum com rótulos.
 - Os cenários vêm só da spec: regras de negócio precisam ser informadas à IA.

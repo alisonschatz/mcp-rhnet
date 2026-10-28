@@ -39,8 +39,8 @@ function boundedJsonText(value) {
 const toolText = (value) => ({ content: [{ type: 'text', text: boundedJsonText(value) }] });
 const toolError = (message) => ({ content: [{ type: 'text', text: message }], isError: true });
 
-function paginate(items, page, pageSize) {
-  const size = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(pageSize || DEFAULT_PAGE_SIZE)));
+function paginate(items, page, pageSize, maxSize = MAX_PAGE_SIZE) {
+  const size = Math.min(maxSize, Math.max(1, Math.floor(pageSize || DEFAULT_PAGE_SIZE)));
   const totalItems = items.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / size));
   const current = Math.min(Math.max(1, Math.floor(page || 1)), totalPages);
@@ -50,10 +50,38 @@ function paginate(items, page, pageSize) {
   };
 }
 
+/**
+ * Pagina e monta a resposta escolhendo o maior tamanho de página (<= pedido) em que TODAS
+ * as páginas cabem em MAX_RESPONSE_CHARS. Como o tamanho efetivo não depende da página
+ * pedida, a numeração é estável: page=1,2,3... percorre todos os itens sem pular nenhum.
+ */
+function paginateFitting(items, page, pageSize, build) {
+  const requested = Math.max(1, Math.floor(pageSize));
+  const render = (size, p) => {
+    const { items: slice, meta } = paginate(items, p, size, Infinity);
+    return build(slice, meta);
+  };
+  let size = requested;
+  while (size > 1) {
+    const pages = Math.max(1, Math.ceil(items.length / size));
+    let ok = true;
+    for (let p = 1; p <= pages && ok; p++) ok = fitsResponse(render(size, p));
+    if (ok) break;
+    size = Math.max(1, Math.floor(size * 0.75));
+  }
+  return render(size, page);
+}
+
 const PAGE_PARAMS = {
   page: z.number().int().min(1).optional().describe('Página a consultar (padrão 1)'),
   pageSize: z.number().int().min(1).max(MAX_PAGE_SIZE).optional().describe(`Itens por página (padrão ${DEFAULT_PAGE_SIZE}, máximo ${MAX_PAGE_SIZE})`),
 };
+
+const DEFAULT_FIELDS_PAGE = 40;
+const MAX_FIELDS_PAGE = 120;
+const VARIANTE = z.number().int().min(0).optional().describe('Índice da variante do corpo quando ele é oneOf/anyOf (ver "variantes"); padrão 0');
+
+const fitsResponse = (value) => JSON.stringify(value, null, 2).length <= MAX_RESPONSE_CHARS || JSON.stringify(value).length <= MAX_RESPONSE_CHARS;
 
 const API_ID = z.string().describe('Id retornado por list_apis (nome do arquivo em specs/ sem .json)');
 const OPERATION_PARAMS = {
@@ -206,7 +234,7 @@ export function buildMcpServer() {
         for (const [status, r] of Object.entries(responsesInfo(spec, op))) {
           responses[status] = { schema: r.schema ? resolveOneLevel(spec, r.schema) : null, example: r.example ?? null };
         }
-        return toolText({
+        const result = {
           parameters: operationParameters(spec, op.pathItem, op.operation)
             .filter((p) => p.in !== 'body')
             .map((p) => ({ name: p.name, in: p.in, required: Boolean(p.required), schema: resolveOneLevel(spec, p.schema || { type: p.type, format: p.format, enum: p.enum }) })),
@@ -214,7 +242,14 @@ export function buildMcpServer() {
             ? { required: body.required, contentType: body.mediaType, schema: body.schema ? resolveOneLevel(spec, body.schema) : null, example: body.example ?? null }
             : null,
           responses,
-        });
+        };
+        if (!fitsResponse(result)) {
+          // Sem os exemplos costuma caber; eles continuam disponíveis em generate_example_payload.
+          if (result.requestBody) result.requestBody.example = undefined;
+          for (const r of Object.values(result.responses)) r.example = undefined;
+          result.aviso = 'Exemplos omitidos por tamanho: use generate_example_payload para o corpo de exemplo.';
+        }
+        return toolText(result);
       })
   );
 
@@ -282,11 +317,64 @@ export function buildMcpServer() {
     {
       title: 'Contexto de teste de uma operação',
       description:
-        'Visão achatada e completa de uma operação para escrever testes: segurança, parâmetros e campos do corpo com caminho ("cliente.endereco.cep", "itens[].sku"), obrigatoriedade e restrições (enum, min/max, pattern, format), e os campos de cada resposta. Todas as $ref já vêm resolvidas.',
-      inputSchema: OPERATION_PARAMS,
+        'Visão achatada de uma operação para escrever testes: segurança, parâmetros e campos do corpo com caminho ("cliente.endereco.cep", "itens[].sku"), obrigatoriedade e restrições (enum, min/max, pattern, format), e os campos de cada resposta. Todas as $ref já vêm resolvidas. ' +
+        'Em operações grandes a resposta vem resumida (só contagem de campos): peça secao="requisicao" ou secao="respostas" (com status opcional) e pagine com page/pageSize. Se o corpo tiver variantes (oneOf), escolha com "variante".',
+      inputSchema: {
+        ...OPERATION_PARAMS,
+        secao: z.enum(['requisicao', 'respostas']).optional().describe('Traz só os campos do corpo da requisição ou só os das respostas, paginados'),
+        status: z.string().optional().describe('Com secao="respostas": só esse status, ex.: "201"'),
+        prefixo: z.string().optional().describe('Só campos cujo caminho começa com esse prefixo, ex.: "dependentes"'),
+        variante: VARIANTE,
+        page: PAGE_PARAMS.page,
+        pageSize: z.number().int().min(1).max(MAX_FIELDS_PAGE).optional().describe(`Campos por página (padrão ${DEFAULT_FIELDS_PAGE}, máximo ${MAX_FIELDS_PAGE})`),
+      },
       annotations: readOnly,
     },
-    async ({ apiId, method, path }) => withOperation(apiId, method, path, (spec, op) => toolText(testContext(spec, op)))
+    async ({ apiId, method, path, secao, status, prefixo, variante, page, pageSize }) =>
+      withOperation(apiId, method, path, (spec, op) => {
+        const ctx = testContext(spec, op, { variante });
+        const filtra = (campos) => (prefixo ? campos.filter((c) => c.campo === prefixo || c.campo.startsWith(`${prefixo}.`) || c.campo.startsWith(`${prefixo}[]`)) : campos);
+        const cabecalho = { operacao: ctx.operacao, operationId: ctx.operationId, resumo: ctx.resumo };
+
+        if (secao === 'requisicao') {
+          const campos = filtra(ctx.corpo?.campos || []);
+          const { campos: _c, ...corpoMeta } = ctx.corpo || {};
+          return toolText(
+            paginateFitting(campos, page, pageSize || DEFAULT_FIELDS_PAGE, (items, meta) => ({
+              ...cabecalho,
+              parametros: meta.page === 1 ? ctx.parametros : undefined,
+              corpo: ctx.corpo ? corpoMeta : null,
+              ...meta,
+              campos: items,
+            }))
+          );
+        }
+        if (secao === 'respostas') {
+          if (status && !ctx.respostas[status]) return toolError(`Status "${status}" não documentado. Disponíveis: ${Object.keys(ctx.respostas).join(', ') || '(nenhum)'}.`);
+          const campos = [];
+          for (const [st, r] of Object.entries(ctx.respostas)) {
+            if (status && st !== status) continue;
+            for (const c of filtra(r.campos)) campos.push({ status: st, ...c });
+          }
+          const respostas = Object.fromEntries(Object.entries(ctx.respostas).map(([st, r]) => [st, { descricao: r.descricao, schema: r.schema, totalCampos: r.campos.length }]));
+          return toolText(paginateFitting(campos, page, pageSize || DEFAULT_FIELDS_PAGE, (items, meta) => ({ ...cabecalho, respostas, ...meta, campos: items })));
+        }
+
+        if (prefixo) {
+          if (ctx.corpo) ctx.corpo.campos = filtra(ctx.corpo.campos);
+          for (const r of Object.values(ctx.respostas)) r.campos = filtra(r.campos);
+        }
+        if (fitsResponse(ctx)) return toolText(ctx);
+        // Grande demais: devolve o resumo (sempre JSON válido) e orienta a navegação.
+        const { campos: _c, ...corpoMeta } = ctx.corpo || {};
+        return toolText({
+          ...ctx,
+          corpo: ctx.corpo ? { ...corpoMeta, totalCampos: ctx.corpo.campos.length } : null,
+          respostas: Object.fromEntries(Object.entries(ctx.respostas).map(([st, r]) => [st, { descricao: r.descricao, schema: r.schema, totalCampos: r.campos.length }])),
+          aviso:
+            'Operação grande: campos omitidos para caber na resposta. Chame de novo com secao="requisicao" (campos do corpo) ou secao="respostas" (opcionalmente com status), paginando com page (reutilize o pageSize devolvido); use prefixo para focar em um objeto.',
+        });
+      })
   );
 
   server.registerTool(
@@ -303,14 +391,15 @@ export function buildMcpServer() {
           .optional()
           .describe('Filtra por categoria'),
         prioridade: z.enum(['alta', 'media', 'baixa']).optional().describe('Filtra por prioridade'),
+        variante: VARIANTE,
         page: PAGE_PARAMS.page,
         pageSize: z.number().int().min(1).max(30).optional().describe('Cenários por página (padrão 20, máximo 30)'),
       },
       annotations: readOnly,
     },
-    async ({ apiId, method, path, categoria, prioridade, page, pageSize }) =>
+    async ({ apiId, method, path, categoria, prioridade, variante, page, pageSize }) =>
       withOperation(apiId, method, path, (spec, op) => {
-        const result = deriveTestScenarios(spec, op);
+        const result = deriveTestScenarios(spec, op, { variante });
         const filtered = result.cenarios.filter((c) => (!categoria || c.categoria === categoria) && (!prioridade || c.prioridade === prioridade));
         const { items, meta } = paginate(filtered, page, Math.min(pageSize || 20, 30));
         const porCategoria = {};
@@ -332,14 +421,18 @@ export function buildMcpServer() {
     {
       title: 'Gerar payload de exemplo',
       description:
-        'Gera parâmetros e corpo válidos para a operação: usa exemplos da spec quando existem; senão gera a partir do schema respeitando enum, format, min/max e pattern. Modo "completo" preenche tudo; "minimo" só o obrigatório. É o payload base para os cenários de suggest_test_scenarios.',
+        'Gera parâmetros e corpo válidos para a operação: usa exemplos da spec quando existem; senão gera a partir do schema respeitando enum, format, min/max e pattern. Modo "completo" preenche tudo; "minimo" só o obrigatório. ' +
+        'Quando a spec tem vários exemplos nomeados (lista em exemplosDisponiveis), escolha com "exemplo"; quando o corpo tem variantes (oneOf), escolha com "variante". É o payload base para os cenários de suggest_test_scenarios.',
       inputSchema: {
         ...OPERATION_PARAMS,
         modo: z.enum(['completo', 'minimo']).optional().describe('Padrão "completo"'),
+        exemplo: z.string().optional().describe('Nome de um exemplo declarado na spec, ex.: "funcionario_estrangeiro"'),
+        variante: VARIANTE,
       },
       annotations: readOnly,
     },
-    async ({ apiId, method, path, modo }) => withOperation(apiId, method, path, (spec, op) => toolText(examplePayload(spec, op, modo || 'completo')))
+    async ({ apiId, method, path, modo, exemplo, variante }) =>
+      withOperation(apiId, method, path, (spec, op) => toolText(examplePayload(spec, op, modo || 'completo', { exemplo, variante })))
   );
 
   // ----- Prompts -------------------------------------------------------------
@@ -367,8 +460,8 @@ export function buildMcpServer() {
               `Crie os casos de teste da operação ${method.toUpperCase()} ${path} da API "${apiId}".`,
               '',
               'Passos:',
-              '1. Chame get_operation_test_context para entender parâmetros, campos, restrições, segurança e respostas.',
-              '2. Chame generate_example_payload nos modos "completo" e "minimo" para ter os payloads base.',
+              '1. Chame get_operation_test_context para entender parâmetros, campos, restrições, segurança e respostas (se vier resumido, navegue com secao/page).',
+              '2. Chame generate_example_payload nos modos "completo" e "minimo" para ter os payloads base. Se houver variantes ou exemplos nomeados, gere um payload para cada um relevante.',
               '3. Chame suggest_test_scenarios (percorra todas as páginas) para o checklist de cobertura.',
               '4. Escreva os casos finais: para cada cenário, pré-condição, requisição concreta (payload base + alteração), status e validações esperadas no corpo da resposta.',
               '5. Acrescente cenários de regra de negócio que a spec não cobre e liste separadamente as lacunas da spec e as dúvidas para o time.',

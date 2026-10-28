@@ -1,11 +1,14 @@
 import {
   describeSchema,
+  enumLabels,
   flattenFields,
   inlineSchema,
   operationParameters,
   requestBodyInfo,
   responsesInfo,
+  schemaVariants,
   securityInfo,
+  selectVariant,
   typeInfo,
 } from './openapi.js';
 
@@ -87,10 +90,14 @@ export function buildExample(schema, mode = 'completo', ctx = { avisos: [] }, fi
   if (schema.default !== undefined) return schema.default;
   if (Array.isArray(schema.enum) && schema.enum.length) return schema.enum.find((v) => v !== null) ?? schema.enum[0];
 
-  const variants = schema.oneOf || schema.anyOf;
-  if (variants?.length && !schema.properties) {
-    if (variants.length > 1) ctx.avisos.push(`${path || '(raiz)'}: oneOf/anyOf com ${variants.length} variantes; usada a primeira.`);
+  const variants = schemaVariants(schema);
+  if (variants.length && !schema.properties) {
+    if (variants.length > 1 && path) ctx.avisos.push(`${path}: oneOf/anyOf com ${variants.length} variantes; usada a primeira.`);
     return buildExample({ ...schema, oneOf: undefined, anyOf: undefined, ...variants[0] }, mode, ctx, fieldName, path, depth + 1);
+  }
+  if (enumLabels(schema)) {
+    const first = (schema.oneOf || schema.anyOf).find((v) => v?.type !== 'null');
+    return first.const !== undefined ? first.const : first.enum[0];
   }
 
   const { type } = typeInfo(schema);
@@ -142,7 +149,12 @@ export function buildExample(schema, mode = 'completo', ctx = { avisos: [] }, fi
   }
 }
 
-export function examplePayload(spec, op, mode = 'completo') {
+/**
+ * Payload base da operação. Opções:
+ * - exemplo: nome de um exemplo nomeado do corpo (requestBody.content.*.examples) a usar;
+ * - variante: índice da variante quando o corpo é oneOf/anyOf (ex.: funcionário x contribuinte).
+ */
+export function examplePayload(spec, op, mode = 'completo', { exemplo, variante } = {}) {
   const body = requestBodyInfo(spec, op);
   const ctx = { avisos: [] };
   const params = {};
@@ -155,16 +167,35 @@ export function examplePayload(spec, op, mode = 'completo') {
   }
   let corpo = null;
   let origemCorpo = null;
+  let variantes;
+  const exemplosDisponiveis = (body?.examples || []).map(({ nome, resumo }) => ({ nome, resumo }));
   if (body) {
-    if (body.example !== undefined && mode === 'completo') {
+    const named = exemplo ? body.examples.find((e) => e.nome === exemplo) : null;
+    if (exemplo && !named) {
+      ctx.avisos.push(`Exemplo "${exemplo}" não existe. Disponíveis: ${exemplosDisponiveis.map((e) => e.nome).join(', ') || '(nenhum)'}.`);
+    }
+    if (named) {
+      corpo = named.value;
+      origemCorpo = `exemplo "${named.nome}" declarado na spec`;
+    } else if (body.example !== undefined && mode === 'completo' && variante === undefined) {
       corpo = body.example;
-      origemCorpo = 'exemplo declarado na spec';
+      origemCorpo = exemplosDisponiveis.length ? `exemplo "${exemplosDisponiveis[0].nome}" declarado na spec` : 'exemplo declarado na spec';
     } else if (body.schema) {
-      corpo = buildExample(inlineSchema(spec, body.schema), mode, ctx, '', '');
+      const sel = selectVariant(inlineSchema(spec, body.schema), variante);
+      if (sel.variantes.length > 1) variantes = { usada: sel.indice, opcoes: sel.variantes };
+      corpo = buildExample(sel.schema, mode, ctx, '', '');
       origemCorpo = 'gerado a partir do schema';
     }
   }
-  return { parametros: params, contentType: body?.mediaType || null, corpo, origemCorpo, avisos: ctx.avisos };
+  return {
+    parametros: params,
+    contentType: body?.mediaType || null,
+    corpo,
+    origemCorpo,
+    ...(variantes ? { variantes } : {}),
+    ...(exemplosDisponiveis.length > 1 ? { exemplosDisponiveis } : {}),
+    avisos: ctx.avisos,
+  };
 }
 
 // Swagger 2 descreve parâmetros não-body sem "schema".
@@ -178,7 +209,7 @@ function paramSchema(p) {
 // Contexto de teste (visão achatada da operação)
 // ---------------------------------------------------------------------------
 
-export function testContext(spec, op) {
+export function testContext(spec, op, { variante } = {}) {
   const params = operationParameters(spec, op.pathItem, op.operation)
     .filter((p) => p.in !== 'body')
     .map((p) => ({
@@ -190,13 +221,16 @@ export function testContext(spec, op) {
     }));
 
   const body = requestBodyInfo(spec, op);
+  const sel = body?.schema ? selectVariant(inlineSchema(spec, body.schema), variante) : null;
   const corpo = body
     ? {
         obrigatorio: body.required,
         contentType: body.mediaType,
-        schema: body.schema?.$ref ? body.schema.$ref.split('/').pop() : null,
-        campos: body.schema ? flattenFields(inlineSchema(spec, body.schema), { context: 'request' }) : [],
+        schema: sel?.schema?._schema || (body.schema?.$ref ? body.schema.$ref.split('/').pop() : null),
+        ...(sel?.variantes.length > 1 ? { variantes: { usada: sel.indice, opcoes: sel.variantes } } : {}),
+        campos: sel ? flattenFields(sel.schema, { context: 'request' }) : [],
         temExemplo: body.example !== undefined,
+        ...(body.examples?.length ? { exemplos: body.examples.map(({ nome, resumo }) => ({ nome, resumo })) } : {}),
       }
     : null;
 
@@ -331,7 +365,7 @@ function nonExistentId(d) {
  * Deriva uma lista determinística de cenários a partir da spec. Serve como checklist
  * de cobertura: a IA completa com regras de negócio que a spec não descreve.
  */
-export function deriveTestScenarios(spec, op) {
+export function deriveTestScenarios(spec, op, { variante } = {}) {
   const method = op.method;
   const responses = responsesInfo(spec, op);
   const covered = new Set();
@@ -349,7 +383,7 @@ export function deriveTestScenarios(spec, op) {
   const contrato = successSchemaName ? `validar o corpo da resposta contra o schema ${successSchemaName}` : undefined;
 
   const body = requestBodyInfo(spec, op);
-  const bodySchema = body?.schema ? inlineSchema(spec, body.schema) : null;
+  const bodySchema = body?.schema ? selectVariant(inlineSchema(spec, body.schema), variante).schema : null;
   const campos = bodySchema ? flattenFields(bodySchema, { context: 'request' }) : [];
 
   // --- positivos
