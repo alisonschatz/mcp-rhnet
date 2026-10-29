@@ -14,7 +14,7 @@ let readOnlyReason = null;
 
 async function init() {
   if (store || readOnlyReason) return;
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
     const client = await import('@vercel/blob');
     store = createBlobStore({ client });
   } else if (process.env.VERCEL) {
