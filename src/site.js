@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
-import { SERVER_VERSION, UPDATABLE_APIS } from './config.js';
+import { APIS, SERVER_VERSION, UPDATABLE_APIS } from './config.js';
 import { compareApis, compareOperation } from './compare.js';
 import { findOperation } from './openapi.js';
 import { loadSpec } from './specs.js';
@@ -34,7 +34,10 @@ function detalharOps(lista, ...specs) {
 function specOf(apiId) {
   if (!UPDATABLE_APIS.includes(apiId)) throw new UpdateError(`API "${apiId}" desconhecida.`);
   const { spec } = loadSpec(apiId);
-  if (!spec) throw new UpdateError(`A spec de "${apiId}" ainda não foi carregada.`);
+  if (!spec) {
+    const { nome, modo } = APIS[apiId];
+    throw new UpdateError(modo === 'manual' ? `Envie a spec de ${nome.toLowerCase()} para comparar.` : `A spec de ${nome.toLowerCase()} ainda não foi baixada.`);
+  }
   return spec;
 }
 

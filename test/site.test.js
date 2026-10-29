@@ -8,7 +8,7 @@ import http from 'node:http';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-specs-'));
 
 // "Produção" falsa: serve uma cópia da spec sem uma operação e com um campo a mais.
-const hml = JSON.parse(fs.readFileSync(new URL('../specs/rhnet-hml.json', import.meta.url), 'utf8'));
+const hml = JSON.parse(fs.readFileSync(new URL('./fixtures/specs/rhnet-hml.json', import.meta.url), 'utf8'));
 const prd = structuredClone(hml);
 delete prd.paths['/api/v1/verbas'];
 prd.components.schemas.BancoStoreItem.properties.campo_novo = { type: 'string', maxLength: 10 };
@@ -19,7 +19,7 @@ const prdServer = http.createServer((req, res) => {
 });
 await new Promise((r) => prdServer.listen(0, '127.0.0.1', r));
 process.env.RHNET_PRD_SPEC_URL = `http://127.0.0.1:${prdServer.address().port}/docs?api-docs.json`;
-fs.copyFileSync(new URL('../specs/rhnet-hml.json', import.meta.url), path.join(dir, 'rhnet-hml.json'));
+fs.copyFileSync(new URL('./fixtures/specs/rhnet-hml.json', import.meta.url), path.join(dir, 'rhnet-hml.json'));
 process.env.SPECS_DIR = dir;
 delete process.env.VERCEL;
 

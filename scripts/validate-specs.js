@@ -37,6 +37,6 @@ for (const id of ids) {
   totalErrors += errors.length;
 }
 
-if (!files.length) console.log(`Nenhuma spec encontrada em ${SPECS_DIR}.`);
+if (!files.length) console.log(`Nenhuma spec em ${SPECS_DIR} (normal: as specs são enviadas pela página).`);
 console.log(`\n${totalErrors ? `✖ ${totalErrors} erro(s).` : '✔ Todas as specs válidas.'}`);
 process.exit(totalErrors ? 1 : 0);

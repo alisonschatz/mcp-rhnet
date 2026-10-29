@@ -8,3 +8,5 @@ src/site.bundle.js
 *.tmp
 # backups e registro das atualizações da spec (ficam só na máquina)
 specs/.historico/
+# specs enviadas ao rodar localmente (em produção ficam no Vercel Blob)
+specs/*.json

@@ -1,5 +1,6 @@
 // Cada arquivo de teste roda em processo próprio: dá para configurar o ambiente antes dos imports.
 process.env.VERCEL = '1';
+await import('./fixtures/env.js');
 
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';

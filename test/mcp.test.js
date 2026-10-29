@@ -1,3 +1,4 @@
+import './fixtures/env.js';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';

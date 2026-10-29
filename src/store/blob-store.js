@@ -16,7 +16,8 @@ async function streamToText(stream) {
 }
 
 const RAIZ = 'specs/';
-const MARCA_LIMPEZA = `${RAIZ}.limpeza-v3`;
+// Trocar o nome da marca faz o Blob ser zerado de novo no próximo acesso (começo do zero).
+const MARCA_LIMPEZA = `${RAIZ}.limpeza-v4`;
 
 export function createBlobStore({ client }) {
   const pointerPath = (apiId) => `${RAIZ}${apiId}/atual.json`;
@@ -47,12 +48,12 @@ export function createBlobStore({ client }) {
 
   const store = {
     /**
-     * Começo do zero: apaga uma única vez tudo o que foi guardado antes deste formato
-     * (versões e históricos antigos). Uma marca no Blob evita repetir.
+     * Começo do zero: apaga uma única vez tudo o que estava guardado (specs, versões e
+     * registros). Uma marca no Blob evita repetir.
      */
     async limparAntigos() {
       if (await client.get(MARCA_LIMPEZA, { access: 'private' })) return 0;
-      const antigos = (await listAll()).filter((b) => !b.pathname.startsWith(RAIZ));
+      const antigos = (await listAll()).filter((b) => b.pathname !== MARCA_LIMPEZA);
       for (const b of antigos) await client.del(b.url);
       await client.put(MARCA_LIMPEZA, JSON.stringify({ data: new Date().toISOString(), apagados: antigos.length }), { ...putOpts, allowOverwrite: true });
       return antigos.length;

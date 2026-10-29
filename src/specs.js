@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { HISTORY_DIR, SPECS_DIR } from './config.js';
+import { APIS, HISTORY_DIR, SPECS_DIR } from './config.js';
 
 const VALID_ID = /^[A-Za-z0-9._-]+$/;
 const fileCache = new Map();
@@ -65,6 +65,9 @@ export function specPath(apiId) {
  * para que um JSON quebrado em uma API não derrube as outras.
  */
 export function loadSpec(apiId) {
+  if (APIS[apiId] && !listApiIds().includes(apiId)) {
+    return { error: `A spec de ${APIS[apiId].nome.toLowerCase()} (${apiId}) ainda não foi carregada.${APIS[apiId].modo === 'manual' ? ' Envie o arquivo pela página do MCP.' : ''}` };
+  }
   if (typeof apiId !== 'string' || !VALID_ID.test(apiId) || !listApiIds().includes(apiId)) {
     return { error: `API "${apiId}" não encontrada. Use list_apis para ver os ids válidos.` };
   }

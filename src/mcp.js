@@ -135,7 +135,7 @@ export function buildMcpServer() {
     },
     async ({ page, pageSize }) => {
       const apis = listApis();
-      if (!apis.length) return toolError('Nenhuma spec encontrada na pasta specs/.');
+      if (!apis.length) return toolError('Nenhuma spec carregada ainda. Envie a de homologação pela página do MCP; a de produção é baixada sozinha.');
       const { items, meta } = paginate(apis, page, pageSize);
       return toolText({ ...meta, apis: items });
     }

@@ -56,7 +56,7 @@ claude mcp add --transport http rhnet https://mcp-rhnet.vercel.app/mcp
 
 - **Storage → Blob** (acesso Private) conectado ao projeto: guarda a versão atual e a anterior de cada ambiente, em `specs/`. Arquivos de formatos antigos são apagados sozinhos no primeiro acesso.
 - Nenhuma variável de ambiente é obrigatória.
-- `specs/rhnet-hml.json` é só a versão inicial de homologação; depois vale a última enviada pela página. Produção é baixada sozinha no primeiro uso.
+- O repositório não tem spec fixa: homologação começa vazia até o primeiro envio pela página, e produção é baixada sozinha no primeiro uso.
 
 ## Rodando local
 
@@ -66,7 +66,7 @@ npm start      # página em http://127.0.0.1:3001 · conector em http://127.0.0.
 npm test
 ```
 
-Localmente as specs ficam em `specs/` (versão anterior em `specs/.historico/`).
+Localmente as specs enviadas ficam em `specs/` (fora do git; versão anterior em `specs/.historico/`).
 
 ## Ferramentas MCP
 
@@ -88,7 +88,6 @@ Prompts: `casos_de_teste_operacao` e `plano_de_testes_api`. Resources: `docs://i
 ## Estrutura
 
 ```
-specs/rhnet-hml.json    spec inicial de homologação
 src/
   site.html · site.js   página (/) e API usada por ela
   updater.js            valida, grava, restaura e baixa produção sozinho
@@ -97,5 +96,5 @@ src/
   mcp.js · openapi.js · testing.js · specs.js · validate.js · spec-diff.js
   web.js · app.js (Vercel) · http.js (local)
 scripts/                build-bundle, validate-specs
-test/                   node:test
+test/                   node:test (a spec usada nos testes fica em test/fixtures/specs/)
 ```

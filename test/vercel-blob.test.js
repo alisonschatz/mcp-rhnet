@@ -1,5 +1,6 @@
 // Simula o deploy na Vercel com Vercel Blob (cliente em memória).
 process.env.VERCEL = '1';
+await import('./fixtures/env.js');
 process.env.SPEC_SYNC_SECONDS = '0';
 process.env.SPEC_AUTO_UPDATE_MINUTES = '0';
 
@@ -141,14 +142,14 @@ test('Blob: no máximo atual + anterior por ambiente', async () => {
   assert.ok(versoes.length <= 2, `encontradas ${versoes.length}`);
 });
 
-test('Blob: apaga uma vez tudo do formato antigo', async () => {
+test('Blob: começa do zero uma única vez', async () => {
   const c = fakeBlobClient();
   await c.put('rhnet/atual.json', '{}', { access: 'private' });
   await c.put('rhnet/versoes/a.json', '{}', { access: 'private' });
   await c.put('rhnet-prd/versoes/b.json', '{}', { access: 'private' });
   await c.put('specs/rhnet-hml/atual.json', '{}', { access: 'private' });
   const store = createBlobStore({ client: c });
-  assert.equal(await store.limparAntigos(), 3);
-  assert.deepEqual([...c.blobs.keys()].filter((k) => !k.startsWith('specs/.')), ['specs/rhnet-hml/atual.json']);
+  assert.equal(await store.limparAntigos(), 4);
+  assert.deepEqual([...c.blobs.keys()].filter((k) => !k.startsWith('specs/.')), []);
   assert.equal(await store.limparAntigos(), 0, 'não repete');
 });

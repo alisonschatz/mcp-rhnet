@@ -347,7 +347,7 @@ function renderMudanca(st) {
         <button class="btn ghost sm" data-restaurar="${esc(st.versaoAnterior.arquivo)}">${ICON_UNDO}Restaurar</button></div>`
     : '';
   if (!u) {
-    el.innerHTML = `<div class="rotulo">Última mudança</div><div class="mud-linha"><span class="origem">Nenhuma ainda — usando a versão do deploy.</span></div>${anterior}`;
+    el.innerHTML = `<div class="rotulo">Última mudança</div><div class="mud-linha"><span class="origem">${st.atual ? 'Nenhuma ainda.' : st.modo === 'manual' ? 'Nenhuma spec ainda — envie o arquivo acima.' : 'Aguardando a primeira verificação.'}</span></div>${anterior}`;
     return;
   }
   const cab = `<div class="rotulo">Última mudança</div>
