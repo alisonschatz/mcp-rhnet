@@ -34,7 +34,7 @@ export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_MATCHES_PER_API = 5;
 
 export const SERVER_NAME = 'mcp-rhnet';
-export const SERVER_VERSION = '2.6.0';
+export const SERVER_VERSION = '2.7.0';
 
 // ---------------------------------------------------------------------------
 // Atualização da spec

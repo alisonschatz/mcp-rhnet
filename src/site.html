@@ -3,234 +3,209 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCP RH Net</title>
+<title>RH Net · MCP</title>
 <style>
   :root {
-    --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f8f9fb; --text: #0f172a; --text-2: #475467; --muted: #8a94a6;
-    --line: #e7eaf0; --line-2: #eef0f4; --accent: #4f46e5; --accent-2: #eef0ff;
+    --bg: #f4f5f7; --surface: #ffffff; --surface-2: #f8f9fb; --text: #101828; --text-2: #475467; --muted: #98a2b3;
+    --line: #e4e7ec; --line-2: #eef0f3; --accent: #3e4ccf; --accent-2: #eef0fb;
     --green: #067647; --green-bg: #ecfdf3; --red: #b42318; --red-bg: #fef3f2; --amber: #b54708; --amber-bg: #fffaeb;
     --blue: #175cd3; --blue-bg: #eff8ff; --violet: #6941c6; --violet-bg: #f4f3ff; --gray-bg: #f2f4f7;
-    --hml: #f59e0b; --prd: #10b981;
-    --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .06);
-    --shadow-lg: 0 12px 32px -8px rgba(16, 24, 40, .18);
-    --radius: 14px;
+    --hml: #f59e0b; --prd: #12b76a;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .05);
+    --shadow-lg: 0 12px 32px -8px rgba(16, 24, 40, .2);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0b0d12; --surface: #12151c; --surface-2: #171b24; --text: #eef0f4; --text-2: #b4bccb; --muted: #7d8799;
-      --line: #232835; --line-2: #1c212c; --accent: #8b87ff; --accent-2: #1f1d3d;
+      --bg: #0c0e12; --surface: #13161c; --surface-2: #181c24; --text: #eceef2; --text-2: #b0b8c6; --muted: #737d8f;
+      --line: #252a35; --line-2: #1d222b; --accent: #8c95ff; --accent-2: #1d2040;
       --green: #47cd89; --green-bg: #0f2a1e; --red: #f97066; --red-bg: #2f1414; --amber: #fdb022; --amber-bg: #2c2110;
-      --blue: #53b1fd; --blue-bg: #0f2236; --violet: #a48afb; --violet-bg: #211a3a; --gray-bg: #1d2230;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .3); --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, .6);
+      --blue: #53b1fd; --blue-bg: #0f2236; --violet: #a48afb; --violet-bg: #211a3a; --gray-bg: #1c212b;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .35); --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, .6);
     }
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { -webkit-font-smoothing: antialiased; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-feature-settings: "tnum"; }
-  main { max-width: 980px; margin: 0 auto; padding: 36px 20px 72px; }
+  main { max-width: 1000px; margin: 0 auto; padding: 0 20px 72px; }
   a { color: inherit; text-decoration: none; }
   svg { flex: none; }
   .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; }
 
-  /* ---------- topo ---------- */
-  .top { display: flex; align-items: center; gap: 14px; }
-  .logo { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px; letter-spacing: -.02em; box-shadow: 0 4px 12px -2px rgba(99, 102, 241, .45); }
-  .top h1 { font-size: 19px; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
-  .top p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
-  .status { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 10px; box-shadow: var(--shadow); }
-  .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-bg); }
-  .status.off i { background: var(--red); box-shadow: 0 0 0 3px var(--red-bg); }
+  /* ---------- barra superior ---------- */
+  .bar { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+  .marca { display: flex; align-items: baseline; gap: 8px; font-size: 15px; white-space: nowrap; }
+  .marca b { font-weight: 700; letter-spacing: -.02em; }
+  .marca span { color: var(--muted); font-weight: 500; }
+  .marca span::before { content: '/'; margin-right: 8px; color: var(--line); }
+  .con { margin-left: auto; display: flex; align-items: center; min-width: 0; height: 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+  .con .lbl { padding: 0 10px; font-size: 12px; color: var(--muted); border-right: 1px solid var(--line); height: 100%; display: grid; place-items: center; background: var(--surface-2); }
+  .con code { padding: 0 10px; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .con button { height: 100%; width: 34px; border: 0; border-left: 1px solid var(--line); background: var(--surface); color: var(--text-2); cursor: pointer; display: grid; place-items: center; }
+  .con button:hover { color: var(--text); background: var(--surface-2); }
+  .ver { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .ver i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .ver.off i { background: var(--red); }
 
-  .conector { margin-top: 22px; display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 10px 10px 16px; box-shadow: var(--shadow); }
-  .conector .lbl { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
-  .conector .url { font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
-
-  /* ---------- botões ---------- */
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 34px; padding: 0 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: 500 13px/1 inherit; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; white-space: nowrap; box-shadow: var(--shadow); }
-  .btn:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--line) 50%, var(--muted)); }
-  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.primary:hover { filter: brightness(1.07); }
+  /* ---------- botões, chips ---------- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: 500 13px/1 inherit; cursor: pointer; transition: background .15s, border-color .15s; white-space: nowrap; box-shadow: var(--shadow); }
+  .btn:hover { background: var(--surface-2); }
+  .btn:focus-visible, .seg button:focus-visible, .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .btn.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--text-2); }
   .btn.ghost:hover { background: var(--gray-bg); color: var(--text); }
-  .btn.sm { height: 28px; padding: 0 10px; font-size: 12.5px; border-radius: 8px; }
+  .btn.sm { height: 28px; padding: 0 10px; font-size: 12.5px; }
   .btn[disabled] { opacity: .55; cursor: default; }
-  .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: girar .7s linear infinite; }
+  .spin { width: 13px; height: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: girar .7s linear infinite; }
   @keyframes girar { to { transform: rotate(360deg); } }
-
-  /* ---------- chips / badges ---------- */
-  .chip { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; background: var(--gray-bg); color: var(--text-2); }
+  .chip { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; font-size: 11.5px; font-weight: 600; white-space: nowrap; background: var(--gray-bg); color: var(--text-2); }
   .chip.green { background: var(--green-bg); color: var(--green); }
   .chip.red { background: var(--red-bg); color: var(--red); }
   .chip.amber { background: var(--amber-bg); color: var(--amber); }
-  .chip b { font-weight: 650; }
-  .metodo { display: inline-flex; align-items: center; justify-content: center; width: 58px; height: 22px; border-radius: 6px; font: 650 10.5px/1 ui-monospace, "SF Mono", Consolas, monospace; letter-spacing: .02em; flex: none; }
+  .metodo { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 20px; border-radius: 5px; font: 650 10.5px/1 ui-monospace, "SF Mono", Consolas, monospace; letter-spacing: .02em; flex: none; }
   .metodo.GET { background: var(--green-bg); color: var(--green); }
   .metodo.POST { background: var(--blue-bg); color: var(--blue); }
   .metodo.PUT { background: var(--amber-bg); color: var(--amber); }
   .metodo.PATCH { background: var(--violet-bg); color: var(--violet); }
   .metodo.DELETE { background: var(--red-bg); color: var(--red); }
+  kbd { font: 500 11px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--surface); color: var(--text); }
 
-  /* ---------- cartões ---------- */
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
-  .envs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; align-items: start; }
-  .env { display: flex; flex-direction: column; }
-  .env-head { display: flex; align-items: center; gap: 10px; padding: 18px 20px 0; }
-  .env-head .dot { width: 10px; height: 10px; border-radius: 3px; }
-  .env-head h2 { font-size: 15.5px; margin: 0; letter-spacing: -.01em; }
+  /* ---------- ambientes ---------- */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
+  .envs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+  .env { display: flex; flex-direction: column; padding: 18px 20px 20px; }
+  .env-head { display: flex; align-items: center; gap: 9px; }
+  .env-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .env-head h2 { font-size: 15px; margin: 0; letter-spacing: -.01em; }
   .env-head .id { color: var(--muted); font-size: 12px; }
   .env-head .chip { margin-left: auto; }
-  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); margin: 16px 20px 0; border: 1px solid var(--line-2); border-radius: 11px; background: var(--surface-2); }
-  .metric { padding: 12px 14px; min-width: 0; }
-  .metric + .metric { border-left: 1px solid var(--line-2); }
-  .metric .l { font-size: 11.5px; color: var(--muted); font-weight: 500; }
-  .metric .v { font-size: 21px; font-weight: 650; letter-spacing: -.02em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .metric .v small { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-  .env-body { padding: 16px 20px 18px; }
-  .passos { display: grid; gap: 10px; }
-  .passo { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-size: 13px; }
-  .passo .n { width: 20px; height: 20px; border-radius: 50%; background: var(--gray-bg); color: var(--text-2); font-size: 11px; font-weight: 650; display: grid; place-items: center; flex: none; }
-  kbd { font: 500 11px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; background: var(--surface); color: var(--text); }
-  .drop { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 1.5px dashed var(--line); border-radius: 12px; padding: 18px 12px; text-align: center; color: var(--muted); font-size: 13px; cursor: pointer; transition: border-color .15s, background .15s; }
-  .drop .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--gray-bg); color: var(--text-2); display: grid; place-items: center; }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr 1.3fr; margin-top: 16px; }
+  .metric { min-width: 0; }
+  .metric + .metric { padding-left: 16px; border-left: 1px solid var(--line-2); margin-left: 16px; }
+  .metric .l { font-size: 12px; color: var(--muted); }
+  .metric .v { font-size: 22px; font-weight: 650; letter-spacing: -.02em; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .metric .s { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acao { margin-top: auto; padding-top: 18px; }
+  .acao-linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-2); }
+  .acao-linha .dica { color: var(--muted); }
+  .drop { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; height: 64px; border: 1.5px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 13px; cursor: pointer; transition: border-color .15s, background .15s; }
   .drop strong { color: var(--text); font-weight: 600; }
   .drop u { color: var(--accent); text-decoration: none; font-weight: 500; }
   .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-2); }
-  .drop.over .ic { background: var(--accent); color: #fff; }
-  .auto { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .auto .quando { color: var(--text-2); font-size: 13px; margin-right: auto; display: inline-flex; align-items: center; gap: 7px; }
-  .auto .erro { color: var(--red); display: inline-flex; align-items: center; gap: 7px; }
-  .acoes { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .verif { display: flex; align-items: center; gap: 7px; height: 32px; font-size: 12.5px; color: var(--text-2); }
+  .verif.erro { color: var(--red); }
+  .botoes { margin-top: 10px; display: flex; gap: 8px; align-items: center; height: 64px; padding: 0 14px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2); }
+  .botoes .dica { margin-left: auto; font-size: 12px; color: var(--muted); }
 
-  /* última mudança */
-  .mudanca { border-top: 1px solid var(--line-2); padding: 14px 20px 16px; }
-  .rotulo { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  .mud-linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .mud-linha .quando { font-size: 13px; color: var(--text); font-weight: 500; }
-  .mud-linha .origem { font-size: 12.5px; color: var(--muted); }
-  .mud-linha .chips { display: flex; gap: 5px; margin-left: auto; flex-wrap: wrap; }
-  .toggle { margin-top: 10px; display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; color: var(--accent); font: 500 12.5px inherit; cursor: pointer; }
-  .toggle svg { transition: transform .2s; }
-  .toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
-  .mud-det { margin-top: 10px; display: grid; gap: 12px; }
-  .mud-det h4 { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--text-2); display: flex; gap: 6px; align-items: center; }
-  .mini { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 220px; overflow: auto; }
-  .mini li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; min-width: 0; }
-  .mini .p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .anterior { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 8px 8px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2); font-size: 12.5px; color: var(--text-2); }
-  .anterior span { margin-right: auto; }
-
-  /* ---------- comparação ---------- */
-  .cmp { margin-top: 16px; padding: 20px; }
-  .cmp-head { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
-  .cmp-head h2 { margin: 0; font-size: 15.5px; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
-  .cmp-head h2 .dot { width: 10px; height: 10px; border-radius: 3px; }
-  .cmp-head .vs { color: var(--muted); font-weight: 500; }
-  .frase { margin: 6px 0 0; color: var(--text-2); font-size: 13.5px; }
+  /* ---------- painel de comparação ---------- */
+  .painel { margin-top: 16px; }
+  .tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tabs button { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 12px; border: 0; background: none; color: var(--text-2); font: 500 13.5px inherit; cursor: pointer; white-space: nowrap; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.on { color: var(--text); }
+  .tabs button.on::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--text); }
+  .tabs .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .tabs .n { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+  .corpo { padding: 18px 20px 20px; }
+  .cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .frase { margin: 0; font-size: 14px; color: var(--text-2); flex: 1; min-width: 240px; }
   .frase b { color: var(--text); font-weight: 600; }
-  .seg { display: flex; gap: 4px; padding: 4px; background: var(--gray-bg); border-radius: 11px; margin-top: 16px; overflow-x: auto; }
-  .seg button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 34px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); font: 500 13px inherit; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+  .versoes { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .versoes .seta { color: var(--line); }
+  .ctrl { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; }
+  .seg button { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
   .seg button:hover:not([disabled]) { color: var(--text); }
   .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-  .seg button[disabled] { opacity: .45; cursor: default; }
-  .seg .cnt { min-width: 22px; height: 20px; padding: 0 6px; border-radius: 6px; font-size: 11.5px; font-weight: 650; display: inline-grid; place-items: center; }
-  .busca { position: relative; margin-top: 12px; }
-  .busca svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-  .busca input { width: 100%; height: 36px; padding: 0 12px 0 34px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; transition: border-color .15s, box-shadow .15s; }
+  .seg button[disabled] { opacity: .4; cursor: default; }
+  .busca { position: relative; margin-left: auto; width: 240px; max-width: 100%; }
+  .busca svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .busca input { width: 100%; height: 34px; padding: 0 10px 0 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; }
   .busca input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-2); }
-  .ajuda { font-size: 12.5px; color: var(--muted); margin: 10px 2px 0; }
-  .lista { list-style: none; margin: 10px 0 0; padding: 0; border: 1px solid var(--line-2); border-radius: 11px; overflow: hidden; }
+  .ajuda { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  .lista { list-style: none; margin: 10px 0 0; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
   .lista > li + li { border-top: 1px solid var(--line-2); }
-  .row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-width: 0; }
-  .row.click { cursor: pointer; transition: background .12s; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; min-width: 0; }
+  .row.click { cursor: pointer; }
   .row.click:hover { background: var(--surface-2); }
-  .row .txt { min-width: 0; flex: 1; }
-  .row .p { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .row .r { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .row .chev { color: var(--muted); transition: transform .2s; }
-  li.aberto .row { background: var(--surface-2); }
+  .row .p { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .row .r { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; padding-left: 12px; max-width: 45%; }
+  .row .chev { color: var(--muted); transition: transform .2s; margin-left: 4px; }
+  .row .r + .chev { margin-left: 0; }
+  li.aberto > .row { background: var(--surface-2); }
   li.aberto .chev { transform: rotate(90deg); color: var(--text); }
-  .vazio { padding: 22px; text-align: center; color: var(--muted); font-size: 13px; }
-  .det { padding: 4px 14px 14px; background: var(--surface-2); }
+  .mais { width: 100%; height: 38px; border: 0; background: var(--surface-2); color: var(--accent); font: 500 13px inherit; cursor: pointer; }
+  .mais:hover { background: var(--gray-bg); }
+  .vazio { padding: 26px; text-align: center; color: var(--muted); font-size: 13px; }
+  .det { padding: 2px 12px 12px; background: var(--surface-2); }
   .det .resumo { font-size: 12.5px; color: var(--text-2); margin: 0 0 8px; }
-  .tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
-  .tabela th { text-align: left; font-weight: 600; font-size: 11.5px; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
-  .tabela td { padding: 8px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; overflow-wrap: anywhere; color: var(--text-2); }
+  .tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .tabela th { text-align: left; font-weight: 600; font-size: 11.5px; color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--line); }
+  .tabela td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; overflow-wrap: anywhere; color: var(--text-2); }
   .tabela tr:last-child td { border-bottom: 0; }
   .tabela td:first-child { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text); width: 36%; }
   .tabela .nao { color: var(--muted); font-style: italic; }
   .tabela .t { color: var(--text); font-weight: 600; }
+  .scroll { max-height: 66vh; overflow: auto; }
 
-  /* ---------- avisos ---------- */
-  .aviso { margin-top: 16px; padding: 12px 14px; border-radius: 11px; background: var(--red-bg); color: var(--red); font-size: 13px; }
-  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; transition: transform .25s, opacity .25s; z-index: 10; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 11px 16px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); }
+  .aviso { margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; background: var(--red-bg); color: var(--red); font-size: 13px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; transition: transform .25s, opacity .25s; z-index: 10; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 10px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); }
   .toast.show { transform: translate(-50%, 0); opacity: 1; }
   .toast.err { background: var(--red); color: #fff; }
-  .busy { pointer-events: none; }
-  .skeleton { color: transparent !important; background: linear-gradient(90deg, var(--gray-bg), var(--line-2), var(--gray-bg)); background-size: 200% 100%; animation: brilho 1.2s infinite; border-radius: 6px; }
-  @keyframes brilho { to { background-position: -200% 0; } }
+  .busy { pointer-events: none; opacity: .7; }
 
-  @media (max-width: 760px) {
-    main { padding: 24px 14px 60px; }
+  @media (max-width: 780px) {
+    main { padding: 0 14px 60px; }
+    .bar { flex-wrap: wrap; gap: 10px; }
+    .con { margin-left: 0; width: 100%; order: 3; }
+    .ver { margin-left: auto; }
     .envs { grid-template-columns: 1fr; }
-    .status { display: none; }
+    .metrics { grid-template-columns: 1fr 1fr 1.4fr; }
+    .metric + .metric { padding-left: 12px; margin-left: 12px; }
+    .busca { width: 100%; margin-left: 0; }
+    .seg { overflow-x: auto; max-width: 100%; }
     .row .r { display: none; }
-    .seg { display: grid; grid-template-columns: 1fr 1fr; }
-    .seg button { justify-content: space-between; }
     .tabela td:first-child { width: auto; }
   }
 </style>
 </head>
 <body>
 <main>
-  <header class="top">
-    <div class="logo">RH</div>
-    <div>
-      <h1>MCP RH Net</h1>
-      <p>Documentação da API RH Net para IA</p>
+  <header class="bar">
+    <div class="marca"><b>RH Net</b><span>MCP</span></div>
+    <div class="con">
+      <span class="lbl">Conector</span>
+      <code class="mono" id="mcpUrl"></code>
+      <button id="copiar" title="Copiar endereço do conector" aria-label="Copiar endereço do conector">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
     </div>
-    <span class="status" id="status"><i></i><span>Conectando…</span></span>
+    <span class="ver" id="ver"><i></i><span>…</span></span>
   </header>
-
-  <div class="conector">
-    <span class="lbl">Conector MCP</span>
-    <span class="url mono" id="mcpUrl"></span>
-    <button class="btn sm" id="copiar" title="Copiar endereço">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      <span>Copiar</span>
-    </button>
-  </div>
   <div id="aviso"></div>
 
   <div class="envs">
-    <!-- Homologação -->
     <section class="card env" id="card-rhnet-hml">
       <div class="env-head">
         <span class="dot" style="background:var(--hml)"></span>
         <h2>Homologação</h2><span class="id mono">rhnet-hml</span>
-        <span class="chip">Manual · VPN</span>
+        <span class="chip">Manual</span>
       </div>
       <div class="metrics" data-metrics></div>
-      <div class="env-body">
-        <div class="passos">
-          <div class="passo"><span class="n">1</span><span>Com a VPN ligada,</span>
-            <a class="btn sm" data-spec target="_blank" rel="noopener">Abrir spec
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-            </a>
-          </div>
-          <div class="passo"><span class="n">2</span><span>Salve com <kbd>Ctrl</kbd> + <kbd>S</kbd> e envie abaixo</span></div>
+      <div class="acao">
+        <div class="acao-linha">
+          <a class="btn sm" data-spec target="_blank" rel="noopener">Abrir spec
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          </a>
+          <span class="dica">com a VPN ligada · salve com <kbd>Ctrl</kbd> <kbd>S</kbd> e envie abaixo</span>
         </div>
         <label class="drop" id="drop" for="arquivo">
-          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
-          <span><strong>Arraste o arquivo</strong> ou <u>selecione</u></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span id="dropTxt"><strong>Solte o arquivo aqui</strong> ou <u>selecione</u></span>
           <input type="file" id="arquivo" hidden>
         </label>
       </div>
-      <div class="mudanca" data-mudanca></div>
     </section>
 
-    <!-- Produção -->
     <section class="card env" id="card-rhnet-prd">
       <div class="env-head">
         <span class="dot" style="background:var(--prd)"></span>
@@ -238,39 +213,39 @@
         <span class="chip green">Automático</span>
       </div>
       <div class="metrics" data-metrics></div>
-      <div class="env-body">
-        <div class="auto">
-          <span class="quando" data-verificada></span>
-        </div>
-        <div class="acoes">
-          <button class="btn" id="btnPrd">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      <div class="acao">
+        <div class="verif" data-verificada></div>
+        <div class="botoes">
+          <button class="btn sm" id="btnPrd">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
             <span>Atualizar agora</span>
           </button>
-          <a class="btn ghost" data-spec target="_blank" rel="noopener">Abrir spec
+          <a class="btn ghost sm" data-spec target="_blank" rel="noopener">Abrir spec
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
           </a>
         </div>
       </div>
-      <div class="mudanca" data-mudanca></div>
     </section>
   </div>
 
-  <!-- Comparação -->
-  <section class="card cmp">
-    <div class="cmp-head">
-      <div>
-        <h2><span class="dot" style="background:var(--hml)"></span>Homologação <span class="vs">×</span> <span class="dot" style="background:var(--prd)"></span>Produção</h2>
-        <p class="frase" id="frase"><span class="skeleton">Comparando os dois ambientes…</span></p>
+  <section class="card painel">
+    <nav class="tabs" id="views" role="tablist"></nav>
+    <div class="corpo">
+      <div class="cab">
+        <p class="frase" id="frase">Carregando…</p>
+        <span id="cabAcoes"></span>
       </div>
+      <div class="versoes" id="versoes" hidden></div>
+      <div class="ctrl" id="ctrl" hidden>
+        <div class="seg" id="cats" role="tablist"></div>
+        <div class="busca">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="filtro" type="search" placeholder="Filtrar operações">
+        </div>
+      </div>
+      <p class="ajuda" id="ajuda" hidden></p>
+      <div class="scroll" id="scroll"><ul class="lista" id="lista" hidden></ul></div>
     </div>
-    <div class="seg" id="abas" role="tablist"></div>
-    <div class="busca" id="busca" hidden>
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="filtro" type="search" placeholder="Filtrar por caminho, descrição ou grupo">
-    </div>
-    <p class="ajuda" id="ajuda"></p>
-    <ul class="lista" id="lista" hidden></ul>
   </section>
 </main>
 <div class="toast" id="toast"></div>
@@ -278,13 +253,13 @@
 <script>
 const HML = 'rhnet-hml', PRD = 'rhnet-prd';
 const NOMES = { [HML]: 'Homologação', [PRD]: 'Produção' };
+const POR_PAGINA = 12;
 const $ = (id) => document.getElementById(id);
 const card = (apiId) => $('card-' + apiId);
 const q = (apiId, sel) => card(apiId).querySelector(sel);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const dataHora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
-const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB');
 function relativo(iso) {
   if (!iso) return '—';
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -294,12 +269,11 @@ function relativo(iso) {
   const d = Math.floor(s / 86400);
   return d === 1 ? 'ontem' : d < 30 ? `há ${d} dias` : new Date(iso).toLocaleDateString('pt-BR');
 }
-const ICON_CHEV = '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
-const ICON_CHEV_SM = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
-const ICON_UNDO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>';
-const ICON_CLOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+const CHEV = '<svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+const CLOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+const UNDO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>';
+const metodoBadge = (m) => `<span class="metodo ${esc(m)}">${esc(m)}</span>`;
 
-// ---------------- utilidades ----------------
 let toastTimer;
 function toast(msg, erro = false) {
   const t = $('toast');
@@ -316,83 +290,139 @@ async function api(path, opts) {
   return body;
 }
 
-const metodoBadge = (m) => `<span class="metodo ${esc(m)}">${esc(m)}</span>`;
-const splitOp = (chave) => { const [m, ...p] = chave.split(' '); return { m, p: p.join(' ') }; };
+// ================= ambientes =================
+let status = null;
 
-function chipsResumo(r) {
-  const o = r.operacoes, s = r.schemas, c = [];
-  if (o.adicionadas) c.push(`<span class="chip green"><b>+${o.adicionadas}</b> op</span>`);
-  if (o.removidas) c.push(`<span class="chip red"><b>−${o.removidas}</b> op</span>`);
-  if (o.alteradas) c.push(`<span class="chip amber"><b>${o.alteradas}</b> alterada${o.alteradas > 1 ? 's' : ''}</span>`);
-  const sc = s.adicionados + s.removidos + s.alterados;
-  if (sc) c.push(`<span class="chip"><b>${sc}</b> schema${sc > 1 ? 's' : ''}</span>`);
-  return c.join('') || '<span class="chip">só textos</span>';
-}
-
-// ---------------- ambientes ----------------
-function renderMetrics(st) {
+function renderApi(st) {
   const a = st.atual;
+  const origem = st.ultimaMudanca?.origem;
   q(st.apiId, '[data-metrics]').innerHTML = `
     <div class="metric"><div class="l">Operações</div><div class="v">${a?.operacoes ?? '—'}</div></div>
     <div class="metric"><div class="l">Schemas</div><div class="v">${a?.schemas ?? '—'}</div></div>
-    <div class="metric" title="${st.atualizadaEm ? dataHora(st.atualizadaEm) : 'Versão que veio no deploy'}"><div class="l">Atualizada</div>
-      <div class="v">${st.atualizadaEm ? relativo(st.atualizadaEm) : a ? '<small>no deploy</small>' : '—'}</div></div>`;
-}
-
-function renderMudanca(st) {
-  const el = q(st.apiId, '[data-mudanca]');
-  const u = st.ultimaMudanca;
-  const anterior = st.versaoAnterior
-    ? `<div class="anterior"><span>Versão anterior · ${dataHora(st.versaoAnterior.salvoEm)} · ${kb(st.versaoAnterior.tamanho)}</span>
-        <button class="btn ghost sm" data-restaurar="${esc(st.versaoAnterior.arquivo)}">${ICON_UNDO}Restaurar</button></div>`
-    : '';
-  if (!u) {
-    el.innerHTML = `<div class="rotulo">Última mudança</div><div class="mud-linha"><span class="origem">${st.atual ? 'Nenhuma ainda.' : st.modo === 'manual' ? 'Nenhuma spec ainda — envie o arquivo acima.' : 'Aguardando a primeira verificação.'}</span></div>${anterior}`;
-    return;
-  }
-  const cab = `<div class="rotulo">Última mudança</div>
-    <div class="mud-linha"><span class="quando" title="${dataHora(u.data)}">${relativo(u.data)}</span><span class="origem">· ${esc(u.origem)}</span>
-      <span class="chips">${u.primeiraCarga ? `<span class="chip">primeira carga · <b>${u.nova.operacoes}</b> op</span>` : chipsResumo(u.resumo)}</span></div>`;
-  if (u.primeiraCarga) { el.innerHTML = cab + anterior; return; }
-  const d = u.diff;
-  const ops = (titulo, cls, itens) => itens.length
-    ? `<div><h4><span class="chip ${cls}">${itens.length}</span>${titulo}</h4><ul class="mini">${itens.map((k) => { const { m, p } = splitOp(k); return `<li>${metodoBadge(m)}<span class="p mono">${esc(p)}</span></li>`; }).join('')}</ul></div>` : '';
-  const schemas = (titulo, cls, itens) => itens.length
-    ? `<div><h4><span class="chip ${cls}">${itens.length}</span>${titulo}</h4><ul class="mini">${itens.map((n) => `<li><span class="p mono">${esc(n)}</span></li>`).join('')}</ul></div>` : '';
-  const det = ops('Operações novas', 'green', d.operacoes.adicionadas) + ops('Operações removidas', 'red', d.operacoes.removidas) + ops('Operações alteradas', 'amber', d.operacoes.alteradas) +
-    schemas('Schemas novos', 'green', d.schemas.adicionadas) + schemas('Schemas removidos', 'red', d.schemas.removidas) + schemas('Schemas alterados', 'amber', d.schemas.alteradas);
-  el.innerHTML = cab + (det ? `<button class="toggle" aria-expanded="false" data-toggle>${ICON_CHEV_SM}Ver o que mudou</button><div class="mud-det" hidden>${det}</div>` : '') + anterior;
-}
-
-function renderApi(st) {
-  renderMetrics(st);
+    <div class="metric" title="${st.atualizadaEm ? dataHora(st.atualizadaEm) : ''}"><div class="l">Atualizada</div>
+      <div class="v">${st.atualizadaEm ? relativo(st.atualizadaEm) : '—'}</div>
+      <div class="s">${a ? esc(origem || '') || '&nbsp;' : st.modo === 'manual' ? 'envie a primeira versão' : 'aguardando download'}</div></div>`;
   card(st.apiId).querySelectorAll('[data-spec]').forEach((el) => (el.href = st.specUrl));
   const v = q(st.apiId, '[data-verificada]');
   if (v) {
+    v.className = 'verif' + (st.ultimoErro ? ' erro' : '');
     v.innerHTML = st.ultimoErro
-      ? `<span class="erro" title="${esc(st.ultimoErro)}">${ICON_CLOCK} Falha na verificação ${relativo(st.verificadaEm)}</span>`
-      : `${ICON_CLOCK}<span title="${dataHora(st.verificadaEm)}">Verificada ${relativo(st.verificadaEm)} · a cada hora</span>`;
+      ? `${CLOCK}<span title="${esc(st.ultimoErro)}">Falha ao verificar ${relativo(st.verificadaEm)}: ${esc(st.ultimoErro)}</span>`
+      : `${CLOCK}<span title="${dataHora(st.verificadaEm)}">Verificada ${relativo(st.verificadaEm)} · confere sozinha a cada hora</span>`;
   }
-  renderMudanca(st);
 }
 
-// ---------------- comparação ----------------
-let cmp = null;
-let aba = null;
-const ABAS = [
-  { id: 'soEmA', titulo: 'Só em homologação', cls: 'green', ajuda: 'Operações que existem em homologação e ainda não chegaram em produção.' },
-  { id: 'soEmB', titulo: 'Só em produção', cls: 'red', ajuda: 'Operações de produção que não existem mais em homologação.' },
-  { id: 'diferentes', titulo: 'Diferentes', cls: 'amber', ajuda: 'O contrato mudou (campos, tipos, obrigatoriedade, limites, respostas). Clique para ver campo a campo.' },
-  { id: 'soTextos', titulo: 'Só textos', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos. Clique para ver.' },
-];
+// ================= painel de comparação =================
+const VIEWS = {
+  'mud-hml': {
+    titulo: 'Mudanças em homologação', dot: 'var(--hml)', api: HML, url: `/${HML}/mudancas`, colA: 'Anterior', colB: 'Atual',
+    cats: [
+      { id: 'soEmB', t: 'Novas', um: 'nova', cls: 'green', ajuda: 'Operações que entraram nesta versão.' },
+      { id: 'soEmA', t: 'Removidas', um: 'removida', cls: 'red', ajuda: 'Operações que existiam na versão anterior e saíram.' },
+      { id: 'diferentes', t: 'Alteradas', um: 'alterada', cls: 'amber', ajuda: 'O contrato mudou (campos, tipos, obrigatoriedade, limites, respostas). Clique para ver campo a campo.' },
+      { id: 'soTextos', t: 'Só textos', um: 'só texto', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
+    ],
+  },
+  'mud-prd': {
+    titulo: 'Mudanças em produção', dot: 'var(--prd)', api: PRD, url: `/${PRD}/mudancas`, colA: 'Anterior', colB: 'Atual',
+    cats: null, // mesmas de mud-hml
+  },
+  'hml-prd': {
+    titulo: 'Homologação × Produção', url: `/comparar?a=${HML}&b=${PRD}`, colA: 'Homologação', colB: 'Produção',
+    cats: [
+      { id: 'soEmA', t: 'Só em homologação', cls: 'green', ajuda: 'Ainda não chegaram em produção.' },
+      { id: 'soEmB', t: 'Só em produção', cls: 'red', ajuda: 'Existem em produção e não existem mais em homologação.' },
+      { id: 'diferentes', t: 'Diferentes', cls: 'amber', ajuda: 'O contrato é diferente entre os ambientes. Clique para ver campo a campo.' },
+      { id: 'soTextos', t: 'Só textos', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
+    ],
+  },
+};
+VIEWS['mud-prd'].cats = VIEWS['mud-hml'].cats;
 
-function frase(d) {
-  const o = d.operacoes, p = [];
-  if (o.soEmA.length) p.push(`<b>${plural(o.soEmA.length, 'operação', 'operações')}</b> só em homologação`);
-  if (o.soEmB.length) p.push(`<b>${o.soEmB.length}</b> só em produção`);
-  if (o.diferentes.length) p.push(`<b>${plural(o.diferentes.length, 'diferente', 'diferentes')}</b> no contrato`);
-  if (o.soTextos.length) p.push(`<b>${o.soTextos.length}</b> com mudança só de texto`);
-  return p.length ? p.join(' · ') : '✓ Os dois ambientes estão iguais.';
+let view = null;      // id da view
+let dados = null;     // resposta da comparação
+let cat = null;       // categoria selecionada
+let mostrarTodas = false;
+const cacheView = new Map();
+
+function total(d) { return d?.operacoes ? Object.values(d.operacoes).reduce((n, l) => n + l.length, 0) : 0; }
+
+function renderViews() {
+  $('views').innerHTML = Object.entries(VIEWS).map(([id, v]) => {
+    const d = cacheView.get(id);
+    const n = d && !d.semAnterior && !d.erro ? total(d) : null;
+    const dots = v.dot ? `<span class="dot" style="background:${v.dot}"></span>` : `<span class="dot" style="background:var(--hml)"></span><span class="dot" style="background:var(--prd);margin-left:-4px"></span>`;
+    return `<button role="tab" data-view="${id}" class="${id === view ? 'on' : ''}">${dots}${v.titulo}${n !== null ? `<span class="n">${n}</span>` : ''}</button>`;
+  }).join('');
+}
+
+function frase(v, d) {
+  const o = d.operacoes;
+  if (!total(d)) return view === 'hml-prd' ? '<b>Os dois ambientes estão iguais.</b>' : '<b>Nenhuma diferença</b> entre a versão anterior e a atual.';
+  const partes = v.cats.filter((c) => o[c.id].length).map((c) => `<b>${o[c.id].length}</b> ${(o[c.id].length === 1 && c.um) || c.t.toLowerCase()}`);
+  return partes.join(' · ');
+}
+
+function renderCabecalho() {
+  const v = VIEWS[view];
+  const d = dados;
+  $('cabAcoes').innerHTML = '';
+  $('versoes').hidden = true;
+  if (!d || d.erro) { $('frase').textContent = d?.erro || 'Carregando…'; return; }
+  if (d.semAnterior) {
+    $('frase').innerHTML = `<b>Ainda não há versão anterior.</b> Quando ${v.api === HML ? 'você enviar uma nova versão' : 'a spec de produção mudar'}, as diferenças aparecem aqui.`;
+    return;
+  }
+  $('frase').innerHTML = frase(v, d);
+  if (d.anterior) {
+    const st = status?.apis.find((a) => a.apiId === v.api);
+    $('versoes').hidden = false;
+    $('versoes').innerHTML = `Anterior · ${dataHora(d.anterior.salvoEm)} · ${d.anterior.operacoes} op<span class="seta">→</span>Atual · ${dataHora(st?.atualizadaEm)} · ${d.atual.operacoes} op${st?.ultimaMudanca?.origem ? ` · ${esc(st.ultimaMudanca.origem)}` : ''}`;
+    $('cabAcoes').innerHTML = `<button class="btn ghost sm" data-restaurar="${esc(d.anterior.arquivo)}" data-api="${v.api}">${UNDO}Voltar para a anterior</button>`;
+  }
+}
+
+function renderCats() {
+  const v = VIEWS[view];
+  const temDados = dados && !dados.erro && !dados.semAnterior && total(dados);
+  $('ctrl').hidden = !temDados;
+  $('ajuda').hidden = !temDados;
+  $('lista').hidden = !temDados;
+  if (!temDados) return;
+  if (!cat || !dados.operacoes[cat]?.length) cat = v.cats.find((c) => dados.operacoes[c.id].length)?.id;
+  $('cats').innerHTML = v.cats.map((c) => {
+    const n = dados.operacoes[c.id].length;
+    return `<button role="tab" data-cat="${c.id}" class="${c.id === cat ? 'on' : ''}" ${n ? '' : 'disabled'}>${c.t}<span class="chip ${c.cls}">${n}</span></button>`;
+  }).join('');
+  $('ajuda').textContent = v.cats.find((c) => c.id === cat)?.ajuda || '';
+}
+
+function renderLista() {
+  if ($('lista').hidden) return;
+  const itens = dados.operacoes[cat] || [];
+  const termo = $('filtro').value.trim().toLowerCase();
+  const filtrados = itens.map((i, n) => ({ ...i, n })).filter((i) => !termo || `${i.metodo} ${i.path} ${i.resumo} ${i.tag}`.toLowerCase().includes(termo));
+  const visiveis = mostrarTodas || termo ? filtrados : filtrados.slice(0, POR_PAGINA);
+  const clicavel = cat === 'diferentes' || cat === 'soTextos';
+  $('lista').innerHTML = visiveis.map((i) =>
+    `<li data-n="${i.n}"><div class="row ${clicavel ? 'click' : ''}">${metodoBadge(i.metodo)}<span class="p mono">${esc(i.path)}</span><span class="r">${esc(i.resumo)}</span>${clicavel ? CHEV : ''}</div></li>`).join('') ||
+    `<li class="vazio">Nenhuma operação${termo ? ` para “${esc(termo)}”` : ''}.</li>`;
+  const resto = filtrados.length - visiveis.length;
+  if (resto > 0) $('lista').insertAdjacentHTML('beforeend', `<li><button class="mais" id="mais">Mostrar mais ${resto}</button></li>`);
+}
+
+async function abrirView(id, { recarregar = false } = {}) {
+  if (view !== id) { cat = null; mostrarTodas = false; $('filtro').value = ''; }
+  view = id;
+  renderViews();
+  dados = recarregar ? null : cacheView.get(id) || null;
+  renderCabecalho(); renderCats(); renderLista();
+  if (dados && !recarregar) return;
+  try { dados = await api(VIEWS[id].url); }
+  catch (e) { dados = { erro: e.message }; }
+  cacheView.set(id, dados);
+  if (view !== id) return;
+  renderViews(); renderCabecalho(); renderCats(); renderLista();
 }
 
 function formatar(v) {
@@ -414,23 +444,23 @@ function formatar(v) {
 }
 
 async function abrirDetalhe(li, item) {
-  if (li.classList.toggle('aberto') === false) { li.querySelector('.det')?.remove(); return; }
+  const jaAberto = li.classList.contains('aberto');
+  $('lista').querySelectorAll('li.aberto').forEach((x) => { x.classList.remove('aberto'); x.querySelector('.det')?.remove(); });
+  if (jaAberto) return;
+  li.classList.add('aberto');
   const box = document.createElement('div');
   box.className = 'det';
-  box.innerHTML = '<div class="resumo">Carregando…</div>';
+  box.innerHTML = '<p class="resumo">Carregando…</p>';
   li.appendChild(box);
+  const v = VIEWS[view];
   try {
-    const qs = `a=${HML}&b=${PRD}&method=${encodeURIComponent(item.metodo)}&path=${encodeURIComponent(item.path)}`;
-    let r = await api(`/comparar?${qs}${aba === 'soTextos' ? '&descricoes=1' : ''}`);
-    if (r.iguais && aba !== 'soTextos') r = await api(`/comparar?${qs}&descricoes=1`);
-    const linhas = [
-      ...r.soEmA.map((i) => [i.item, i, null]),
-      ...r.soEmB.map((i) => [i.item, null, i]),
-      ...r.diferentes.map((i) => [i.item, i.a, i.b]),
-    ];
+    const base = `${v.url}${v.url.includes('?') ? '&' : '?'}method=${encodeURIComponent(item.metodo)}&path=${encodeURIComponent(item.path)}`;
+    let r = await api(base + (cat === 'soTextos' ? '&descricoes=1' : ''));
+    if (r.iguais && cat !== 'soTextos') r = await api(base + '&descricoes=1');
+    const linhas = [...r.soEmA.map((i) => [i.item, i, null]), ...r.soEmB.map((i) => [i.item, null, i]), ...r.diferentes.map((i) => [i.item, i.a, i.b])];
     const resumo = r.resumoDiferente ? `<p class="resumo">Resumo: “${esc(r.resumoDiferente.a)}” → “${esc(r.resumoDiferente.b)}”</p>` : '';
     const tabela = linhas.length
-      ? `<table class="tabela"><thead><tr><th>Item</th><th>Homologação</th><th>Produção</th></tr></thead><tbody>${linhas.map(([k, a, b]) => `<tr><td>${esc(k)}</td><td>${formatar(a)}</td><td>${formatar(b)}</td></tr>`).join('')}</tbody></table>`
+      ? `<table class="tabela"><thead><tr><th>Item</th><th>${v.colA}</th><th>${v.colB}</th></tr></thead><tbody>${linhas.map(([k, a, b]) => `<tr><td>${esc(k)}</td><td>${formatar(a)}</td><td>${formatar(b)}</td></tr>`).join('')}</tbody></table>`
       : '';
     box.innerHTML = resumo + tabela || '<p class="resumo">Mudaram apenas exemplos.</p>';
   } catch (e) {
@@ -438,80 +468,56 @@ async function abrirDetalhe(li, item) {
   }
 }
 
-function renderAbas() {
-  $('abas').innerHTML = ABAS.map((a) => {
-    const n = cmp.operacoes[a.id].length;
-    return `<button role="tab" data-aba="${a.id}" class="${a.id === aba ? 'on' : ''}" ${n ? '' : 'disabled'}><span>${a.titulo}</span><span class="cnt chip ${a.cls}">${n}</span></button>`;
-  }).join('');
-  $('ajuda').textContent = ABAS.find((a) => a.id === aba)?.ajuda || '';
-}
-
-function renderLista() {
-  const itens = cmp.operacoes[aba] || [];
-  const termo = $('filtro').value.trim().toLowerCase();
-  const filtrados = itens.map((i, n) => ({ ...i, n })).filter((i) => !termo || `${i.metodo} ${i.path} ${i.resumo} ${i.tag}`.toLowerCase().includes(termo));
-  const clicavel = aba === 'diferentes' || aba === 'soTextos';
-  $('lista').hidden = false;
-  $('lista').innerHTML = filtrados.map((i) =>
-    `<li data-n="${i.n}"><div class="row ${clicavel ? 'click' : ''}">${metodoBadge(i.metodo)}
-      <div class="txt"><div class="p mono">${esc(i.path)}</div></div>
-      <span class="r">${esc(i.resumo)}</span>${clicavel ? ICON_CHEV : ''}</div></li>`).join('') ||
-    `<li class="vazio">Nenhuma operação encontrada${termo ? ` para “${esc(termo)}”` : ''}.</li>`;
-}
-
-async function carregarComparacao() {
-  try {
-    cmp = await api(`/comparar?a=${HML}&b=${PRD}`);
-    $('frase').innerHTML = frase(cmp);
-    const comItens = ABAS.filter((a) => cmp.operacoes[a.id].length);
-    if (!comItens.length) { $('abas').innerHTML = ''; $('lista').hidden = true; $('busca').hidden = true; $('ajuda').textContent = ''; return; }
-    if (!aba || !cmp.operacoes[aba].length) aba = comItens[0].id;
-    $('busca').hidden = comItens.reduce((n, a) => n + cmp.operacoes[a.id].length, 0) < 8;
-    renderAbas();
-    renderLista();
-  } catch (e) {
-    $('frase').textContent = e.message;
-  }
-}
-
-$('abas').onclick = (ev) => { const b = ev.target.closest('[data-aba]'); if (b && !b.disabled) { aba = b.dataset.aba; renderAbas(); renderLista(); } };
+$('views').onclick = (ev) => { const b = ev.target.closest('[data-view]'); if (b) abrirView(b.dataset.view); };
+$('cats').onclick = (ev) => { const b = ev.target.closest('[data-cat]'); if (b && !b.disabled) { cat = b.dataset.cat; mostrarTodas = false; renderCats(); renderLista(); } };
 $('filtro').oninput = renderLista;
 $('lista').onclick = (ev) => {
+  if (ev.target.id === 'mais') { mostrarTodas = true; renderLista(); return; }
   const row = ev.target.closest('.row.click');
   if (!row) return;
   const li = row.closest('li');
-  abrirDetalhe(li, cmp.operacoes[aba][Number(li.dataset.n)]);
+  abrirDetalhe(li, dados.operacoes[cat][Number(li.dataset.n)]);
 };
 
-// ---------------- carregar / ações ----------------
-async function carregar() {
-  const s = await api('/status');
-  $('status').className = 'status';
-  $('status').lastElementChild.textContent = `Online · v${s.versaoServidor}`;
-  const semGravar = s.apis.find((a) => !a.armazenamento.gravavel);
+// ================= carregar / ações =================
+async function carregar({ recarregarView = false } = {}) {
+  status = await api('/status');
+  $('ver').className = 'ver';
+  $('ver').lastElementChild.textContent = `online · v${status.versaoServidor}`;
+  const semGravar = status.apis.find((a) => !a.armazenamento.gravavel);
   $('aviso').innerHTML = semGravar ? `<div class="aviso">${esc(semGravar.armazenamento.motivo)}</div>` : '';
-  s.apis.forEach(renderApi);
-  carregarComparacao();
+  status.apis.forEach(renderApi);
+  if (recarregarView) cacheView.clear();
+  if (!view) {
+    const hml = status.apis.find((a) => a.apiId === HML);
+    view = hml?.versaoAnterior ? 'mud-hml' : hml?.atual ? 'hml-prd' : 'mud-prd';
+    return abrirView(view);
+  }
+  return abrirView(view, { recarregar: recarregarView });
 }
 
 function mensagem(r) {
   if (r.status === 'invalida') return [`Spec inválida: ${r.erros.slice(0, 2).join('; ')}`, true];
   if (r.status === 'sem-mudancas') return ['Já estava atualizada.', false];
+  if (!r.anterior) return ['Spec carregada.', false];
   const o = r.resumo.operacoes;
   return [`Spec atualizada · +${o.adicionadas} −${o.removidas} ~${o.alteradas} operações`, false];
 }
 
-async function acao(apiId, botao, fn) {
-  const c = card(apiId);
-  c.classList.add('busy');
+async function acao(apiId, botao, fn, { depois } = {}) {
+  card(apiId).classList.add('busy');
   const html = botao?.innerHTML;
   if (botao) { botao.disabled = true; botao.innerHTML = '<span class="spin"></span><span>Aguarde…</span>'; }
-  try { const [m, erro] = mensagem(await fn()); toast(`${NOMES[apiId]}: ${m}`, erro); }
-  catch (e) { toast(`${NOMES[apiId]}: ${e.message}`, true); }
+  try {
+    const r = await fn();
+    const [m, erro] = mensagem(r);
+    toast(`${NOMES[apiId]}: ${m}`, erro);
+    if (!erro && r.status === 'atualizada' && depois) view = depois;
+  } catch (e) { toast(`${NOMES[apiId]}: ${e.message}`, true); }
   finally {
-    c.classList.remove('busy');
+    card(apiId).classList.remove('busy');
     if (botao) { botao.disabled = false; botao.innerHTML = html; }
-    carregar().catch(() => {});
+    carregar({ recarregarView: true }).catch(() => {});
   }
 }
 
@@ -527,20 +533,19 @@ async function enviarArquivo(file) {
 const drop = $('drop');
 const enviar = (f) => {
   if (!f) return;
-  const txt = drop.querySelector('span:last-of-type');
-  const antes = txt.innerHTML;
-  txt.innerHTML = `<strong>Enviando ${esc(f.name)}…</strong>`;
-  acao(HML, null, () => enviarArquivo(f)).finally(() => (txt.innerHTML = antes));
+  const antes = $('dropTxt').innerHTML;
+  $('dropTxt').innerHTML = `<strong>Enviando ${esc(f.name)}…</strong>`;
+  // Depois do envio, mostra direto o que mudou em homologação.
+  acao(HML, null, () => enviarArquivo(f), { depois: 'mud-hml' }).finally(() => ($('dropTxt').innerHTML = antes));
 };
 $('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; enviar(f); };
 drop.ondragover = (ev) => { ev.preventDefault(); drop.classList.add('over'); };
 drop.ondragleave = () => drop.classList.remove('over');
 drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); enviar(ev.dataTransfer.files[0]); };
-// Soltar o arquivo em qualquer lugar da página também envia para homologação.
 window.addEventListener('dragover', (ev) => ev.preventDefault());
 window.addEventListener('drop', (ev) => { if (ev.defaultPrevented) return; ev.preventDefault(); enviar(ev.dataTransfer?.files[0]); });
 
-$('btnPrd').onclick = (ev) => acao(PRD, ev.currentTarget, () => api(`/${PRD}/atualizar`, { method: 'POST' }));
+$('btnPrd').onclick = (ev) => acao(PRD, ev.currentTarget, () => api(`/${PRD}/atualizar`, { method: 'POST' }), { depois: 'mud-prd' });
 
 $('mcpUrl').textContent = location.origin + '/mcp';
 $('copiar').onclick = async () => {
@@ -548,25 +553,17 @@ $('copiar').onclick = async () => {
 };
 
 document.addEventListener('click', (ev) => {
-  const t = ev.target.closest('[data-toggle]');
-  if (t) {
-    const aberto = t.getAttribute('aria-expanded') === 'true';
-    t.setAttribute('aria-expanded', String(!aberto));
-    t.nextElementSibling.hidden = aberto;
-    t.lastChild.textContent = aberto ? 'Ver o que mudou' : 'Ocultar';
-    return;
-  }
   const b = ev.target.closest('[data-restaurar]');
   if (!b) return;
-  const apiId = b.closest('.env').id.replace('card-', '');
-  if (confirm(`Voltar ${NOMES[apiId]} para a versão anterior?`)) {
+  const apiId = b.dataset.api;
+  if (confirm(`Voltar ${NOMES[apiId]} para a versão anterior? A atual passa a ser a anterior.`)) {
     acao(apiId, b, () => api(`/${apiId}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: b.dataset.restaurar }) }));
   }
 });
 
 carregar().catch((e) => {
-  $('status').className = 'status off';
-  $('status').lastElementChild.textContent = 'Fora do ar';
+  $('ver').className = 'ver off';
+  $('ver').lastElementChild.textContent = 'fora do ar';
   $('aviso').innerHTML = `<div class="aviso">${esc(e.message)}</div>`;
 });
 </script>

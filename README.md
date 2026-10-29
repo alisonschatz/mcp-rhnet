@@ -20,7 +20,7 @@ Servidor MCP com a spec OpenAPI do **RH Net** em dois ambientes, para a IA consu
 
 **Produção**: o servidor confere sozinho a cada hora, na primeira vez que a página ou o MCP é usado depois desse intervalo. O botão **Atualizar agora** força na hora.
 
-O MCP passa a usar a versão nova na hora, sem deploy. Cada ambiente guarda só a versão em uso e a anterior: a página mostra o que mudou na última atualização e permite voltar para a anterior.
+O MCP passa a usar a versão nova na hora, sem deploy. Cada ambiente guarda só a versão em uso e a anterior. Depois de enviar, a página abre **Mudanças em homologação**: operações novas, removidas, alteradas (campo a campo) e só de texto, em relação à versão anterior — ideal para o QA ver o que o dev mudou. Dá para voltar para a anterior com um clique.
 
 ## Comparar homologação e produção
 
@@ -79,6 +79,7 @@ Localmente as specs enviadas ficam em `specs/` (fora do git; versão anterior em
 | `get_operation_schema` · `get_schema_definition` | schemas |
 | `search_documentation` | busca em caminhos, descrições, parâmetros e schemas |
 | `compare_apis` | diferenças entre homologação e produção (geral ou de uma operação) |
+| `compare_previous_version` | o que mudou da versão anterior para a atual de um ambiente |
 | `get_operation_test_context` | campos com restrições, segurança e respostas (paginado) |
 | `generate_example_payload` | payload válido (`completo`/`minimo`, `exemplo`, `variante`) |
 | `suggest_test_scenarios` | cenários de teste com status esperado e lacunas da spec |

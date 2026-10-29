@@ -74,7 +74,18 @@ test('envio atualiza o arquivo, guarda backup e o MCP enxerga sem reiniciar', as
   assert.ok(loadSpec('rhnet-hml').spec.paths['/api/v1/novo']);
   const st = await status();
   assert.ok(st.versaoAnterior);
-  assert.deepEqual(st.ultimaMudanca.diff.operacoes.adicionadas, ['GET /api/v1/novo']);
+  const mud = await fetch(`${base}/api/rhnet-hml/mudancas`).then((x) => x.json());
+  assert.deepEqual(mud.operacoes.soEmB.map((o) => `${o.metodo} ${o.path}`), ['GET /api/v1/novo']);
+  assert.equal(mud.anterior.operacoes, 135);
+  const det = await fetch(`${base}/api/rhnet-hml/mudancas?method=GET&path=/api/v1/novo`).then((x) => x.json());
+  assert.equal(det.existeEmA, false);
+  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const c = new Client({ name: 't', version: '1' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
+  const viaIa = JSON.parse((await c.callTool({ name: 'compare_previous_version', arguments: { apiId: 'rhnet-hml' } })).content[0].text);
+  assert.deepEqual(viaIa.operacoes.soEmB, ['GET /api/v1/novo']);
+  await c.close();
   assert.equal(st.ultimaMudanca.origem, 'arquivo');
 });
 

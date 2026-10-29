@@ -56,6 +56,7 @@ test('primeiro envio vira a versão em uso (primeira carga)', async () => {
   assert.equal(st.atual.operacoes, 135);
   assert.equal(st.ultimaMudanca.primeiraCarga, true);
   assert.equal(st.versaoAnterior, null);
+  assert.deepEqual(await fetch(`${base}/api/rhnet-hml/mudancas`).then((x) => x.json()), { semAnterior: true });
   const ops = JSON.parse((await tool('list_operations', { apiId: 'rhnet-hml', tag: 'Bancos' })).content[0].text);
   assert.equal(ops.totalItems, 4);
 });

@@ -24,6 +24,7 @@ import {
 } from './openapi.js';
 import { deriveTestScenarios, examplePayload, testContext } from './testing.js';
 import { compareApis, compareOperation } from './compare.js';
+import { previousSpec } from './updater.js';
 
 // ---------------------------------------------------------------------------
 // Helpers de resposta
@@ -271,6 +272,36 @@ export function buildMcpServer() {
           return toolError(`Schema "${schemaName}" não encontrado em "${apiId}". Disponíveis: ${available.join(', ') || '(nenhum)'}.`);
         }
         return toolText({ name: schemaName, schema: shortenRefs(schema) });
+      })
+  );
+
+  server.registerTool(
+    'compare_previous_version',
+    {
+      title: 'O que mudou na última versão',
+      description:
+        'Compara a versão anterior com a atual de uma API (ex.: "rhnet-hml" depois que o QA enviou uma spec nova). Sem method/path: operações novas (soEmB), removidas (soEmA), alteradas no contrato (diferentes) e só de texto. ' +
+        'Com method e path: diferença campo a campo da operação.',
+      inputSchema: {
+        apiId: API_ID,
+        method: z.string().optional().describe('Método HTTP da operação'),
+        path: z.string().optional().describe('Caminho da operação'),
+        incluirDescricoes: z.boolean().optional().describe('Considerar também diferenças em descrições (padrão: não)'),
+      },
+      annotations: readOnly,
+    },
+    async ({ apiId, method, path: opPath, incluirDescricoes }) =>
+      withSpec(apiId, async (atual) => {
+        let anterior;
+        try {
+          anterior = await previousSpec(apiId);
+        } catch (e) {
+          return toolError(e.message);
+        }
+        if (!anterior) return toolText({ apiId, semAnterior: true, mensagem: 'Ainda não há versão anterior guardada para comparar.' });
+        const base = { apiId, a: `anterior (${anterior.salvoEm})`, b: 'atual' };
+        if (method && opPath) return toolText({ ...base, ...compareOperation(anterior.spec, atual, method, opPath, { incluirDescricoes }) });
+        return toolText({ ...base, ...compareApis(anterior.spec, atual) });
       })
   );
 

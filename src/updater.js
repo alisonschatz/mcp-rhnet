@@ -116,8 +116,8 @@ async function apply(store, apiId, spec, text, origem, { verificacao = false } =
     delete meta.ultimoErro;
   }
   if (versao) meta.versao = versao;
-  // Só a última mudança, com o detalhe do que mudou (nomes de operações e schemas).
-  meta.ultimaMudanca = { data: agora, origem, primeiraCarga: !anterior, anterior: anterior && { operacoes: anterior.operacoes, schemas: anterior.schemas }, nova: { operacoes: nova.operacoes, schemas: nova.schemas }, resumo: diffCounts(diff), diff };
+  // Só a data e a origem da última mudança; o detalhe é calculado comparando com a versão anterior.
+  meta.ultimaMudanca = { data: agora, origem, primeiraCarga: !anterior, resumo: diffCounts(diff) };
   delete meta.eventos;
   await store.writeMeta(apiId, meta);
   markSynced(apiId, versao, spec);
@@ -231,4 +231,26 @@ export async function ensureFresh() {
       }
     })
   );
+}
+
+// ---------------------------------------------------------------------------
+// Versão anterior (para comparar anterior × atual)
+// ---------------------------------------------------------------------------
+
+const anteriorCache = new Map(); // arquivo → spec (as versões guardadas nunca mudam)
+
+/** Spec da versão anterior guardada, ou null se ainda não houver. */
+export async function previousSpec(apiId) {
+  checkApi(apiId);
+  const store = await getStore();
+  if (!store) return null;
+  const [anterior] = await store.listBackups(apiId);
+  if (!anterior) return null;
+  if (!anteriorCache.has(anterior.arquivo)) {
+    const spec = tryParseSpec(await store.readBackup(apiId, anterior.arquivo));
+    if (!spec) return null;
+    anteriorCache.clear();
+    anteriorCache.set(anterior.arquivo, spec);
+  }
+  return { ...anterior, spec: anteriorCache.get(anterior.arquivo) };
 }

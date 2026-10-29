@@ -6,7 +6,8 @@ import { APIS, SERVER_VERSION, UPDATABLE_APIS } from './config.js';
 import { compareApis, compareOperation } from './compare.js';
 import { findOperation } from './openapi.js';
 import { loadSpec } from './specs.js';
-import { ensureFresh, restoreBackup, specStatus, updateFromText, updateFromUrl, UpdateError } from './updater.js';
+import { summarize } from './spec-diff.js';
+import { ensureFresh, previousSpec, restoreBackup, specStatus, updateFromText, updateFromUrl, UpdateError } from './updater.js';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const readLocal = (name) => fs.readFileSync(path.join(DIR, name), 'utf8');
@@ -31,6 +32,24 @@ function detalharOps(lista, ...specs) {
   });
 }
 
+/** Resumo da comparação (listas de operações) ou, com method+path, o detalhe da operação. */
+function comparacao(specA, specB, query) {
+  if (query.method && query.path) {
+    return compareOperation(specA, specB, String(query.method), String(query.path), { incluirDescricoes: query.descricoes === '1' });
+  }
+  const r = compareApis(specA, specB);
+  return {
+    totalDiferencas: r.totalDiferencas,
+    operacoes: {
+      soEmA: detalharOps(r.operacoes.soEmA, specA),
+      soEmB: detalharOps(r.operacoes.soEmB, specB),
+      diferentes: detalharOps(r.operacoes.diferentes, specA, specB),
+      soTextos: detalharOps(r.operacoes.soTextos, specA, specB),
+    },
+    schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
+  };
+}
+
 function specOf(apiId) {
   if (!UPDATABLE_APIS.includes(apiId)) throw new UpdateError(`API "${apiId}" desconhecida.`);
   const { spec } = loadSpec(apiId);
@@ -48,6 +67,8 @@ function specOf(apiId) {
  * - POST /api/:apiId/atualizar       o servidor baixa a spec (ambientes com spec pública)
  * - POST /api/:apiId/restaurar       volta para uma versão anterior
  * - GET  /api/comparar?a=&b=         diferenças entre dois ambientes
+ * - GET  /api/:apiId/mudancas        o que mudou da versão anterior para a atual
+ *   (as duas aceitam &method=&path= para o detalhe campo a campo de uma operação)
  * `files` vem do bundle na Vercel; localmente a página é lida do disco.
  */
 export function mountSiteRoutes(app, { files } = {}) {
@@ -85,23 +106,21 @@ export function mountSiteRoutes(app, { files } = {}) {
     handle(async (req) => {
       await ensureFresh();
       const [a, b] = [String(req.query.a || ''), String(req.query.b || '')];
-      const specA = specOf(a);
-      const specB = specOf(b);
-      if (req.query.method && req.query.path) {
-        return compareOperation(specA, specB, String(req.query.method), String(req.query.path), { incluirDescricoes: req.query.descricoes === '1' });
-      }
-      const r = compareApis(specA, specB);
+      return { a, b, ...comparacao(specOf(a), specOf(b), req.query) };
+    })
+  );
+  app.get(
+    '/api/:apiId/mudancas',
+    handle(async (req) => {
+      await ensureFresh();
+      const atual = specOf(req.params.apiId);
+      const anterior = await previousSpec(req.params.apiId);
+      if (!anterior) return { semAnterior: true };
+      const resumo = (s) => ({ operacoes: summarize(s, '').operacoes, schemas: summarize(s, '').schemas });
       return {
-        a,
-        b,
-        totalDiferencas: r.totalDiferencas,
-        operacoes: {
-          soEmA: detalharOps(r.operacoes.soEmA, specA),
-          soEmB: detalharOps(r.operacoes.soEmB, specB),
-          diferentes: detalharOps(r.operacoes.diferentes, specA, specB),
-          soTextos: detalharOps(r.operacoes.soTextos, specA, specB),
-        },
-        schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
+        anterior: { salvoEm: anterior.salvoEm, arquivo: anterior.arquivo, ...resumo(anterior.spec) },
+        atual: resumo(atual),
+        ...comparacao(anterior.spec, atual, req.query),
       };
     })
   );

@@ -22,7 +22,7 @@ const call = async (name, args = {}) => {
 test('expõe as tools, prompts e resources esperados', async () => {
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(tools, [
-    'compare_apis', 'generate_example_payload', 'get_api_overview', 'get_operation_docs', 'get_operation_schema',
+    'compare_apis', 'compare_previous_version', 'generate_example_payload', 'get_api_overview', 'get_operation_docs', 'get_operation_schema',
     'get_operation_test_context', 'get_schema_definition', 'list_apis', 'list_operations',
     'search_documentation', 'suggest_test_scenarios',
   ]);
