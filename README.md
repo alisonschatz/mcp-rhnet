@@ -7,7 +7,7 @@ Servidor MCP com a spec OpenAPI do **RH Net** em dois ambientes, para a IA consu
 | Homologação | `rhnet-hml` | https://api-rhnet-hml.sci.com.br/docs?api-docs.json (VPN) | manual, pela página |
 | Produção | `rhnet-prd` | https://api2.rhnetsocial.com.br/docs?api-docs.json | automática, a cada hora |
 
-- **Página:** https://mcp-rhnet.vercel.app (specs em uso, atualização, comparação e histórico)
+- **Página:** https://mcp-rhnet.vercel.app (specs em uso, atualização, última mudança e comparação)
 - **Conector MCP:** https://mcp-rhnet.vercel.app/mcp
 
 ## Atualizar a spec
@@ -20,11 +20,11 @@ Servidor MCP com a spec OpenAPI do **RH Net** em dois ambientes, para a IA consu
 
 **Produção**: o servidor confere sozinho a cada hora, na primeira vez que a página ou o MCP é usado depois desse intervalo. O botão **Atualizar agora** força na hora.
 
-O MCP passa a usar a versão nova na hora, sem deploy. As versões anteriores ficam no histórico e podem ser restauradas.
+O MCP passa a usar a versão nova na hora, sem deploy. Cada ambiente guarda só a versão em uso e a anterior: a página mostra o que mudou na última atualização e permite voltar para a anterior.
 
 ## Comparar homologação e produção
 
-A página mostra as operações que existem só em um ambiente e as que diferem. Para o detalhe campo a campo, peça à IA, por exemplo:
+A página mostra as operações que existem só em homologação, só em produção e as que estão diferentes — inclusive quando a diferença está num schema usado pela operação. Clique numa operação diferente para ver campo a campo. Pela IA, por exemplo:
 
 > Compare POST /api/v1/admissoes entre rhnet-hml e rhnet-prd.
 
@@ -54,7 +54,7 @@ claude mcp add --transport http rhnet https://mcp-rhnet.vercel.app/mcp
 
 ## Deploy (Vercel)
 
-- **Storage → Blob** (acesso Private) conectado ao projeto: guarda as versões da spec.
+- **Storage → Blob** (acesso Private) conectado ao projeto: guarda a versão atual e a anterior de cada ambiente, em `specs/`. Arquivos de formatos antigos são apagados sozinhos no primeiro acesso.
 - Nenhuma variável de ambiente é obrigatória.
 - `specs/rhnet-hml.json` é só a versão inicial de homologação; depois vale a última enviada pela página. Produção é baixada sozinha no primeiro uso.
 
@@ -66,7 +66,7 @@ npm start      # página em http://127.0.0.1:3001 · conector em http://127.0.0.
 npm test
 ```
 
-Localmente as specs ficam em `specs/` (versões anteriores em `specs/.historico/`).
+Localmente as specs ficam em `specs/` (versão anterior em `specs/.historico/`).
 
 ## Ferramentas MCP
 

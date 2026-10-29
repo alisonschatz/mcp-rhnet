@@ -21,7 +21,6 @@ await new Promise((r) => prdServer.listen(0, '127.0.0.1', r));
 process.env.RHNET_PRD_SPEC_URL = `http://127.0.0.1:${prdServer.address().port}/docs?api-docs.json`;
 fs.copyFileSync(new URL('../specs/rhnet-hml.json', import.meta.url), path.join(dir, 'rhnet-hml.json'));
 process.env.SPECS_DIR = dir;
-process.env.SPEC_HISTORY_LIMIT = '2';
 delete process.env.VERCEL;
 
 const { test, before, after } = await import('node:test');
@@ -74,8 +73,9 @@ test('envio atualiza o arquivo, guarda backup e o MCP enxerga sem reiniciar', as
   assert.equal(r.status, 'atualizada');
   assert.ok(loadSpec('rhnet-hml').spec.paths['/api/v1/novo']);
   const st = await status();
-  assert.equal(st.backups.length, 1);
-  assert.equal(st.eventos.length, 1);
+  assert.ok(st.versaoAnterior);
+  assert.deepEqual(st.ultimaMudanca.diff.operacoes.adicionadas, ['GET /api/v1/novo']);
+  assert.equal(st.ultimaMudanca.origem, 'arquivo');
 });
 
 test('conteúdo inválido não altera nada', async () => {
@@ -86,14 +86,16 @@ test('conteúdo inválido não altera nada', async () => {
   assert.ok(loadSpec('rhnet-hml').spec.paths['/api/v1/novo']);
 });
 
-test('limite de versões e restaurar', async () => {
+test('guarda só a versão anterior e restaura', async () => {
   await enviar(JSON.stringify(versao(3)));
   await enviar(JSON.stringify(versao(4)));
+  const arquivos = fs.readdirSync(path.join(dir, '.historico')).filter((f) => f.startsWith('rhnet-hml-'));
+  assert.equal(arquivos.length, 1, 'só a anterior fica guardada');
   const st = await status();
-  assert.equal(st.backups.length, 2, 'respeita SPEC_HISTORY_LIMIT');
-  const r = await fetch(`${base}/api/rhnet-hml/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) }).then((x) => x.json());
+  const r = await fetch(`${base}/api/rhnet-hml/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.versaoAnterior.arquivo }) }).then((x) => x.json());
   assert.equal(r.status, 'atualizada');
   assert.equal(loadSpec('rhnet-hml').spec.info.version, '3');
+  assert.equal((await status()).versaoAnterior.arquivo !== st.versaoAnterior.arquivo, true, 'a que estava em uso virou a anterior');
 });
 
 test('API desconhecida é recusada', async () => {
@@ -116,7 +118,7 @@ test('produção é baixada sozinha pelo servidor e só uma vez dentro do interv
 
 test('comparar ambientes pela API da página e pela tool do MCP', async () => {
   const d = await fetch(`${base}/api/comparar?a=rhnet-hml&b=rhnet-prd`).then((r) => r.json());
-  assert.ok(d.operacoes.soEmA.includes('GET /api/v1/verbas'));
+  assert.ok(d.operacoes.soEmA.some((o) => o.metodo === 'GET' && o.path === '/api/v1/verbas' && o.resumo));
 
   const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
   const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');

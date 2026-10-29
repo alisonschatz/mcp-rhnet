@@ -37,7 +37,7 @@ function fakeBlobClient() {
     },
     async list({ prefix }) {
       ops.list++;
-      const items = [...blobs.values()].filter((b) => b.pathname.startsWith(prefix)).map((b) => ({ pathname: b.pathname, url: b.url, size: b.text.length, uploadedAt: b.uploadedAt }));
+      const items = [...blobs.values()].filter((b) => b.pathname.startsWith(prefix ?? '')).map((b) => ({ pathname: b.pathname, url: b.url, size: b.text.length, uploadedAt: b.uploadedAt }));
       return { blobs: items, hasMore: false };
     },
     async del(url) {
@@ -97,7 +97,8 @@ test('envio do arquivo (gzip) → MCP já usa a versão nova', async () => {
   const st = await specAtual();
   assert.equal(st.atual.operacoes, 136);
   assert.ok(st.atualizadaEm);
-  assert.equal(st.eventos[0].origem, 'docs.json');
+  assert.equal(st.ultimaMudanca.origem, 'docs.json');
+  assert.equal(st.ultimaMudanca.primeiraCarga, false, 'compara com a spec do deploy');
 
   const denovo = await (await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nova) })).json();
   assert.equal(denovo.status, 'sem-mudancas');
@@ -118,8 +119,8 @@ test('restaurar a versão anterior e enviar conteúdo inválido', async () => {
   v2.info.version = '2.0.0';
   await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: JSON.stringify(v2) });
   const st = await specAtual();
-  assert.equal(st.backups.length, 1);
-  const r = await (await fetch(`${base}/api/rhnet-hml/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) })).json();
+  assert.ok(st.versaoAnterior);
+  const r = await (await fetch(`${base}/api/rhnet-hml/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.versaoAnterior.arquivo }) })).json();
   assert.equal(r.status, 'atualizada');
   assert.equal((await mcpCall('list_operations', { apiId: 'rhnet-hml', tag: 'Novo' })).totalItems, 1);
 
@@ -133,4 +134,21 @@ test('acha a variável do Blob mesmo com prefixo personalizado', async () => {
   const pref = findBlobCredentials({ MCP_RHNET_READ_WRITE_TOKEN: 'vercel_blob_rw_abc_123' });
   assert.deepEqual(pref, { opts: { token: 'vercel_blob_rw_abc_123' }, origem: 'MCP_RHNET_READ_WRITE_TOKEN' });
   assert.equal(findBlobCredentials({ OUTRA: '1' }), null);
+});
+
+test('Blob: no máximo atual + anterior por ambiente', async () => {
+  const versoes = [...client.blobs.keys()].filter((k) => k.startsWith('specs/rhnet-hml/versoes/'));
+  assert.ok(versoes.length <= 2, `encontradas ${versoes.length}`);
+});
+
+test('Blob: apaga uma vez tudo do formato antigo', async () => {
+  const c = fakeBlobClient();
+  await c.put('rhnet/atual.json', '{}', { access: 'private' });
+  await c.put('rhnet/versoes/a.json', '{}', { access: 'private' });
+  await c.put('rhnet-prd/versoes/b.json', '{}', { access: 'private' });
+  await c.put('specs/rhnet-hml/atual.json', '{}', { access: 'private' });
+  const store = createBlobStore({ client: c });
+  assert.equal(await store.limparAntigos(), 3);
+  assert.deepEqual([...c.blobs.keys()].filter((k) => !k.startsWith('specs/.')), ['specs/rhnet-hml/atual.json']);
+  assert.equal(await store.limparAntigos(), 0, 'não repete');
 });

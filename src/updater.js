@@ -1,5 +1,5 @@
 import zlib from 'node:zlib';
-import { APIS, SPEC_AUTO_UPDATE_MINUTES, SPEC_FETCH_TIMEOUT_MS, SPEC_HISTORY_LIMIT, UPDATABLE_APIS } from './config.js';
+import { APIS, SPEC_AUTO_UPDATE_MINUTES, SPEC_FETCH_TIMEOUT_MS, UPDATABLE_APIS } from './config.js';
 import { compareSpecs, diffCounts, summarize } from './spec-diff.js';
 import { loadSpec } from './specs.js';
 import { getStore, markSynced, storageInfo, syncSpecs } from './store/index.js';
@@ -17,7 +17,6 @@ export { compareSpecs } from './spec-diff.js';
 
 export class UpdateError extends Error {}
 
-const MAX_EVENTS = 40;
 const running = new Set();
 
 function stamp(date = new Date()) {
@@ -60,7 +59,7 @@ async function currentVersion(store, apiId) {
 export async function specStatus(apiId) {
   checkApi(apiId);
   const store = await getStore();
-  const meta = store ? await store.readMeta(apiId) : { eventos: [] };
+  const meta = store ? await store.readMeta(apiId) : {};
   const cur = await currentVersion(store, apiId);
   const cfg = APIS[apiId];
   return {
@@ -73,8 +72,8 @@ export async function specStatus(apiId) {
     verificadaEm: meta.ultimaVerificacao || null,
     ultimoErro: meta.ultimoErro || null,
     armazenamento: await storageInfo(),
-    eventos: (meta.eventos || []).filter((e) => e.tipo === 'atualizado'),
-    backups: store ? await store.listBackups(apiId) : [],
+    ultimaMudanca: meta.ultimaMudanca || null,
+    versaoAnterior: (store ? await store.listBackups(apiId) : [])[0] || null,
   };
 }
 
@@ -117,10 +116,13 @@ async function apply(store, apiId, spec, text, origem, { verificacao = false } =
     delete meta.ultimoErro;
   }
   if (versao) meta.versao = versao;
-  meta.eventos = [{ data: agora, tipo: 'atualizado', origem, hash: nova.hash, backup, resumo: diffCounts(diff) }, ...(meta.eventos || [])].slice(0, MAX_EVENTS);
+  // Só a última mudança, com o detalhe do que mudou (nomes de operações e schemas).
+  meta.ultimaMudanca = { data: agora, origem, primeiraCarga: !anterior, anterior: anterior && { operacoes: anterior.operacoes, schemas: anterior.schemas }, nova: { operacoes: nova.operacoes, schemas: nova.schemas }, resumo: diffCounts(diff), diff };
+  delete meta.eventos;
   await store.writeMeta(apiId, meta);
   markSynced(apiId, versao, spec);
-  for (const { arquivo } of (await store.listBackups(apiId)).slice(SPEC_HISTORY_LIMIT)) await store.deleteBackup(apiId, arquivo);
+  // Guarda só a versão anterior à atual.
+  for (const { arquivo } of (await store.listBackups(apiId)).slice(1)) await store.deleteBackup(apiId, arquivo);
 
   if (anterior?.hash === nova.hash) return { ...base, status: 'sem-mudancas', mensagem: 'Já estava atualizada.' };
   return { ...base, status: 'atualizada', backup, mensagem: 'Spec atualizada.' };

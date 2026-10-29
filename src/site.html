@@ -9,20 +9,22 @@
     --bg: #f5f6f8; --card: #fff; --text: #1b2130; --muted: #6b7385; --line: #e5e7ec;
     --accent: #1f6feb; --ok: #12805c; --ok-bg: #e8f6ef; --err: #c0362c; --err-bg: #fdeceb;
     --chg: #9a6700; --chg-bg: #fff4d6; --soft: #f1f3f6;
+    --get: #12805c; --post: #1f6feb; --put: #9a6700; --patch: #8250df; --delete: #c0362c;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0e1117; --card: #161b22; --text: #e6e8ec; --muted: #949cab; --line: #272e39;
       --accent: #4c8dff; --ok: #3ccf91; --ok-bg: #12291f; --err: #ff7b72; --err-bg: #2d1615;
       --chg: #e3b341; --chg-bg: #2b2412; --soft: #1d232c;
+      --get: #3ccf91; --post: #4c8dff; --put: #e3b341; --patch: #b78cff; --delete: #ff7b72;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 880px; margin: 0 auto; padding: 32px 16px 56px; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 16px 56px; }
   h1 { font-size: 22px; margin: 0 0 6px; }
   h2 { font-size: 16px; margin: 0; }
-  h3 { font-size: 12px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  h3 { font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
   a { color: var(--accent); }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 16px; min-width: 0; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
@@ -31,17 +33,16 @@
   .tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
   .conector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
   code { font: 13px ui-monospace, Consolas, monospace; background: var(--soft); padding: 3px 7px; border-radius: 6px; color: var(--text); overflow-wrap: anywhere; }
-  button, .btn { font: inherit; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-  button:hover, .btn:hover { border-color: var(--accent); }
-  button:disabled { opacity: .5; cursor: default; }
+  button { font: inherit; font-size: 14px; font-weight: 500; padding: 7px 13px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
   .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 500; }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .stat .v { font-size: 20px; font-weight: 600; white-space: nowrap; }
   .stat .l { font-size: 12px; color: var(--muted); }
-  .acoes { margin-top: 16px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 14px; }
+  .acoes { margin-top: 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 14px; }
   .info { font-size: 13px; color: var(--muted); margin-top: 12px; }
   ol.info { padding-left: 18px; margin: 14px 0 0; }
-  .drop { display: block; margin-top: 12px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 18px 12px; text-align: center; color: var(--muted); font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop { display: block; margin-top: 10px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 16px 12px; text-align: center; color: var(--muted); font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
   .drop strong { color: var(--text); font-weight: 600; }
   .drop:hover, .drop.over { border-color: var(--accent); background: var(--soft); }
   .busy { pointer-events: none; opacity: .6; }
@@ -53,25 +54,56 @@
   .msg.neutral { background: var(--soft); color: var(--text); }
   .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-right: 4px; white-space: nowrap; }
   .add { background: var(--ok-bg); color: var(--ok); } .del { background: var(--err-bg); color: var(--err); } .chg { background: var(--chg-bg); color: var(--chg); }
-  .cmp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
-  .cmp details { background: var(--soft); border-radius: 8px; padding: 10px 12px; }
-  .cmp summary { cursor: pointer; font-size: 14px; list-style: none; }
-  .cmp summary::-webkit-details-marker { display: none; }
-  .cmp .n { font-size: 20px; font-weight: 600; display: block; }
-  .cmp ul { margin: 8px 0 0; padding: 0; list-style: none; font: 12px ui-monospace, Consolas, monospace; max-height: 220px; overflow: auto; }
-  .cmp li { padding: 3px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  td { padding: 9px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
-  tr:first-child td { border-top: 0; }
-  td.r { text-align: right; white-space: nowrap; }
   .muted { color: var(--muted); }
-  details.rest { margin-top: 14px; }
-  details.rest summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+
+  /* última mudança */
+  .mudanca { margin-top: auto; padding-top: 14px; }
+  .mudanca .box { border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; }
+  .mudanca .linha { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+  .mudanca details { margin-top: 8px; }
+  .mudanca summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+  .grupo { margin-top: 8px; }
+  .grupo .t { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+  .anterior { margin-top: 10px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+  /* operações */
+  .ops { list-style: none; margin: 0; padding: 0; }
+  .ops li { border-top: 1px solid var(--line); }
+  .ops li:first-child { border-top: 0; }
+  .op { display: flex; gap: 10px; align-items: baseline; padding: 7px 2px; font-size: 14px; min-width: 0; }
+  .op .m { font: 700 11px ui-monospace, Consolas, monospace; width: 52px; flex: none; }
+  .m.GET { color: var(--get); } .m.POST { color: var(--post); } .m.PUT { color: var(--put); } .m.PATCH { color: var(--patch); } .m.DELETE { color: var(--delete); }
+  .op .p { font: 13px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  .op .r { color: var(--muted); font-size: 13px; margin-left: auto; text-align: right; }
+  .op.click { cursor: pointer; }
+  .op.click:hover .p { color: var(--accent); }
+  .op .seta { color: var(--muted); font-size: 12px; flex: none; transition: transform .15s; }
+  li.aberto .seta { transform: rotate(90deg); }
+
+  /* comparação */
+  .resumo-cmp { font-size: 15px; margin: 4px 0 14px; }
+  .abas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .aba { display: inline-flex; align-items: center; gap: 8px; }
+  .aba .n { font-weight: 700; }
+  .aba.ativa { border-color: var(--accent); background: var(--soft); }
+  .aba[disabled] { opacity: .45; cursor: default; }
+  .filtro { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: 14px; margin-bottom: 6px; }
+  .detalhe { padding: 4px 0 12px 62px; }
+  .detalhe table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .detalhe th { text-align: left; color: var(--muted); font-weight: 500; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  .detalhe td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+  .detalhe td:first-child { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .vazio { color: var(--muted); }
+
   .online { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
   .online::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
   .online:empty { display: none; }
   .online.off::before { background: var(--err); }
-  @media (max-width: 720px) { .grid, .cmp { grid-template-columns: 1fr; } td.origem { display: none; } }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    .op { flex-wrap: wrap; } .op .r { margin-left: 62px; text-align: left; width: 100%; }
+    .detalhe { padding-left: 0; }
+  }
 </style>
 </head>
 <body>
@@ -81,7 +113,7 @@
   <div id="aviso"></div>
 
   <div class="grid">
-    <section class="card" id="card-rhnet-hml">
+    <section class="card" id="card-rhnet-hml" style="display:flex;flex-direction:column">
       <div class="head"><h2>Homologação</h2><span class="tag">rhnet-hml · manual</span></div>
       <div class="stats" data-stats></div>
       <ol class="info">
@@ -93,9 +125,10 @@
         <input type="file" id="arquivo" hidden>
       </label>
       <div data-resultado></div>
+      <div class="mudanca" data-mudanca></div>
     </section>
 
-    <section class="card" id="card-rhnet-prd">
+    <section class="card" id="card-rhnet-prd" style="display:flex;flex-direction:column">
       <div class="head"><h2>Produção</h2><span class="tag">rhnet-prd · automático</span></div>
       <div class="stats" data-stats></div>
       <div class="info" data-verificada></div>
@@ -104,18 +137,16 @@
         <a data-spec target="_blank" rel="noopener">Abrir spec ↗</a>
       </div>
       <div data-resultado></div>
+      <div class="mudanca" data-mudanca></div>
     </section>
   </div>
 
-  <section class="card">
+  <section class="card" id="cmp">
     <h3>Homologação × Produção</h3>
-    <div id="comparacao" class="muted">—</div>
-  </section>
-
-  <section class="card">
-    <h3>Histórico</h3>
-    <table><tbody id="eventos"></tbody></table>
-    <details class="rest"><summary>Restaurar versão anterior</summary><table><tbody id="backups"></tbody></table></details>
+    <div class="resumo-cmp" id="cmpResumo">Comparando…</div>
+    <div class="abas" id="cmpAbas"></div>
+    <input class="filtro" id="cmpFiltro" type="search" placeholder="Filtrar por caminho ou descrição" hidden>
+    <ul class="ops" id="cmpLista"></ul>
   </section>
 </main>
 <script>
@@ -128,28 +159,60 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const data = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
 const dia = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : '—');
 const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB');
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
 $('mcpUrl').textContent = location.origin + '/mcp';
 $('copiar').onclick = async () => {
   try { await navigator.clipboard.writeText(location.origin + '/mcp'); $('copiar').textContent = 'Copiado'; setTimeout(() => ($('copiar').textContent = 'Copiar'), 1500); } catch {}
 };
 
-function mudancas(r) {
+async function api(path, opts) {
+  const r = await fetch('/api' + path, opts);
+  const body = await r.json().catch(() => ({ erro: 'Resposta inválida do servidor.' }));
+  if (!r.ok) throw new Error(body.erro || 'Falha.');
+  return body;
+}
+
+function pills(r) {
   if (!r) return '';
   const o = r.operacoes, s = r.schemas, p = [];
   if (o.adicionadas) p.push(`<span class="pill add">+${o.adicionadas} op</span>`);
   if (o.removidas) p.push(`<span class="pill del">−${o.removidas} op</span>`);
   if (o.alteradas) p.push(`<span class="pill chg">~${o.alteradas} op</span>`);
   const sc = s.adicionados + s.removidos + s.alterados;
-  if (sc) p.push(`<span class="pill chg">${sc} schema</span>`);
-  return p.join('') || '<span class="muted">sem mudanças</span>';
+  if (sc) p.push(`<span class="pill chg">${plural(sc, 'schema', 'schemas')}</span>`);
+  return p.join('') || '<span class="muted">nenhuma diferença</span>';
 }
 
-async function api(path, opts) {
-  const r = await fetch('/api' + path, opts);
-  const body = await r.json().catch(() => ({ erro: 'Resposta inválida do servidor.' }));
-  if (!r.ok) throw new Error(body.erro || 'Falha.');
-  return body;
+const opLinha = (chave) => { const [m, ...p] = chave.split(' '); return `<li><div class="op"><span class="m ${esc(m)}">${esc(m)}</span><span class="p">${esc(p.join(' '))}</span></div></li>`; };
+const grupo = (titulo, itens, fmt) => (itens?.length ? `<div class="grupo"><div class="t">${titulo} (${itens.length})</div><ul class="ops">${itens.map(fmt).join('')}</ul></div>` : '');
+const schemaLinha = (nome) => `<li><div class="op"><span class="p">${esc(nome)}</span></div></li>`;
+
+function renderMudanca(st) {
+  const el = q(st.apiId, '[data-mudanca]');
+  const u = st.ultimaMudanca;
+  const anterior = st.versaoAnterior
+    ? `<div class="anterior"><span>Versão anterior: ${data(st.versaoAnterior.salvoEm)} · ${kb(st.versaoAnterior.tamanho)}</span><button data-restaurar="${esc(st.versaoAnterior.arquivo)}">Restaurar</button></div>`
+    : '';
+  if (!u) { el.innerHTML = anterior ? `<div class="box">${anterior}</div>` : ''; return; }
+  const titulo = `Última mudança · ${data(u.data)} · <span class="muted">${esc(u.origem)}</span>`;
+  if (u.primeiraCarga) {
+    el.innerHTML = `<div class="box"><div class="linha"><span>${titulo}</span><span class="muted">primeira carga · ${plural(u.nova.operacoes, 'operação', 'operações')}</span></div>${anterior}</div>`;
+    return;
+  }
+  const d = u.diff;
+  const detalhe =
+    grupo('Operações novas', d.operacoes.adicionadas, opLinha) +
+    grupo('Operações removidas', d.operacoes.removidas, opLinha) +
+    grupo('Operações alteradas', d.operacoes.alteradas, opLinha) +
+    grupo('Schemas novos', d.schemas.adicionadas, schemaLinha) +
+    grupo('Schemas removidos', d.schemas.removidas, schemaLinha) +
+    grupo('Schemas alterados', d.schemas.alteradas, schemaLinha);
+  el.innerHTML = `<div class="box">
+    <div class="linha"><span>${titulo}</span><span>${pills(u.resumo)}</span></div>
+    ${detalhe ? `<details><summary>Ver o que mudou</summary>${detalhe}</details>` : ''}
+    ${anterior}
+  </div>`;
 }
 
 function renderApi(st) {
@@ -165,24 +228,112 @@ function renderApi(st) {
       ? `<span style="color:var(--err)">Falha na última verificação (${data(st.verificadaEm)}): ${esc(st.ultimoErro)}</span>`
       : `Confere sozinha a cada hora · última: ${data(st.verificadaEm)}`;
   }
+  renderMudanca(st);
+}
+
+// ---------------- comparação ----------------
+let cmp = null;
+let aba = null;
+const ABAS = [
+  { id: 'soEmA', titulo: 'Só em homologação', cls: 'add' },
+  { id: 'soEmB', titulo: 'Só em produção', cls: 'del' },
+  { id: 'diferentes', titulo: 'Diferentes', cls: 'chg' },
+];
+
+function frase(d) {
+  const o = d.operacoes, partes = [];
+  if (o.soEmA.length) partes.push(`<b>${plural(o.soEmA.length, 'operação', 'operações')}</b> ainda não ${o.soEmA.length === 1 ? 'chegou' : 'chegaram'} em produção`);
+  if (o.soEmB.length) partes.push(`<b>${plural(o.soEmB.length, 'operação', 'operações')}</b> de produção não ${o.soEmB.length === 1 ? 'existe' : 'existem'} mais em homologação`);
+  if (o.diferentes.length) partes.push(`<b>${plural(o.diferentes.length, 'operação está diferente', 'operações estão diferentes')}</b>`);
+  if (!partes.length) return d.totalDiferencas ? 'As operações são iguais; mudaram apenas schemas ou textos.' : '✔ Homologação e produção estão iguais.';
+  return partes.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.';
+}
+
+function formatar(v) {
+  if (!v) return '<span class="vazio">não existe</span>';
+  const p = [];
+  if (v.tipo) p.push(`<b>${esc(v.tipo)}</b>`);
+  if (v.obrigatorio !== undefined) p.push(v.obrigatorio ? 'obrigatório' : 'opcional');
+  if (v.format) p.push(esc(v.format));
+  if (v.minLength !== undefined) p.push(`mín ${v.minLength}`);
+  if (v.maxLength !== undefined) p.push(`máx ${v.maxLength}`);
+  if (v.minimum !== undefined) p.push(`≥ ${v.minimum}`);
+  if (v.maximum !== undefined) p.push(`≤ ${v.maximum}`);
+  if (v.nullable) p.push('aceita null');
+  if (v.pattern) p.push(`padrão ${esc(v.pattern)}`);
+  if (v.enum) p.push(`valores: ${esc(v.enum.slice(0, 12).join(', '))}${v.enum.length > 12 ? '…' : ''}`);
+  if (v.mediaType) p.push(esc(v.mediaType));
+  if (v.descricao) p.push(`<span class="muted">“${esc(String(v.descricao).slice(0, 140))}”</span>`);
+  return p.join(' · ') || '<span class="vazio">—</span>';
+}
+
+async function abrirDetalhe(li, item) {
+  if (li.classList.toggle('aberto') === false) { li.querySelector('.detalhe')?.remove(); return; }
+  const box = document.createElement('div');
+  box.className = 'detalhe';
+  box.innerHTML = '<span class="muted">Carregando…</span>';
+  li.appendChild(box);
+  try {
+    const qs = `a=${HML}&b=${PRD}&method=${encodeURIComponent(item.metodo)}&path=${encodeURIComponent(item.path)}`;
+    let r = await api(`/comparar?${qs}`);
+    let soTexto = false;
+    if (r.iguais) { r = await api(`/comparar?${qs}&descricoes=1`); soTexto = true; }
+    const linhas = [
+      ...r.soEmA.map((i) => [i.item, i, null]),
+      ...r.soEmB.map((i) => [i.item, null, i]),
+      ...r.diferentes.map((i) => [i.item, i.a, i.b]),
+    ];
+    const resumo = r.resumoDiferente ? `<div style="margin-bottom:6px">Resumo: “${esc(r.resumoDiferente.a)}” → “${esc(r.resumoDiferente.b)}”</div>` : '';
+    const tabela = linhas.length
+      ? `${soTexto ? '<div class="muted" style="margin-bottom:6px">Só textos/descrições mudaram:</div>' : ''}<table><thead><tr><th>Item</th><th>Homologação</th><th>Produção</th></tr></thead><tbody>${linhas.map(([k, a, b]) => `<tr><td>${esc(k)}</td><td>${formatar(a)}</td><td>${formatar(b)}</td></tr>`).join('')}</tbody></table>`
+      : '';
+    box.innerHTML = resumo + tabela || '<span class="muted">Sem diferenças de contrato.</span>';
+  } catch (e) {
+    box.innerHTML = `<span style="color:var(--err)">${esc(e.message)}</span>`;
+  }
+}
+
+function renderLista() {
+  const itens = cmp.operacoes[aba] || [];
+  const termo = $('cmpFiltro').value.trim().toLowerCase();
+  const filtrados = itens.filter((i) => !termo || `${i.metodo} ${i.path} ${i.resumo} ${i.tag}`.toLowerCase().includes(termo));
+  const clicavel = aba === 'diferentes';
+  $('cmpLista').innerHTML = filtrados.map((i, n) =>
+    `<li data-n="${itens.indexOf(i)}"><div class="op ${clicavel ? 'click' : ''}">${clicavel ? '<span class="seta">▸</span>' : ''}<span class="m ${esc(i.metodo)}">${esc(i.metodo)}</span><span class="p">${esc(i.path)}</span><span class="r">${esc(i.resumo)}</span></div></li>`).join('') ||
+    '<li><div class="op muted">Nada aqui.</div></li>';
+}
+
+function renderAbas() {
+  $('cmpAbas').innerHTML = ABAS.map((a) => {
+    const n = cmp.operacoes[a.id].length;
+    return `<button class="aba ${a.id === aba ? 'ativa' : ''}" data-aba="${a.id}" ${n ? '' : 'disabled'}><span class="pill ${a.cls}"><span class="n">${n}</span></span>${a.titulo}</button>`;
+  }).join('');
 }
 
 async function carregarComparacao() {
   try {
-    const d = await api(`/comparar?a=${HML}&b=${PRD}`);
-    const bloco = (titulo, cls, ops) =>
-      `<details><summary><span class="n">${ops.length}</span><span class="pill ${cls}">${titulo}</span></summary>${ops.length ? `<ul>${ops.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>` : ''}</details>`;
-    $('comparacao').className = '';
-    $('comparacao').innerHTML = d.totalDiferencas === 0
-      ? '<div class="msg ok" style="margin:0">✔ As duas specs são iguais.</div>'
-      : `<div class="cmp">${bloco('só em homologação', 'add', d.operacoes.soEmA)}${bloco('só em produção', 'del', d.operacoes.soEmB)}${bloco('diferentes', 'chg', d.operacoes.diferentes)}</div>
-         <div class="info">Operações. Detalhe campo a campo pela IA: <i>“compare POST /api/v1/… entre rhnet-hml e rhnet-prd”</i>.</div>`;
+    cmp = await api(`/comparar?a=${HML}&b=${PRD}`);
+    $('cmpResumo').innerHTML = frase(cmp);
+    const comItens = ABAS.filter((a) => cmp.operacoes[a.id].length);
+    if (!comItens.length) { $('cmpAbas').innerHTML = ''; $('cmpLista').innerHTML = ''; $('cmpFiltro').hidden = true; return; }
+    if (!aba || !cmp.operacoes[aba].length) aba = comItens[0].id;
+    $('cmpFiltro').hidden = comItens.reduce((n, a) => n + cmp.operacoes[a.id].length, 0) < 8;
+    renderAbas();
+    renderLista();
   } catch (e) {
-    $('comparacao').className = 'muted';
-    $('comparacao').textContent = e.message;
+    $('cmpResumo').innerHTML = `<span class="muted">${esc(e.message)}</span>`;
   }
 }
 
+$('cmpAbas').onclick = (ev) => { const b = ev.target.closest('[data-aba]'); if (b && !b.disabled) { aba = b.dataset.aba; renderAbas(); renderLista(); } };
+$('cmpFiltro').oninput = renderLista;
+$('cmpLista').onclick = (ev) => {
+  if (aba !== 'diferentes' || !ev.target.closest('.op.click')) return;
+  const li = ev.target.closest('li');
+  abrirDetalhe(li, cmp.operacoes.diferentes[Number(li.dataset.n)]);
+};
+
+// ---------------- carregar / ações ----------------
 async function carregar() {
   const s = await api('/status');
   $('online').className = 'online';
@@ -190,21 +341,14 @@ async function carregar() {
   const semGravar = s.apis.find((a) => !a.armazenamento.gravavel);
   $('aviso').innerHTML = semGravar ? `<div class="msg err">${esc(semGravar.armazenamento.motivo)}</div>` : '';
   s.apis.forEach(renderApi);
-  const eventos = s.apis.flatMap((a) => a.eventos.map((e) => ({ ...e, api: a.apiId }))).sort((x, y) => (x.data < y.data ? 1 : -1));
-  $('eventos').innerHTML = eventos.slice(0, 12).map((e) =>
-    `<tr><td>${data(e.data)}</td><td><span class="tag">${NOMES[e.api]}</span></td><td>${mudancas(e.resumo)}</td><td class="r muted origem">${esc(e.origem)}</td></tr>`).join('') ||
-    '<tr><td class="muted">Nenhuma atualização ainda.</td></tr>';
-  const backups = s.apis.flatMap((a) => a.backups.map((b) => ({ ...b, api: a.apiId }))).sort((x, y) => (x.salvoEm < y.salvoEm ? 1 : -1));
-  $('backups').innerHTML = backups.map((b) =>
-    `<tr><td>${data(b.salvoEm)}</td><td><span class="tag">${NOMES[b.api]}</span></td><td class="muted">${kb(b.tamanho)}</td><td class="r"><button data-api="${b.api}" data-arq="${esc(b.arquivo)}">Restaurar</button></td></tr>`).join('') ||
-    '<tr><td class="muted">Nenhuma versão anterior.</td></tr>';
   carregarComparacao();
 }
 
 function resultado(apiId, r) {
   const el = q(apiId, '[data-resultado]');
   if (r.status === 'invalida') el.innerHTML = `<div class="msg err">${esc(r.mensagem)}<br>${r.erros.slice(0, 5).map(esc).join('<br>')}</div>`;
-  else el.innerHTML = `<div class="msg ok">✔ ${esc(r.mensagem)} ${r.status === 'atualizada' ? mudancas(r.resumo) : ''}</div>`;
+  else el.innerHTML = `<div class="msg ok">✔ ${esc(r.mensagem)}</div>`;
+  setTimeout(() => (el.innerHTML = ''), 6000);
 }
 
 async function acao(apiId, fn) {
@@ -236,12 +380,14 @@ window.addEventListener('dragover', (ev) => ev.preventDefault());
 window.addEventListener('drop', (ev) => { if (ev.defaultPrevented) return; ev.preventDefault(); enviar(ev.dataTransfer?.files[0]); });
 
 $('btnPrd').onclick = () => acao(PRD, () => api(`/${PRD}/atualizar`, { method: 'POST' }));
-$('backups').onclick = (ev) => {
-  const { api: apiId, arq } = ev.target.dataset || {};
-  if (arq && confirm(`Restaurar esta versão de ${NOMES[apiId]}?`)) {
-    acao(apiId, () => api(`/${apiId}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) }));
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-restaurar]');
+  if (!b) return;
+  const apiId = b.closest('.card').id.replace('card-', '');
+  if (confirm(`Voltar ${NOMES[apiId]} para a versão anterior?`)) {
+    acao(apiId, () => api(`/${apiId}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: b.dataset.restaurar }) }));
   }
-};
+});
 
 carregar().catch((e) => {
   $('online').className = 'online off';

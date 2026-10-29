@@ -4,6 +4,7 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { SERVER_VERSION, UPDATABLE_APIS } from './config.js';
 import { compareApis, compareOperation } from './compare.js';
+import { findOperation } from './openapi.js';
 import { loadSpec } from './specs.js';
 import { ensureFresh, restoreBackup, specStatus, updateFromText, updateFromUrl, UpdateError } from './updater.js';
 
@@ -18,6 +19,16 @@ function nomeArquivo(v) {
   } catch {
     return 'arquivo';
   }
+}
+
+/** "POST /api/v1/x" → { metodo, path, resumo, tag } para a página mostrar. */
+function detalharOps(lista, ...specs) {
+  return lista.map((chave) => {
+    const [metodo, ...resto] = chave.split(' ');
+    const path = resto.join(' ');
+    const op = specs.map((s) => findOperation(s, metodo, path)).find(Boolean);
+    return { metodo, path, resumo: op?.operation.summary || '', tag: op?.operation.tags?.[0] || '' };
+  });
 }
 
 function specOf(apiId) {
@@ -73,8 +84,21 @@ export function mountSiteRoutes(app, { files } = {}) {
       const [a, b] = [String(req.query.a || ''), String(req.query.b || '')];
       const specA = specOf(a);
       const specB = specOf(b);
-      if (req.query.method && req.query.path) return compareOperation(specA, specB, String(req.query.method), String(req.query.path));
-      return { a, b, ...compareApis(specA, specB) };
+      if (req.query.method && req.query.path) {
+        return compareOperation(specA, specB, String(req.query.method), String(req.query.path), { incluirDescricoes: req.query.descricoes === '1' });
+      }
+      const r = compareApis(specA, specB);
+      return {
+        a,
+        b,
+        totalDiferencas: r.totalDiferencas,
+        operacoes: {
+          soEmA: detalharOps(r.operacoes.soEmA, specA),
+          soEmB: detalharOps(r.operacoes.soEmB, specB),
+          diferentes: detalharOps(r.operacoes.diferentes, specA, specB),
+        },
+        schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
+      };
     })
   );
   return app;

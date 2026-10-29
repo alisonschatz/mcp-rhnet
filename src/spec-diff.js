@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { listOperations } from './openapi.js';
+import { listOperations, resolvePointer } from './openapi.js';
 
 export const sha256 = (text) => crypto.createHash('sha256').update(text).digest('hex');
 
@@ -16,13 +16,41 @@ export function summarize(spec, text) {
   };
 }
 
+/**
+ * Hash de uma operação que inclui os schemas/parâmetros referenciados ($ref), direta ou
+ * indiretamente: uma mudança num schema usado pela operação conta como mudança nela.
+ */
+function operationHasher(spec) {
+  const refHash = new Map();
+  const collect = (node, refs) => {
+    if (Array.isArray(node)) node.forEach((n) => collect(n, refs));
+    else if (node && typeof node === 'object') {
+      if (typeof node.$ref === 'string' && node.$ref.startsWith('#/') && !refs.has(node.$ref)) {
+        refs.add(node.$ref);
+        collect(resolvePointer(spec, node.$ref), refs);
+      }
+      for (const [k, v] of Object.entries(node)) if (k !== '$ref') collect(v, refs);
+    }
+  };
+  const hashRef = (ref) => {
+    if (!refHash.has(ref)) refHash.set(ref, sha256(JSON.stringify(resolvePointer(spec, ref) ?? null)));
+    return refHash.get(ref);
+  };
+  return (op) => {
+    const own = { shared: op.pathItem?.parameters, op: op.operation };
+    const refs = new Set();
+    collect(own, refs);
+    return sha256(JSON.stringify({ own, deps: [...refs].sort().map((r) => [r, hashRef(r)]) }));
+  };
+}
+
 function operationMap(spec) {
   const map = new Map();
   if (!spec?.paths) return map;
+  const hashOf = operationHasher(spec);
   for (const op of listOperations(spec)) {
     const key = `${op.method.toUpperCase()} ${op.path}`;
-    const body = JSON.stringify({ shared: op.pathItem?.parameters, op: op.operation });
-    map.set(key, { hash: sha256(body), summary: op.operation.summary || '', tag: op.operation.tags?.[0] || '' });
+    map.set(key, { hash: hashOf(op), summary: op.operation.summary || '', tag: op.operation.tags?.[0] || '' });
   }
   return map;
 }

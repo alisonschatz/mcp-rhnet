@@ -1,4 +1,4 @@
-import { APIS, SPEC_SYNC_SECONDS, SPECS_DIR, UPDATABLE_APIS } from '../config.js';
+import { SPEC_SYNC_SECONDS, SPECS_DIR, UPDATABLE_APIS } from '../config.js';
 import { setSpecOverride } from '../specs.js';
 import { createBlobStore } from './blob-store.js';
 import { createFsStore } from './fs-store.js';
@@ -39,13 +39,23 @@ function withCredentials(sdk, opts) {
   };
 }
 
-async function init() {
+let initPromise = null;
+const init = () => (initPromise ??= doInit());
+
+async function doInit() {
   if (store || readOnlyReason) return;
   const creds = findBlobCredentials();
   if (creds) {
     const sdk = await import('@vercel/blob');
-    store = createBlobStore({ client: withCredentials(sdk, creds.opts), keyFor: (id) => APIS[id]?.storeKey || id });
-    store.descricao = `Vercel Blob (privado · ${creds.origem})`;
+    const blob = createBlobStore({ client: withCredentials(sdk, creds.opts) });
+    blob.descricao = `Vercel Blob (privado · ${creds.origem})`;
+    try {
+      const n = await blob.limparAntigos();
+      if (n) console.log(`[spec] ${n} arquivo(s) antigo(s) apagado(s) do Blob`);
+    } catch (e) {
+      console.error(`[spec] falha ao limpar arquivos antigos do Blob: ${e.message}`);
+    }
+    store = blob;
   } else if (process.env.VERCEL) {
     // Só os nomes (nunca os valores) para ajudar a diagnosticar.
     const nomes = Object.keys(process.env).filter((k) => /BLOB|STORE/i.test(k));
@@ -73,6 +83,7 @@ export async function storageInfo() {
 export function useStore(custom) {
   store = custom;
   readOnlyReason = null;
+  initPromise = Promise.resolve();
   pollState.clear();
   lastPoll = 0;
 }

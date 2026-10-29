@@ -4,8 +4,8 @@ import path from 'node:path';
 /**
  * Armazenamento em disco (desenvolvimento local).
  * - spec atual:   <specsDir>/<apiId>.json  (lida pelo specs.js, que recarrega pelo mtime)
- * - backups:      <specsDir>/.historico/<apiId>-<data>.json
- * - registro:     <specsDir>/.historico/<apiId>.meta.json
+ * - anterior:     <specsDir>/.historico/<apiId>-<data>.json
+ * - registro:     <specsDir>/.historico/<apiId>.meta.json (última mudança)
  */
 export function createFsStore({ specsDir }) {
   const historyDir = path.join(specsDir, '.historico');
@@ -26,7 +26,7 @@ export function createFsStore({ specsDir }) {
       try {
         return JSON.parse(fs.readFileSync(metaFile(apiId), 'utf8'));
       } catch {
-        return { eventos: [] };
+        return {};
       }
     },
 

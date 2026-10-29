@@ -1,9 +1,9 @@
 /**
  * Armazenamento no Vercel Blob (deploy na Vercel, onde o disco é somente leitura).
  *
- * Tudo é privado (access: 'private'):
- * - <apiId>/versoes/<data>-<hash>.json   uma por versão, nunca é sobrescrita
- * - <apiId>/atual.json                   ponteiro: qual versão vale + registro de eventos
+ * Tudo é privado (access: 'private'), dentro de specs/:
+ * - specs/<apiId>/versoes/<data>-<hash>.json   a atual e a anterior (as demais são apagadas)
+ * - specs/<apiId>/atual.json                   ponteiro: qual versão vale + última mudança
  *
  * Todas as instâncias da função leem o ponteiro (com cache curto), então uma atualização
  * feita pela tela vale para o MCP em todas elas em poucos segundos.
@@ -15,10 +15,12 @@ async function streamToText(stream) {
   return new Response(stream).text();
 }
 
-export function createBlobStore({ client, keyFor = (apiId) => apiId }) {
-  // keyFor: pasta de cada API no Blob (permite renomear o apiId sem perder as versões guardadas).
-  const pointerPath = (apiId) => `${keyFor(apiId)}/atual.json`;
-  const versionPrefix = (apiId) => `${keyFor(apiId)}/versoes/`;
+const RAIZ = 'specs/';
+const MARCA_LIMPEZA = `${RAIZ}.limpeza-v3`;
+
+export function createBlobStore({ client }) {
+  const pointerPath = (apiId) => `${RAIZ}${apiId}/atual.json`;
+  const versionPrefix = (apiId) => `${RAIZ}${apiId}/versoes/`;
   const putOpts = { access: 'private', contentType: 'application/json', addRandomSuffix: false };
 
   async function readText(pathname, opts = {}) {
@@ -28,30 +30,44 @@ export function createBlobStore({ client, keyFor = (apiId) => apiId }) {
     return { text: await streamToText(r.stream), etag: r.blob.etag, uploadedAt: r.blob.uploadedAt };
   }
 
-  async function listVersions(apiId) {
+  async function listAll(prefix) {
     const out = [];
     let cursor;
     do {
-      const page = await client.list({ prefix: versionPrefix(apiId), cursor, limit: 1000 });
+      const page = await client.list({ ...(prefix ? { prefix } : {}), cursor, limit: 1000 });
       out.push(...page.blobs);
       cursor = page.hasMore ? page.cursor : undefined;
     } while (cursor);
-    return out.sort((a, b) => (a.pathname < b.pathname ? 1 : -1));
+    return out;
   }
+
+  const listVersions = async (apiId) => (await listAll(versionPrefix(apiId))).sort((a, b) => (a.pathname < b.pathname ? 1 : -1));
 
   const nameOf = (pathname) => pathname.split('/').pop();
 
   const store = {
+    /**
+     * Começo do zero: apaga uma única vez tudo o que foi guardado antes deste formato
+     * (versões e históricos antigos). Uma marca no Blob evita repetir.
+     */
+    async limparAntigos() {
+      if (await client.get(MARCA_LIMPEZA, { access: 'private' })) return 0;
+      const antigos = (await listAll()).filter((b) => !b.pathname.startsWith(RAIZ));
+      for (const b of antigos) await client.del(b.url);
+      await client.put(MARCA_LIMPEZA, JSON.stringify({ data: new Date().toISOString(), apagados: antigos.length }), { ...putOpts, allowOverwrite: true });
+      return antigos.length;
+    },
+
     tipo: 'vercel-blob',
     descricao: 'Vercel Blob (privado)',
 
     async readMeta(apiId) {
       const r = await readText(pointerPath(apiId), { useCache: false });
-      if (!r?.text) return { eventos: [] };
+      if (!r?.text) return {};
       try {
         return JSON.parse(r.text);
       } catch {
-        return { eventos: [] };
+        return {};
       }
     },
 
