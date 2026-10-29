@@ -51,6 +51,10 @@
   tr:first-child td { border-top: 0; }
   td.r { text-align: right; white-space: nowrap; }
   .muted { color: var(--muted); }
+  .online { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+  .online::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  .online:empty { display: none; }
+  .online.off::before { background: var(--err); }
   details { margin-top: 14px; }
   summary { cursor: pointer; color: var(--muted); font-size: 14px; }
   @media (max-width: 520px) { .stats { grid-template-columns: 1fr 1fr; } }
@@ -59,7 +63,7 @@
 <body>
 <main>
   <h1>MCP RH Net</h1>
-  <div class="conector">Conector: <code id="mcpUrl"></code><button class="link" id="copiar">Copiar</button></div>
+  <div class="conector">Conector: <code id="mcpUrl"></code><button class="link" id="copiar">Copiar</button><span class="online" id="online"></span></div>
 
   <section class="card">
     <h2>Spec em uso</h2>
@@ -124,6 +128,8 @@ async function api(path, opts) {
 async function carregar() {
   const st = await api('/status');
   $('specLink').href = st.specUrl;
+  $('online').className = 'online';
+  $('online').textContent = `Online · v${st.versaoServidor}`;
   $('ops').textContent = st.atual?.operacoes ?? '—';
   $('schemas').textContent = st.atual?.schemas ?? '—';
   $('quando').textContent = st.atualizadaEm ? data(st.atualizadaEm) : 'deploy';
@@ -176,7 +182,11 @@ $('backups').onclick = (ev) => {
   }
 };
 
-carregar().catch((e) => ($('aviso').innerHTML = `<div class="msg err">${esc(e.message)}</div>`));
+carregar().catch((e) => {
+  $('online').className = 'online off';
+  $('online').textContent = 'Fora do ar';
+  $('aviso').innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
+});
 </script>
 </body>
 </html>

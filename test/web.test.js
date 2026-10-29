@@ -50,12 +50,11 @@ test('JSON inválido -> erro de parse JSON-RPC', async () => {
   assert.equal((await r.json()).error.code, -32700);
 });
 
-test('health é público e não expõe os ids das APIs', async () => {
-  const { listApiIds } = await import('../src/specs.js');
-  const body = await (await fetch(`${base}/mcp/health`)).json();
-  assert.equal(body.status, 'ok');
-  assert.equal(body.apis, listApiIds().length);
-  assert.ok(body.apis >= 1);
+test('só existem / e /mcp: /mcp/health não existe mais', async () => {
+  assert.equal((await fetch(`${base}/mcp/health`)).status, 404);
+  const st = await (await fetch(`${base}/api/rhnet/status`)).json();
+  assert.equal(st.atual.operacoes, 135);
+  assert.match(st.versaoServidor, /^\d+\.\d+\.\d+$/);
 });
 
 test('cliente MCP real via HTTP lê as specs do bundle', async () => {

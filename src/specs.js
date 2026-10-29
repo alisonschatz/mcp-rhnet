@@ -8,7 +8,7 @@ const fileCache = new Map();
 /**
  * Em serverless (Vercel) o sistema de arquivos da função não é confiável para ler
  * specs/ em runtime, então o build gera src/specs.bundle.js com todas as specs e o
- * entrypoint registra aqui. Localmente (stdio/http) as specs são lidas do disco.
+ * entrypoint registra aqui. Localmente as specs são lidas do disco.
  */
 let bundled = null;
 

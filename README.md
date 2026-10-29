@@ -2,7 +2,7 @@
 
 Servidor MCP com a spec OpenAPI do **RH Net**, para a IA consultar a documentação e criar casos de teste da API.
 
-- **Página:** https://mcp-rhnet.vercel.app
+- **Página:** https://mcp-rhnet.vercel.app (spec em uso, atualização e histórico)
 - **Conector MCP:** https://mcp-rhnet.vercel.app/mcp
 
 ## Atualizar a spec
@@ -15,16 +15,29 @@ O MCP passa a usar a versão nova na hora, sem deploy. As versões anteriores fi
 
 ## Conectar na IA
 
-| Cliente | Como |
-|---|---|
-| claude.ai | Conector personalizado com a URL `https://mcp-rhnet.vercel.app/mcp` |
-| Claude Code | `claude mcp add --transport http rhnet https://mcp-rhnet.vercel.app/mcp` |
-| VS Code / Cursor | `examples/vscode-mcp.json` |
-| Claude Desktop | `examples/claude_desktop_config.json` |
+**claude.ai** — conector personalizado com a URL `https://mcp-rhnet.vercel.app/mcp`.
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http rhnet https://mcp-rhnet.vercel.app/mcp
+```
+
+**VS Code / Cursor** (`.vscode/mcp.json`)
+
+```json
+{ "servers": { "rhnet": { "type": "http", "url": "https://mcp-rhnet.vercel.app/mcp" } } }
+```
+
+**Claude Desktop** (`claude_desktop_config.json`)
+
+```json
+{ "mcpServers": { "rhnet": { "command": "npx", "args": ["-y", "mcp-remote", "https://mcp-rhnet.vercel.app/mcp"] } } }
+```
 
 ## Deploy (Vercel)
 
-- **Storage → Blob** (acesso Private) conectado ao projeto. É onde ficam as versões da spec.
+- **Storage → Blob** (acesso Private) conectado ao projeto: guarda as versões da spec.
 - Nenhuma variável de ambiente é obrigatória.
 - `specs/rhnet.json` é só a versão inicial do deploy; depois vale a última enviada pela página.
 
@@ -36,7 +49,7 @@ npm start      # página em http://127.0.0.1:3001 · conector em http://127.0.0.
 npm test
 ```
 
-Localmente a spec atualizada fica em `specs/rhnet.json` (versões anteriores em `specs/.historico/`).
+Localmente a spec enviada fica em `specs/rhnet.json` (versões anteriores em `specs/.historico/`).
 
 ## Ferramentas MCP
 
@@ -63,7 +76,7 @@ src/
   updater.js            valida, compara, grava e restaura versões
   store/                Vercel Blob (produção) ou disco (local)
   mcp.js · openapi.js · testing.js · specs.js · validate.js · spec-diff.js
-  web.js · app.js (Vercel) · http.js (local) · stdio.js
+  web.js · app.js (Vercel) · http.js (local)
 scripts/                build-bundle, validate-specs
 test/                   node:test
 ```

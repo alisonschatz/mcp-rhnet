@@ -17,8 +17,7 @@ if (fs.existsSync(envFile) && typeof process.loadEnvFile === 'function') {
 
 /**
  * Pasta com os arquivos OpenAPI (*.json). Resolvida a partir da raiz do projeto,
- * e não do cwd, porque clientes MCP via stdio (Claude Desktop, VS Code, Cursor)
- * iniciam o processo em diretórios arbitrários.
+ * e não do cwd, porque o processo pode ser iniciado de qualquer pasta.
  */
 export const SPECS_DIR = process.env.SPECS_DIR ? path.resolve(process.env.SPECS_DIR) : path.join(ROOT_DIR, 'specs');
 
@@ -35,7 +34,7 @@ export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_MATCHES_PER_API = 5;
 
 export const SERVER_NAME = 'mcp-rhnet';
-export const SERVER_VERSION = '2.1.0';
+export const SERVER_VERSION = '2.2.0';
 
 // ---------------------------------------------------------------------------
 // Atualização da spec

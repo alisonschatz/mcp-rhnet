@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /**
- * Armazenamento em disco (uso local, Docker, servidor interno).
+ * Armazenamento em disco (desenvolvimento local).
  * - spec atual:   <specsDir>/<apiId>.json  (lida pelo specs.js, que recarrega pelo mtime)
  * - backups:      <specsDir>/.historico/<apiId>-<data>.json
  * - registro:     <specsDir>/.historico/<apiId>.meta.json
@@ -21,7 +21,6 @@ export function createFsStore({ specsDir }) {
   return {
     tipo: 'disco',
     descricao: `pasta ${specsDir}`,
-    persistEveryEvent: true,
 
     async readMeta(apiId) {
       try {

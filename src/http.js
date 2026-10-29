@@ -3,7 +3,7 @@ import { HTTP_HOST, HTTP_PORT, SPECS_DIR } from './config.js';
 import { listApiIds } from './specs.js';
 import { mountMcpRoutes } from './web.js';
 
-// Servidor HTTP local (ou Docker). Sem Vercel Blob, a spec atualizada fica na pasta specs/.
+// Servidor local para desenvolvimento (npm start). Sem Vercel Blob, a spec enviada fica em specs/.
 const app = mountMcpRoutes(express());
 
 app.listen(HTTP_PORT, HTTP_HOST, () => {

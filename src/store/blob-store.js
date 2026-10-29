@@ -43,8 +43,6 @@ export function createBlobStore({ client }) {
   const store = {
     tipo: 'vercel-blob',
     descricao: 'Vercel Blob (privado)',
-    // Cada gravação é uma operação paga do Blob: só grava o registro quando algo muda.
-    persistEveryEvent: false,
 
     async readMeta(apiId) {
       const r = await readText(pointerPath(apiId), { useCache: false });

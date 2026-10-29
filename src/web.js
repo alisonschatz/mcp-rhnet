@@ -1,9 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { SERVER_VERSION } from './config.js';
 import { buildMcpServer } from './mcp.js';
-import { listApiIds } from './specs.js';
 import { mountSiteRoutes } from './site.js';
 import { syncSpecs } from './store/index.js';
 
@@ -56,7 +54,6 @@ export function mountMcpRoutes(app, { siteFiles } = {}) {
   app.get('/mcp', methodNotAllowed);
   app.delete('/mcp', methodNotAllowed);
 
-  app.get('/mcp/health', (_req, res) => res.json({ status: 'ok', versao: SERVER_VERSION, apis: listApiIds().length }));
   mountSiteRoutes(app, { files: siteFiles });
 
   app.use((err, _req, res, _next) => {
