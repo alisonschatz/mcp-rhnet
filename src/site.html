@@ -113,53 +113,34 @@
   .versoes { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
   .versoes .seta { color: var(--line); }
 
-  /* impacto: cartões que também filtram */
-  .impactos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
-  .imp { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: var(--text); transition: border-color .15s, background .15s; }
-  .imp:hover { background: var(--surface-2); }
-  .imp .t { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
-  .imp .t i { width: 8px; height: 8px; border-radius: 2px; }
-  .imp .n { font-size: 20px; font-weight: 650; letter-spacing: -.02em; }
-  .imp .d { font-size: 12px; color: var(--muted); }
-  .imp.on { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
-  .imp[disabled] { opacity: .5; cursor: default; }
-  .i-quebra { background: var(--red); } .i-atencao { background: var(--amber); } .i-info { background: var(--muted); }
-
-  .filtros { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
-  .cats { display: flex; gap: 6px; flex-wrap: wrap; }
-  .cat { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
-  .cat:hover:not([disabled]) { color: var(--text); border-color: color-mix(in srgb, var(--line) 40%, var(--muted)); }
-  .cat b { font-weight: 650; color: var(--muted); font-size: 11.5px; }
-  .cat.on { background: var(--text); border-color: var(--text); color: var(--surface); }
-  .cat.on b { color: var(--surface); opacity: .7; }
-  .cat[disabled] { opacity: .4; cursor: default; }
-  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; scrollbar-width: none; }
+  /* filtro único + busca */
+  .filtros { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
   .seg::-webkit-scrollbar { display: none; }
-  .seg button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
+  .seg button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 13px inherit; cursor: pointer; white-space: nowrap; }
   .seg button:hover:not([disabled]) { color: var(--text); }
   .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
   .seg button[disabled] { opacity: .4; cursor: default; }
-  .seg button b { font-size: 11px; color: var(--muted); }
-  .busca { position: relative; margin-left: auto; width: 230px; max-width: 100%; }
+  .seg button b { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+  .busca { position: relative; margin-left: auto; width: 260px; max-width: 100%; }
   .busca svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-  .busca input { width: 100%; height: 32px; padding: 0 10px 0 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; }
+  .busca input { width: 100%; height: 34px; padding: 0 10px 0 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; }
   .busca input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-2); }
-  .limpar { background: none; border: 0; color: var(--accent); font: 500 12.5px inherit; cursor: pointer; padding: 0; }
 
   /* lista de operações */
-  .lista { list-style: none; margin: 12px 0 0; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
+  .lista { list-style: none; margin: 12px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
   .lista > li + li { border-top: 1px solid var(--line-2); }
-  .row { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; min-width: 0; cursor: pointer; }
-  .row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-  .row.quebra::before { background: var(--red); } .row.atencao::before { background: var(--amber); } .row.info::before { background: var(--line); }
+  .row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-width: 0; cursor: pointer; }
   .row:hover { background: var(--surface-2); }
   .row .txt { min-width: 0; flex: 1; }
   .row .p { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .row .r { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .row .tags { display: flex; gap: 4px; flex: none; }
-  .sit { font-size: 10.5px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; flex: none; }
-  .sit.nova { background: var(--green-bg); color: var(--green); } .sit.removida { background: var(--red-bg); color: var(--red); } .sit.alterada { background: var(--gray-bg); color: var(--text-2); }
-  .mini { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: 5px; background: var(--gray-bg); color: var(--text-2); font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .row .qtd { font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
+  .tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 5px; font-size: 11.5px; font-weight: 600; white-space: nowrap; flex: none; }
+  .tag.quebra { background: var(--red-bg); color: var(--red); }
+  .tag.atencao { background: var(--amber-bg); color: var(--amber); }
+  .tag.nova { background: var(--green-bg); color: var(--green); }
+  .tag.removida { background: var(--red-bg); color: var(--red); }
   .row .chev { color: var(--muted); transition: transform .2s; flex: none; }
   li.aberto > .row { background: var(--surface-2); }
   li.aberto .chev { transform: rotate(90deg); color: var(--text); }
@@ -167,24 +148,21 @@
   .mais:hover { background: var(--gray-bg); }
   .vazio { padding: 26px; text-align: center; color: var(--muted); font-size: 13px; }
 
-  /* detalhe da operação */
-  .det { padding: 6px 16px 16px; background: var(--surface-2); }
-  .grupo { margin-top: 12px; }
-  .grupo h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 11.5px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-  .itens { border: 1px solid var(--line); border-radius: 9px; background: var(--surface); overflow: hidden; }
-  .item { display: grid; grid-template-columns: 14px minmax(160px, 32%) 1fr; gap: 10px; padding: 9px 12px; font-size: 12.5px; align-items: start; }
-  .item + .item { border-top: 1px solid var(--line-2); }
-  .item .ic { width: 8px; height: 8px; border-radius: 2px; margin-top: 5px; }
-  .item .loc { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text); overflow-wrap: anywhere; }
-  .item .res { color: var(--text-2); }
-  .item .res b { color: var(--text); font-weight: 600; }
-  .antes-depois { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-  .antes-depois > div { min-width: 0; }
-  .antes-depois .lbl { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
-  .antes-depois pre { margin: 0; padding: 8px 10px; border-radius: 7px; background: var(--surface-2); border: 1px solid var(--line-2); font: 11.5px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; color: var(--text-2); }
-  .antes-depois .a pre { background: var(--red-bg); border-color: transparent; }
-  .antes-depois .b pre { background: var(--green-bg); border-color: transparent; }
-  .scroll { max-height: 70vh; overflow: auto; }
+  /* detalhe: tabela campo | o que mudou | A | B */
+  .det { padding: 4px 14px 16px; background: var(--surface-2); border-top: 1px solid var(--line-2); }
+  .tab { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+  .tab th { text-align: left; font-weight: 600; font-size: 12px; color: var(--text-2); padding: 8px 10px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+  .tab td { padding: 8px 10px; vertical-align: top; border-top: 1px solid var(--line-2); overflow-wrap: anywhere; color: var(--text-2); }
+  .tab tr.sec td { padding: 10px 10px 6px; font-size: 11.5px; font-weight: 650; color: var(--text); background: var(--surface); border-top: 1px solid var(--line); }
+  .tab .campo { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text); }
+  .tab .oq { color: var(--text); }
+  .tab .oq .tag { margin-top: 4px; }
+  .tab .vazio-v { color: var(--muted); }
+  .tab pre { margin: 0; font: 11.5px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; max-height: 220px; overflow: auto; }
+  .col-campo { width: 30%; } .col-oq { width: 18%; }
+  .nota { margin: 10px 0 0; font-size: 13px; color: var(--text-2); }
+  .nota b { color: var(--text); font-weight: 600; }
+  .scroll { max-height: 72vh; overflow: auto; }
 
   .aviso { margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; background: var(--red-bg); color: var(--red); font-size: 13px; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; transition: transform .25s, opacity .25s; z-index: 10; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 10px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); }
@@ -201,17 +179,13 @@
     .metrics { grid-template-columns: 1fr 1fr 1.4fr; }
     .metric + .metric { padding-left: 12px; margin-left: 12px; }
     .busca { width: 100%; margin-left: 0; }
-    .seg { overflow-x: auto; max-width: 100%; }
-    .imp .d { display: none; }
-    .imp { padding: 9px 11px; }
-    .row .tags .mini { display: none; }
-    .item { grid-template-columns: 10px 1fr; }
-    .item .res { grid-column: 2; }
-    .antes-depois { grid-template-columns: 1fr; }
+    .row .qtd { display: none; }
+    .tab, .tab tbody, .tab tr, .tab td { display: block; width: auto; }
+    .tab thead { display: none; }
+    .tab tr:not(.sec) { padding: 8px 10px; border-top: 1px solid var(--line-2); }
+    .tab tr:not(.sec) td { padding: 2px 0; border: 0; }
+    .tab td[data-l]::before { content: attr(data-l) ': '; color: var(--muted); }
   }
-.leitura { margin: 8px 0 2px; font-size: 12px; color: var(--text-2); }
-.leitura b { color: var(--text); font-weight: 600; }
-.onde { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--surface-2); border: 1px solid var(--line, rgba(127,127,127,.25)); color: var(--text-2); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -283,16 +257,11 @@
       </div>
       <div class="versoes" id="versoes" hidden></div>
       <div id="painelConteudo" hidden>
-        <div class="impactos" id="impactos"></div>
         <div class="filtros">
-          <div class="cats" id="cats"></div>
-        </div>
-        <div class="filtros">
-          <div class="seg" id="situacoes"></div>
-          <button class="limpar" id="limpar" hidden>Limpar filtros</button>
+          <div class="seg" id="impactos" role="tablist"></div>
           <div class="busca">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input id="filtro" type="search" placeholder="Filtrar por caminho, campo ou grupo">
+            <input id="filtro" type="search" placeholder="Buscar endpoint ou campo">
           </div>
         </div>
         <div class="scroll"><ul class="lista" id="lista"></ul></div>
@@ -365,15 +334,13 @@ function renderApi(st) {
 
 // ================= painel de comparação =================
 const POR_PAGINA = 15;
-const CATS = [
-  { id: 'endpoint', t: 'Endpoint' }, { id: 'seguranca', t: 'Segurança' }, { id: 'parametro', t: 'Parâmetros' },
-  { id: 'corpo', t: 'Corpo' }, { id: 'resposta', t: 'Respostas' }, { id: 'exemplo', t: 'Exemplos' }, { id: 'texto', t: 'Textos' },
-];
 const IMPS = [
-  { id: 'quebra', t: 'Quebra', d: 'pode quebrar consumidores e testes' },
-  { id: 'atencao', t: 'Atenção', d: 'comportamento novo ou diferente' },
-  { id: 'info', t: 'Documentação', d: 'só textos e exemplos' },
+  { id: null, t: 'Todas' },
+  { id: 'quebra', t: 'Quebram', d: 'pode quebrar quem usa a API' },
+  { id: 'atencao', t: 'Pedem atenção', d: 'comportamento novo ou diferente' },
+  { id: 'info', t: 'Só documentação', d: 'só textos e exemplos' },
 ];
+const TAG_IMP = { quebra: 'Quebra', atencao: 'Atenção' };
 const VIEWS = {
   'mud-hml': { titulo: 'Mudanças em homologação', dot: 'var(--hml)', api: HML, url: `/${HML}/mudancas?`, colA: 'Anterior', colB: 'Atual', sit: { nova: 'Novas', removida: 'Removidas', alterada: 'Alteradas' }, badge: { nova: 'Nova', removida: 'Removida' } },
   'mud-prd': { titulo: 'Mudanças em produção', dot: 'var(--prd)', api: PRD, url: `/${PRD}/mudancas?`, colA: 'Anterior', colB: 'Atual', sit: { nova: 'Novas', removida: 'Removidas', alterada: 'Alteradas' }, badge: { nova: 'Nova', removida: 'Removida' } },
@@ -383,20 +350,14 @@ const VIEWS = {
 
 let view = null;
 let dados = null;
-let f = { impacto: null, categoria: null, situacao: null, termo: '' };
+let f = { impacto: null, termo: '' };
 let mostrarTodas = false;
 const cacheView = new Map();
 const cacheOp = new Map();
 
 const nOps = (d) => d?.operacoes?.length || 0;
 const casaTermo = (o) => !f.termo || `${o.operacao} ${o.resumo} ${o.tag}`.toLowerCase().includes(f.termo);
-/** Operação passa nos filtros (ignorando um deles, para as contagens dos botões). */
-function passa(o, ignorar) {
-  return (ignorar === 'impacto' || !f.impacto || o.porImpacto[f.impacto] > 0)
-    && (ignorar === 'categoria' || !f.categoria || o.porCategoria[f.categoria] > 0)
-    && (ignorar === 'situacao' || !f.situacao || o.situacao === f.situacao)
-    && casaTermo(o);
-}
+const passa = (o, imp = f.impacto) => (!imp || o.impacto === imp) && casaTermo(o);
 
 function renderViews() {
   $('views').innerHTML = Object.entries(VIEWS).map(([id, v]) => {
@@ -447,24 +408,13 @@ function renderCabecalho() {
 
 function renderFiltros() {
   if (!dados?.operacoes?.length) return;
-  const ops = dados.operacoes;
   $('impactos').innerHTML = IMPS.map((i) => {
-    const n = ops.filter((o) => passa(o, 'impacto') && o.porImpacto[i.id] > 0).length;
-    return `<button class="imp ${f.impacto === i.id ? 'on' : ''}" data-imp="${i.id}" ${n || f.impacto === i.id ? '' : 'disabled'}>
-      <span class="t"><i class="i-${i.id}"></i>${i.t}</span><span class="n">${n}</span><span class="d">${plural(n, 'operação', 'operações')} · ${i.d}</span></button>`;
+    const n = dados.operacoes.filter((o) => passa(o, i.id)).length;
+    return `<button data-imp="${i.id || ''}" class="${f.impacto === i.id ? 'on' : ''}" ${n || f.impacto === i.id ? '' : 'disabled'} ${i.d ? `title="${i.d}"` : ''}>${i.t}<b>${n}</b></button>`;
   }).join('');
-  $('cats').innerHTML = CATS.map((c) => {
-    const n = ops.filter((o) => passa(o, 'categoria')).reduce((s, o) => s + (o.porCategoria[c.id] || 0), 0);
-    return `<button class="cat ${f.categoria === c.id ? 'on' : ''}" data-cat="${c.id}" ${n || f.categoria === c.id ? '' : 'disabled'}>${c.t}<b>${n}</b></button>`;
-  }).join('');
-  const v = VIEWS[view];
-  const sits = [{ id: null, t: 'Todas' }, ...['nova', 'removida', 'alterada'].map((s) => ({ id: s, t: v.sit[s] }))];
-  $('situacoes').innerHTML = sits.map((s) => {
-    const n = ops.filter((o) => passa(o, 'situacao') && (!s.id || o.situacao === s.id)).length;
-    return `<button data-sit="${s.id || ''}" class="${f.situacao === s.id ? 'on' : ''}" ${n || f.situacao === s.id ? '' : 'disabled'}>${s.t}<b>${n}</b></button>`;
-  }).join('');
-  $('limpar').hidden = !(f.impacto || f.categoria || f.situacao || f.termo);
 }
+
+const totalItens = (o) => Object.values(o.porCategoria || {}).reduce((a, b) => a + b, 0);
 
 function renderLista() {
   if (!dados?.operacoes?.length) return;
@@ -472,12 +422,14 @@ function renderLista() {
   const filtrados = dados.operacoes.map((o, k) => ({ ...o, k })).filter((o) => passa(o));
   const visiveis = mostrarTodas ? filtrados : filtrados.slice(0, POR_PAGINA);
   $('lista').innerHTML = visiveis.map((o) => {
-    const cats = CATS.filter((c) => o.porCategoria[c.id]).map((c) => `<span class="mini">${c.t} ${o.porCategoria[c.id]}</span>`);
-    const sit = o.situacao !== 'alterada' ? `<span class="sit ${o.situacao}">${esc((v.badge || v.sit)[o.situacao])}</span>` : '';
-    return `<li data-k="${o.k}"><div class="row ${o.impacto}" title="Impacto: ${IMPS.find((i) => i.id === o.impacto)?.t}">${metodoBadge(o.metodo)}
-      <div class="txt"><div class="p mono">${esc(o.path)}</div><div class="r">${esc(o.resumo)}${o.tag ? ` · ${esc(o.tag)}` : ''}</div></div>
-      <span class="tags">${sit}${o.situacao === 'alterada' ? cats.slice(0, 3).join('') + (cats.length > 3 ? `<span class="mini">+${cats.length - 3}</span>` : '') : ''}</span>${CHEV}</div></li>`;
-  }).join('') || '<li class="vazio">Nenhuma operação com esses filtros.</li>';
+    const sit = o.situacao !== 'alterada' ? `<span class="tag ${o.situacao}">${esc((v.badge || v.sit)[o.situacao])}</span>` : '';
+    const imp = o.situacao === 'alterada' && TAG_IMP[o.impacto] ? `<span class="tag ${o.impacto}">${TAG_IMP[o.impacto]}</span>` : '';
+    const n = totalItens(o);
+    const qtd = o.situacao === 'alterada' && n ? `<span class="qtd">${plural(n, 'diferença', 'diferenças')}</span>` : '';
+    return `<li data-k="${o.k}"><div class="row">${metodoBadge(o.metodo)}
+      <div class="txt"><div class="p mono">${esc(o.path)}</div><div class="r">${esc(o.resumo || o.tag || '')}</div></div>
+      ${qtd}${sit}${imp}${CHEV}</div></li>`;
+  }).join('') || '<li class="vazio">Nada encontrado.</li>';
   const resto = filtrados.length - visiveis.length;
   if (resto > 0) $('lista').insertAdjacentHTML('beforeend', `<li><button class="mais" id="mais">Mostrar mais ${resto}</button></li>`);
 }
@@ -485,7 +437,7 @@ function renderLista() {
 function renderTudo() { renderViews(); renderCabecalho(); renderFiltros(); renderLista(); }
 
 async function abrirView(id, { recarregar = false } = {}) {
-  if (view !== id) { f = { impacto: null, categoria: null, situacao: null, termo: '' }; $('filtro').value = ''; mostrarTodas = false; }
+  if (view !== id) { f = { impacto: null, termo: '' }; $('filtro').value = ''; mostrarTodas = false; }
   view = id;
   dados = recarregar ? null : cacheView.get(id) || null;
   renderTudo();
@@ -502,36 +454,73 @@ const json = (v) => {
   return s && s.length > 4000 ? `${s.slice(0, 4000)}\n… (cortado)` : s ?? '';
 };
 
-function formatar(v) {
-  if (v === undefined || v === null) return '—';
+const NOME_PROP = {
+  tipo: 'Tipo', format: 'Formato', obrigatorio: 'Obrigatório', nullable: 'Aceita null', enum: 'Valores aceitos', rotulos: 'Rótulos dos valores',
+  minLength: 'Tamanho mínimo', maxLength: 'Tamanho máximo', minimum: 'Valor mínimo', maximum: 'Valor máximo', pattern: 'Padrão (regex)',
+  minItems: 'Mínimo de itens', maxItems: 'Máximo de itens', default: 'Valor padrão', example: 'Exemplo', descricao: 'Descrição',
+  deprecated: 'Obsoleto', mediaType: 'Tipo de conteúdo', resumo: 'Resumo', tags: 'Grupo', operationId: 'operationId', itens: 'Tipo dos itens',
+};
+
+/** Resumo de um campo inteiro (campo novo/removido). */
+function campoTexto(v) {
+  if (v === undefined || v === null) return '';
   if (typeof v !== 'object' || Array.isArray(v)) return esc(typeof v === 'string' ? v : JSON.stringify(v));
   const p = [];
-  if (v.tipo) p.push(`<b>${esc(v.tipo)}</b>`);
+  if (v.tipo) p.push(esc(v.tipo));
   if (v.obrigatorio !== undefined) p.push(v.obrigatorio ? 'obrigatório' : 'opcional');
   if (v.format) p.push(esc(v.format));
-  if (v.minLength !== undefined) p.push(`mín ${v.minLength}`);
   if (v.maxLength !== undefined) p.push(`máx ${v.maxLength}`);
-  if (v.minimum !== undefined) p.push(`≥ ${v.minimum}`);
-  if (v.maximum !== undefined) p.push(`≤ ${v.maximum}`);
   if (v.nullable) p.push('aceita null');
-  if (v.pattern) p.push(`padrão <span class="mono">${esc(v.pattern)}</span>`);
-  if (v.enum) p.push(`valores: ${esc(v.enum.slice(0, 10).join(', '))}${v.enum.length > 10 ? '…' : ''}`);
-  return p.join(' · ');
+  if (v.enum) p.push(`valores: ${esc(v.enum.slice(0, 8).join(', '))}${v.enum.length > 8 ? '…' : ''}`);
+  if (!p.length && v.descricao) p.push(esc(v.descricao));
+  return p.join(' · ') || 'existe';
 }
 
-function itemHtml(i, v) {
-  const mostraBlocos = i.categoria === 'exemplo' || (i.categoria === 'texto' && (String(i.antes || '').length + String(i.depois || '').length > 60));
-  let res = `<b>${esc(i.resumo)}</b>`;
-  if (!mostraBlocos && (i.mudanca === 'adicionado' || i.mudanca === 'removido') && typeof (i.depois ?? i.antes) === 'object' && !Array.isArray(i.depois ?? i.antes)) {
-    const extra = formatar(i.depois ?? i.antes);
-    if (extra) res += ` · ${extra}`;
+/** Valor de um lado da tabela. */
+function valor(i, lado) {
+  const x = lado === 'a' ? i.antes : i.depois;
+  const outro = lado === 'a' ? i.depois : i.antes;
+  if (i.mudanca === 'adicionado' || i.mudanca === 'removido') return x === undefined ? '<span class="vazio-v">não existe</span>' : campoTexto(x);
+  if (x === undefined || x === null) return '<span class="vazio-v">—</span>';
+  if (i.propriedade === 'obrigatorio') return x ? 'obrigatório' : 'opcional';
+  if (i.propriedade === 'nullable') return x ? 'aceita null' : 'não aceita null';
+  if (i.propriedade === 'deprecated') return x ? 'sim' : 'não';
+  if (i.propriedade === 'enum' && Array.isArray(x)) {
+    const o = new Set((outro || []).map(String));
+    return x.map((val) => (o.has(String(val)) || !outro ? esc(String(val)) : `<b>${esc(String(val))}</b>`)).join(', ');
   }
-  const blocos = mostraBlocos
-    ? `<div class="antes-depois"><div class="a"><div class="lbl">${v.colA}</div><pre>${i.antes === undefined ? '—' : esc(json(i.antes))}</pre></div><div class="b"><div class="lbl">${v.colB}</div><pre>${i.depois === undefined ? '—' : esc(json(i.depois))}</pre></div></div>`
-    : '';
-  const lado = !mostraBlocos && i.mudanca === 'alterado' && (i.antes === undefined) !== (i.depois === undefined)
-    ? ` <span class="onde">só em ${i.antes === undefined ? v.colB : v.colA}</span>` : '';
-  return `<div class="item"><span class="ic i-${i.impacto}" title="${IMPS.find((x) => x.id === i.impacto)?.t}"></span><span class="loc">${esc(i.local)}</span><div class="res">${res}${lado}${blocos}</div></div>`;
+  if (i.propriedade === 'rotulos' && typeof x === 'object') return Object.entries(x).map(([k, t]) => `${esc(k)} = ${esc(t ?? '')}`).join('<br>');
+  if (typeof x === 'object') return `<pre>${esc(json(x))}</pre>`;
+  return esc(String(x));
+}
+
+function oQueMudou(i) {
+  let t;
+  if (i.categoria === 'endpoint' && !i.propriedade) t = i.mudanca === 'adicionado' ? 'Operação nova' : 'Operação removida';
+  else if (i.categoria === 'exemplo') t = 'Exemplo';
+  else if (i.categoria === 'seguranca') t = 'Autenticação';
+  else if (i.mudanca === 'adicionado') t = i.local.startsWith('resposta') && !i.local.includes('.') ? 'Status novo' : 'Campo novo';
+  else if (i.mudanca === 'removido') t = i.local.startsWith('resposta') && !i.local.includes('.') ? 'Status removido' : 'Campo removido';
+  else t = NOME_PROP[i.propriedade] || i.propriedade || 'Mudou';
+  const tag = TAG_IMP[i.impacto] ? `<br><span class="tag ${i.impacto}" title="${esc(i.resumo)}">${TAG_IMP[i.impacto]}</span>` : '';
+  return `${esc(t)}${tag}`;
+}
+
+const SECOES = [
+  { id: 'endpoint', t: 'Operação' }, { id: 'seguranca', t: 'Autenticação' }, { id: 'parametro', t: 'Parâmetros' },
+  { id: 'corpo', t: 'Corpo da requisição' }, { id: 'resposta', t: 'Respostas' }, { id: 'exemplo', t: 'Exemplos' }, { id: 'texto', t: 'Textos da documentação' },
+];
+
+function tabelaHtml(itens, v) {
+  const linhas = SECOES.map((s) => {
+    const doGrupo = itens.filter((i) => i.categoria === s.id);
+    if (!doGrupo.length) return '';
+    return `<tr class="sec"><td colspan="4">${s.t}</td></tr>` + doGrupo.map((i) => `<tr>
+      <td class="campo">${esc(i.local)}</td><td class="oq">${oQueMudou(i)}</td>
+      <td data-l="${v.colA}">${valor(i, 'a')}</td><td data-l="${v.colB}">${valor(i, 'b')}</td></tr>`).join('');
+  }).join('');
+  return `<table class="tab"><colgroup><col class="col-campo"><col class="col-oq"><col><col></colgroup>
+    <thead><tr><th>Campo</th><th>O que mudou</th><th>${v.colA}</th><th>${v.colB}</th></tr></thead><tbody>${linhas}</tbody></table>`;
 }
 
 async function abrirDetalhe(li, o) {
@@ -544,6 +533,11 @@ async function abrirDetalhe(li, o) {
   box.innerHTML = '<p class="muted" style="margin:8px 0 0;font-size:12.5px">Carregando…</p>';
   li.appendChild(box);
   const v = VIEWS[view];
+  if (o.situacao !== 'alterada') {
+    const [tem, nao] = o.situacao === 'nova' ? [v.colB, v.colA] : [v.colA, v.colB];
+    box.innerHTML = `<p class="nota">Esta operação existe em <b>${tem.toLowerCase()}</b> e não existe em <b>${nao.toLowerCase()}</b>.${o.situacao === 'removida' ? ' Quem chama esse endpoint vai receber erro.' : ''}</p>`;
+    return;
+  }
   const chave = `${view}|${o.operacao}`;
   try {
     let d = cacheOp.get(chave);
@@ -551,12 +545,7 @@ async function abrirDetalhe(li, o) {
       d = await api(`${v.url}method=${encodeURIComponent(o.metodo)}&path=${encodeURIComponent(o.path)}`);
       cacheOp.set(chave, d);
     }
-    const itens = d.itens.filter((i) => (!f.impacto || i.impacto === f.impacto) && (!f.categoria || i.categoria === f.categoria));
-    const outros = d.itens.length - itens.length;
-    box.innerHTML = `<p class="leitura">Leitura: <b>${v.colA}</b> → <b>${v.colB}</b>. O que está à esquerda da seta é ${v.colA.toLowerCase()}; à direita, ${v.colB.toLowerCase()}.</p>` + CATS.map((c) => {
-      const doGrupo = itens.filter((i) => i.categoria === c.id);
-      return doGrupo.length ? `<div class="grupo"><h4>${c.t} <span class="mini">${doGrupo.length}</span></h4><div class="itens">${doGrupo.map((i) => itemHtml(i, v)).join('')}</div></div>` : '';
-    }).join('') + (outros ? `<p class="muted" style="margin:10px 0 0;font-size:12.5px">+ ${plural(outros, 'diferença escondida', 'diferenças escondidas')} pelos filtros.</p>` : '');
+    box.innerHTML = d.itens?.length ? tabelaHtml(d.itens, v) : '<p class="muted" style="margin:10px 0 0;font-size:12.5px">Sem diferenças nos detalhes.</p>';
   } catch (e) {
     box.innerHTML = `<p style="color:var(--red);font-size:12.5px">${esc(e.message)}</p>`;
   }
@@ -564,10 +553,7 @@ async function abrirDetalhe(li, o) {
 
 $('views').onclick = (ev) => { const b = ev.target.closest('[data-view]'); if (b) abrirView(b.dataset.view); };
 const aplicar = () => { mostrarTodas = false; renderFiltros(); renderLista(); };
-$('impactos').onclick = (ev) => { const b = ev.target.closest('[data-imp]'); if (b && !b.disabled) { f.impacto = f.impacto === b.dataset.imp ? null : b.dataset.imp; aplicar(); } };
-$('cats').onclick = (ev) => { const b = ev.target.closest('[data-cat]'); if (b && !b.disabled) { f.categoria = f.categoria === b.dataset.cat ? null : b.dataset.cat; aplicar(); } };
-$('situacoes').onclick = (ev) => { const b = ev.target.closest('[data-sit]'); if (b && !b.disabled) { f.situacao = b.dataset.sit || null; aplicar(); } };
-$('limpar').onclick = () => { f = { impacto: null, categoria: null, situacao: null, termo: '' }; $('filtro').value = ''; aplicar(); };
+$('impactos').onclick = (ev) => { const b = ev.target.closest('[data-imp]'); if (b && !b.disabled) { f.impacto = b.dataset.imp || null; aplicar(); } };
 $('filtro').oninput = () => { f.termo = $('filtro').value.trim().toLowerCase(); aplicar(); };
 $('lista').onclick = (ev) => {
   if (ev.target.id === 'mais') { mostrarTodas = true; renderLista(); return; }
