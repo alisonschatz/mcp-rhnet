@@ -110,44 +110,81 @@
   .cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .frase { margin: 0; font-size: 14px; color: var(--text-2); flex: 1; min-width: 240px; }
   .frase b { color: var(--text); font-weight: 600; }
-  .versoes { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .versoes { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
   .versoes .seta { color: var(--line); }
-  .ctrl { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+
+  /* impacto: cartões que também filtram */
+  .impactos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .imp { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: var(--text); transition: border-color .15s, background .15s; }
+  .imp:hover { background: var(--surface-2); }
+  .imp .t { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
+  .imp .t i { width: 8px; height: 8px; border-radius: 2px; }
+  .imp .n { font-size: 20px; font-weight: 650; letter-spacing: -.02em; }
+  .imp .d { font-size: 12px; color: var(--muted); }
+  .imp.on { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+  .imp[disabled] { opacity: .5; cursor: default; }
+  .i-quebra { background: var(--red); } .i-atencao { background: var(--amber); } .i-info { background: var(--muted); }
+
+  .filtros { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  .cats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cat { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
+  .cat:hover:not([disabled]) { color: var(--text); border-color: color-mix(in srgb, var(--line) 40%, var(--muted)); }
+  .cat b { font-weight: 650; color: var(--muted); font-size: 11.5px; }
+  .cat.on { background: var(--text); border-color: var(--text); color: var(--surface); }
+  .cat.on b { color: var(--surface); opacity: .7; }
+  .cat[disabled] { opacity: .4; cursor: default; }
   .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; scrollbar-width: none; }
   .seg::-webkit-scrollbar { display: none; }
-  .seg button { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
+  .seg button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
   .seg button:hover:not([disabled]) { color: var(--text); }
   .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
   .seg button[disabled] { opacity: .4; cursor: default; }
-  .busca { position: relative; margin-left: auto; width: 240px; max-width: 100%; }
+  .seg button b { font-size: 11px; color: var(--muted); }
+  .busca { position: relative; margin-left: auto; width: 230px; max-width: 100%; }
   .busca svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-  .busca input { width: 100%; height: 34px; padding: 0 10px 0 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; }
+  .busca input { width: 100%; height: 32px; padding: 0 10px 0 32px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 13px inherit; outline: none; }
   .busca input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-2); }
-  .ajuda { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
-  .lista { list-style: none; margin: 10px 0 0; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
+  .limpar { background: none; border: 0; color: var(--accent); font: 500 12.5px inherit; cursor: pointer; padding: 0; }
+
+  /* lista de operações */
+  .lista { list-style: none; margin: 12px 0 0; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
   .lista > li + li { border-top: 1px solid var(--line-2); }
-  .row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; min-width: 0; }
-  .row.click { cursor: pointer; }
-  .row.click:hover { background: var(--surface-2); }
-  .row .p { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .row .r { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; padding-left: 12px; max-width: 45%; }
-  .row .chev { color: var(--muted); transition: transform .2s; margin-left: 4px; }
-  .row .r + .chev { margin-left: 0; }
+  .row { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; min-width: 0; cursor: pointer; }
+  .row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+  .row.quebra::before { background: var(--red); } .row.atencao::before { background: var(--amber); } .row.info::before { background: var(--line); }
+  .row:hover { background: var(--surface-2); }
+  .row .txt { min-width: 0; flex: 1; }
+  .row .p { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .r { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .tags { display: flex; gap: 4px; flex: none; }
+  .sit { font-size: 10.5px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; flex: none; }
+  .sit.nova { background: var(--green-bg); color: var(--green); } .sit.removida { background: var(--red-bg); color: var(--red); } .sit.alterada { background: var(--gray-bg); color: var(--text-2); }
+  .mini { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: 5px; background: var(--gray-bg); color: var(--text-2); font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .row .chev { color: var(--muted); transition: transform .2s; flex: none; }
   li.aberto > .row { background: var(--surface-2); }
   li.aberto .chev { transform: rotate(90deg); color: var(--text); }
   .mais { width: 100%; height: 38px; border: 0; background: var(--surface-2); color: var(--accent); font: 500 13px inherit; cursor: pointer; }
   .mais:hover { background: var(--gray-bg); }
   .vazio { padding: 26px; text-align: center; color: var(--muted); font-size: 13px; }
-  .det { padding: 2px 12px 12px; background: var(--surface-2); }
-  .det .resumo { font-size: 12.5px; color: var(--text-2); margin: 0 0 8px; }
-  .tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .tabela th { text-align: left; font-weight: 600; font-size: 11.5px; color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--line); }
-  .tabela td { padding: 7px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; overflow-wrap: anywhere; color: var(--text-2); }
-  .tabela tr:last-child td { border-bottom: 0; }
-  .tabela td:first-child { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text); width: 36%; }
-  .tabela .nao { color: var(--muted); font-style: italic; }
-  .tabela .t { color: var(--text); font-weight: 600; }
-  .scroll { max-height: 66vh; overflow: auto; }
+
+  /* detalhe da operação */
+  .det { padding: 6px 16px 16px; background: var(--surface-2); }
+  .grupo { margin-top: 12px; }
+  .grupo h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 11.5px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .itens { border: 1px solid var(--line); border-radius: 9px; background: var(--surface); overflow: hidden; }
+  .item { display: grid; grid-template-columns: 14px minmax(160px, 32%) 1fr; gap: 10px; padding: 9px 12px; font-size: 12.5px; align-items: start; }
+  .item + .item { border-top: 1px solid var(--line-2); }
+  .item .ic { width: 8px; height: 8px; border-radius: 2px; margin-top: 5px; }
+  .item .loc { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text); overflow-wrap: anywhere; }
+  .item .res { color: var(--text-2); }
+  .item .res b { color: var(--text); font-weight: 600; }
+  .antes-depois { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+  .antes-depois > div { min-width: 0; }
+  .antes-depois .lbl { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .antes-depois pre { margin: 0; padding: 8px 10px; border-radius: 7px; background: var(--surface-2); border: 1px solid var(--line-2); font: 11.5px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; color: var(--text-2); }
+  .antes-depois .a pre { background: var(--red-bg); border-color: transparent; }
+  .antes-depois .b pre { background: var(--green-bg); border-color: transparent; }
+  .scroll { max-height: 70vh; overflow: auto; }
 
   .aviso { margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; background: var(--red-bg); color: var(--red); font-size: 13px; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; transition: transform .25s, opacity .25s; z-index: 10; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 10px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); }
@@ -165,8 +202,12 @@
     .metric + .metric { padding-left: 12px; margin-left: 12px; }
     .busca { width: 100%; margin-left: 0; }
     .seg { overflow-x: auto; max-width: 100%; }
-    .row .r { display: none; }
-    .tabela td:first-child { width: auto; }
+    .imp .d { display: none; }
+    .imp { padding: 9px 11px; }
+    .row .tags .mini { display: none; }
+    .item { grid-template-columns: 10px 1fr; }
+    .item .res { grid-column: 2; }
+    .antes-depois { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -238,15 +279,21 @@
         <span id="cabAcoes"></span>
       </div>
       <div class="versoes" id="versoes" hidden></div>
-      <div class="ctrl" id="ctrl" hidden>
-        <div class="seg" id="cats" role="tablist"></div>
-        <div class="busca">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="filtro" type="search" placeholder="Filtrar operações">
+      <div id="painelConteudo" hidden>
+        <div class="impactos" id="impactos"></div>
+        <div class="filtros">
+          <div class="cats" id="cats"></div>
         </div>
+        <div class="filtros">
+          <div class="seg" id="situacoes"></div>
+          <button class="limpar" id="limpar" hidden>Limpar filtros</button>
+          <div class="busca">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="filtro" type="search" placeholder="Filtrar por caminho, campo ou grupo">
+          </div>
+        </div>
+        <div class="scroll"><ul class="lista" id="lista"></ul></div>
       </div>
-      <p class="ajuda" id="ajuda" hidden></p>
-      <div class="scroll" id="scroll"><ul class="lista" id="lista" hidden></ul></div>
     </div>
   </section>
 </main>
@@ -255,7 +302,6 @@
 <script>
 const HML = 'rhnet-hml', PRD = 'rhnet-prd';
 const NOMES = { [HML]: 'Homologação', [PRD]: 'Produção' };
-const POR_PAGINA = 12;
 const $ = (id) => document.getElementById(id);
 const card = (apiId) => $('card-' + apiId);
 const q = (apiId, sel) => card(apiId).querySelector(sel);
@@ -315,122 +361,149 @@ function renderApi(st) {
 }
 
 // ================= painel de comparação =================
+const POR_PAGINA = 15;
+const CATS = [
+  { id: 'endpoint', t: 'Endpoint' }, { id: 'seguranca', t: 'Segurança' }, { id: 'parametro', t: 'Parâmetros' },
+  { id: 'corpo', t: 'Corpo' }, { id: 'resposta', t: 'Respostas' }, { id: 'exemplo', t: 'Exemplos' }, { id: 'texto', t: 'Textos' },
+];
+const IMPS = [
+  { id: 'quebra', t: 'Quebra', d: 'pode quebrar consumidores e testes' },
+  { id: 'atencao', t: 'Atenção', d: 'comportamento novo ou diferente' },
+  { id: 'info', t: 'Documentação', d: 'só textos e exemplos' },
+];
 const VIEWS = {
-  'mud-hml': {
-    titulo: 'Mudanças em homologação', dot: 'var(--hml)', api: HML, url: `/${HML}/mudancas`, colA: 'Anterior', colB: 'Atual',
-    cats: [
-      { id: 'soEmB', t: 'Novas', um: 'nova', cls: 'green', ajuda: 'Operações que entraram nesta versão.' },
-      { id: 'soEmA', t: 'Removidas', um: 'removida', cls: 'red', ajuda: 'Operações que existiam na versão anterior e saíram.' },
-      { id: 'diferentes', t: 'Alteradas', um: 'alterada', cls: 'amber', ajuda: 'O contrato mudou (campos, tipos, obrigatoriedade, limites, respostas). Clique para ver campo a campo.' },
-      { id: 'soTextos', t: 'Só textos', um: 'só texto', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
-    ],
-  },
-  'mud-prd': {
-    titulo: 'Mudanças em produção', dot: 'var(--prd)', api: PRD, url: `/${PRD}/mudancas`, colA: 'Anterior', colB: 'Atual',
-    cats: null, // mesmas de mud-hml
-  },
-  'hml-prd': {
-    titulo: 'Homologação × Produção', url: `/comparar?a=${HML}&b=${PRD}`, colA: 'Homologação', colB: 'Produção',
-    cats: [
-      { id: 'soEmA', t: 'Só em homologação', cls: 'green', ajuda: 'Ainda não chegaram em produção.' },
-      { id: 'soEmB', t: 'Só em produção', cls: 'red', ajuda: 'Existem em produção e não existem mais em homologação.' },
-      { id: 'diferentes', t: 'Diferentes', um: 'diferente', cls: 'amber', ajuda: 'O contrato é diferente entre os ambientes. Clique para ver campo a campo.' },
-      { id: 'soTextos', t: 'Só textos', um: 'só texto', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
-    ],
-  },
+  'mud-hml': { titulo: 'Mudanças em homologação', dot: 'var(--hml)', api: HML, url: `/${HML}/mudancas?`, colA: 'Anterior', colB: 'Atual', sit: { nova: 'Novas', removida: 'Removidas', alterada: 'Alteradas' }, badge: { nova: 'Nova', removida: 'Removida' } },
+  'mud-prd': { titulo: 'Mudanças em produção', dot: 'var(--prd)', api: PRD, url: `/${PRD}/mudancas?`, colA: 'Anterior', colB: 'Atual', sit: { nova: 'Novas', removida: 'Removidas', alterada: 'Alteradas' }, badge: { nova: 'Nova', removida: 'Removida' } },
+  // Direção produção → homologação: "o que muda quando homologação for para produção".
+  'hml-prd': { titulo: 'Homologação × Produção', url: `/comparar?a=${PRD}&b=${HML}&`, colA: 'Produção', colB: 'Homologação', sit: { nova: 'Só em homologação', removida: 'Só em produção', alterada: 'Diferentes' } },
 };
-VIEWS['mud-prd'].cats = VIEWS['mud-hml'].cats;
 
-let view = null;      // id da view
-let dados = null;     // resposta da comparação
-let cat = null;       // categoria selecionada
+let view = null;
+let dados = null;
+let f = { impacto: null, categoria: null, situacao: null, termo: '' };
 let mostrarTodas = false;
 const cacheView = new Map();
+const cacheOp = new Map();
 
-function total(d) { return d?.operacoes ? Object.values(d.operacoes).reduce((n, l) => n + l.length, 0) : 0; }
+const nOps = (d) => d?.operacoes?.length || 0;
+const casaTermo = (o) => !f.termo || `${o.operacao} ${o.resumo} ${o.tag}`.toLowerCase().includes(f.termo);
+/** Operação passa nos filtros (ignorando um deles, para as contagens dos botões). */
+function passa(o, ignorar) {
+  return (ignorar === 'impacto' || !f.impacto || o.porImpacto[f.impacto] > 0)
+    && (ignorar === 'categoria' || !f.categoria || o.porCategoria[f.categoria] > 0)
+    && (ignorar === 'situacao' || !f.situacao || o.situacao === f.situacao)
+    && casaTermo(o);
+}
 
 function renderViews() {
   $('views').innerHTML = Object.entries(VIEWS).map(([id, v]) => {
     const d = cacheView.get(id);
-    const n = d && !d.semAnterior && !d.erro ? total(d) : null;
-    const dots = v.dot ? `<span class="dot" style="background:${v.dot}"></span>` : `<span class="dot" style="background:var(--hml)"></span><span class="dot" style="background:var(--prd);margin-left:-4px"></span>`;
+    const n = d && d.operacoes ? nOps(d) : null;
+    const dots = v.dot ? `<span class="dot" style="background:${v.dot}"></span>` : '<span class="dot" style="background:var(--hml)"></span><span class="dot" style="background:var(--prd);margin-left:-4px"></span>';
     return `<button role="tab" data-view="${id}" class="${id === view ? 'on' : ''}">${dots}${v.titulo}${n !== null ? `<span class="n">${n}</span>` : ''}</button>`;
   }).join('');
 }
 
-function frase(v, d) {
-  const o = d.operacoes;
-  if (!total(d)) return view === 'hml-prd' ? '<b>Os dois ambientes estão iguais.</b>' : '<b>Nenhuma diferença</b> entre a versão anterior e a atual.';
-  const partes = v.cats.filter((c) => o[c.id].length).map((c) => `<b>${o[c.id].length}</b> ${(o[c.id].length === 1 && c.um) || c.t.toLowerCase()}`);
-  return partes.join(' · ');
+function frase() {
+  const v = VIEWS[view];
+  const r = dados.resumo.operacoes;
+  if (!nOps(dados)) return view === 'hml-prd' ? '<b>Homologação e produção estão iguais.</b>' : '<b>Nenhuma diferença</b> entre a versão anterior e a atual.';
+  const p = [];
+  if (view === 'hml-prd') {
+    if (r.novas) p.push(`<b>${plural(r.novas, 'operação entra', 'operações entram')}</b>`);
+    if (r.removidas) p.push(`<b>${plural(r.removidas, 'sai', 'saem')}</b>`);
+    if (r.alteradas) p.push(`<b>${plural(r.alteradas, 'muda', 'mudam')}</b>`);
+    return `Quando homologação for para produção: ${p.join(', ')}.`;
+  }
+  if (r.novas) p.push(`<b>${plural(r.novas, 'nova', 'novas')}</b>`);
+  if (r.removidas) p.push(`<b>${plural(r.removidas, 'removida', 'removidas')}</b>`);
+  if (r.alteradas) p.push(`<b>${plural(r.alteradas, 'alterada', 'alteradas')}</b>`);
+  return `${plural(nOps(dados), 'operação mudou', 'operações mudaram')}: ${p.join(', ')}.`;
 }
 
 function renderCabecalho() {
   const v = VIEWS[view];
-  const d = dados;
   $('cabAcoes').innerHTML = '';
   $('versoes').hidden = true;
-  if (!d || d.erro) { $('frase').textContent = d?.erro || 'Carregando…'; return; }
-  if (d.semAnterior) {
+  $('painelConteudo').hidden = true;
+  if (!dados) { $('frase').textContent = 'Carregando…'; return; }
+  if (dados.erro) { $('frase').textContent = dados.erro; return; }
+  if (dados.semAnterior) {
     $('frase').innerHTML = `<b>Ainda não há versão anterior.</b> Quando ${v.api === HML ? 'você enviar uma nova versão' : 'a spec de produção mudar'}, as diferenças aparecem aqui.`;
     return;
   }
-  $('frase').innerHTML = frase(v, d);
-  if (d.anterior) {
+  $('frase').innerHTML = frase();
+  if (dados.anterior) {
     const st = status?.apis.find((a) => a.apiId === v.api);
     $('versoes').hidden = false;
-    $('versoes').innerHTML = `Anterior · ${dataHora(d.anterior.salvoEm)} · ${d.anterior.operacoes} op<span class="seta">→</span>Atual · ${dataHora(st?.atualizadaEm)} · ${d.atual.operacoes} op${st?.ultimaMudanca?.origem ? ` · ${esc(st.ultimaMudanca.origem)}` : ''}`;
-    $('cabAcoes').innerHTML = `<button class="btn ghost sm" data-restaurar="${esc(d.anterior.arquivo)}" data-api="${v.api}">${UNDO}Voltar para a anterior</button>`;
+    $('versoes').innerHTML = `Anterior · ${dataHora(dados.anterior.salvoEm)} · ${dados.anterior.operacoes} op<span class="seta">→</span>Atual · ${dataHora(st?.atualizadaEm)} · ${dados.atual.operacoes} op${st?.ultimaMudanca?.origem ? ` · ${esc(st.ultimaMudanca.origem)}` : ''}`;
+    $('cabAcoes').innerHTML = `<button class="btn ghost sm" data-restaurar="${esc(dados.anterior.arquivo)}" data-api="${v.api}">${UNDO}Voltar para a anterior</button>`;
   }
+  $('painelConteudo').hidden = !nOps(dados);
 }
 
-function renderCats() {
-  const v = VIEWS[view];
-  const temDados = dados && !dados.erro && !dados.semAnterior && total(dados);
-  $('ctrl').hidden = !temDados;
-  $('ajuda').hidden = !temDados;
-  $('lista').hidden = !temDados;
-  if (!temDados) return;
-  if (!cat || !dados.operacoes[cat]?.length) cat = v.cats.find((c) => dados.operacoes[c.id].length)?.id;
-  $('cats').innerHTML = v.cats.map((c) => {
-    const n = dados.operacoes[c.id].length;
-    return `<button role="tab" data-cat="${c.id}" class="${c.id === cat ? 'on' : ''}" ${n ? '' : 'disabled'}>${c.t}<span class="chip ${c.cls}">${n}</span></button>`;
+function renderFiltros() {
+  if (!dados?.operacoes?.length) return;
+  const ops = dados.operacoes;
+  $('impactos').innerHTML = IMPS.map((i) => {
+    const n = ops.filter((o) => passa(o, 'impacto') && o.porImpacto[i.id] > 0).length;
+    return `<button class="imp ${f.impacto === i.id ? 'on' : ''}" data-imp="${i.id}" ${n || f.impacto === i.id ? '' : 'disabled'}>
+      <span class="t"><i class="i-${i.id}"></i>${i.t}</span><span class="n">${n}</span><span class="d">${plural(n, 'operação', 'operações')} · ${i.d}</span></button>`;
   }).join('');
-  $('ajuda').textContent = v.cats.find((c) => c.id === cat)?.ajuda || '';
+  $('cats').innerHTML = CATS.map((c) => {
+    const n = ops.filter((o) => passa(o, 'categoria')).reduce((s, o) => s + (o.porCategoria[c.id] || 0), 0);
+    return `<button class="cat ${f.categoria === c.id ? 'on' : ''}" data-cat="${c.id}" ${n || f.categoria === c.id ? '' : 'disabled'}>${c.t}<b>${n}</b></button>`;
+  }).join('');
+  const v = VIEWS[view];
+  const sits = [{ id: null, t: 'Todas' }, ...['nova', 'removida', 'alterada'].map((s) => ({ id: s, t: v.sit[s] }))];
+  $('situacoes').innerHTML = sits.map((s) => {
+    const n = ops.filter((o) => passa(o, 'situacao') && (!s.id || o.situacao === s.id)).length;
+    return `<button data-sit="${s.id || ''}" class="${f.situacao === s.id ? 'on' : ''}" ${n || f.situacao === s.id ? '' : 'disabled'}>${s.t}<b>${n}</b></button>`;
+  }).join('');
+  $('limpar').hidden = !(f.impacto || f.categoria || f.situacao || f.termo);
 }
 
 function renderLista() {
-  if ($('lista').hidden) return;
-  const itens = dados.operacoes[cat] || [];
-  const termo = $('filtro').value.trim().toLowerCase();
-  const filtrados = itens.map((i, n) => ({ ...i, n })).filter((i) => !termo || `${i.metodo} ${i.path} ${i.resumo} ${i.tag}`.toLowerCase().includes(termo));
-  const visiveis = mostrarTodas || termo ? filtrados : filtrados.slice(0, POR_PAGINA);
-  const clicavel = cat === 'diferentes' || cat === 'soTextos';
-  $('lista').innerHTML = visiveis.map((i) =>
-    `<li data-n="${i.n}"><div class="row ${clicavel ? 'click' : ''}">${metodoBadge(i.metodo)}<span class="p mono">${esc(i.path)}</span><span class="r">${esc(i.resumo)}</span>${clicavel ? CHEV : ''}</div></li>`).join('') ||
-    `<li class="vazio">Nenhuma operação${termo ? ` para “${esc(termo)}”` : ''}.</li>`;
+  if (!dados?.operacoes?.length) return;
+  const v = VIEWS[view];
+  const filtrados = dados.operacoes.map((o, k) => ({ ...o, k })).filter((o) => passa(o));
+  const visiveis = mostrarTodas ? filtrados : filtrados.slice(0, POR_PAGINA);
+  $('lista').innerHTML = visiveis.map((o) => {
+    const cats = CATS.filter((c) => o.porCategoria[c.id]).map((c) => `<span class="mini">${c.t} ${o.porCategoria[c.id]}</span>`);
+    const sit = o.situacao !== 'alterada' ? `<span class="sit ${o.situacao}">${esc((v.badge || v.sit)[o.situacao])}</span>` : '';
+    return `<li data-k="${o.k}"><div class="row ${o.impacto}" title="Impacto: ${IMPS.find((i) => i.id === o.impacto)?.t}">${metodoBadge(o.metodo)}
+      <div class="txt"><div class="p mono">${esc(o.path)}</div><div class="r">${esc(o.resumo)}${o.tag ? ` · ${esc(o.tag)}` : ''}</div></div>
+      <span class="tags">${sit}${o.situacao === 'alterada' ? cats.slice(0, 3).join('') + (cats.length > 3 ? `<span class="mini">+${cats.length - 3}</span>` : '') : ''}</span>${CHEV}</div></li>`;
+  }).join('') || '<li class="vazio">Nenhuma operação com esses filtros.</li>';
   const resto = filtrados.length - visiveis.length;
   if (resto > 0) $('lista').insertAdjacentHTML('beforeend', `<li><button class="mais" id="mais">Mostrar mais ${resto}</button></li>`);
 }
 
+function renderTudo() { renderViews(); renderCabecalho(); renderFiltros(); renderLista(); }
+
 async function abrirView(id, { recarregar = false } = {}) {
-  if (view !== id) { cat = null; mostrarTodas = false; $('filtro').value = ''; }
+  if (view !== id) { f = { impacto: null, categoria: null, situacao: null, termo: '' }; $('filtro').value = ''; mostrarTodas = false; }
   view = id;
-  renderViews();
   dados = recarregar ? null : cacheView.get(id) || null;
-  renderCabecalho(); renderCats(); renderLista();
-  if (dados && !recarregar) return;
+  renderTudo();
+  if (dados) return;
   try { dados = await api(VIEWS[id].url); }
   catch (e) { dados = { erro: e.message }; }
   cacheView.set(id, dados);
-  if (view !== id) return;
-  renderViews(); renderCabecalho(); renderCats(); renderLista();
+  if (view === id) renderTudo();
 }
 
+// ---------- detalhe de uma operação ----------
+const json = (v) => {
+  const s = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+  return s && s.length > 4000 ? `${s.slice(0, 4000)}\n… (cortado)` : s ?? '';
+};
+
 function formatar(v) {
-  if (!v) return '<span class="nao">não existe</span>';
+  if (v === undefined || v === null) return '—';
+  if (typeof v !== 'object' || Array.isArray(v)) return esc(typeof v === 'string' ? v : JSON.stringify(v));
   const p = [];
-  if (v.tipo) p.push(`<span class="t">${esc(v.tipo)}</span>`);
+  if (v.tipo) p.push(`<b>${esc(v.tipo)}</b>`);
   if (v.obrigatorio !== undefined) p.push(v.obrigatorio ? 'obrigatório' : 'opcional');
   if (v.format) p.push(esc(v.format));
   if (v.minLength !== undefined) p.push(`mín ${v.minLength}`);
@@ -439,46 +512,64 @@ function formatar(v) {
   if (v.maximum !== undefined) p.push(`≤ ${v.maximum}`);
   if (v.nullable) p.push('aceita null');
   if (v.pattern) p.push(`padrão <span class="mono">${esc(v.pattern)}</span>`);
-  if (v.enum) p.push(`valores: ${esc(v.enum.slice(0, 12).join(', '))}${v.enum.length > 12 ? '…' : ''}`);
-  if (v.mediaType) p.push(esc(v.mediaType));
-  if (v.descricao) p.push(`“${esc(String(v.descricao).slice(0, 160))}”`);
-  return p.join(' · ') || '—';
+  if (v.enum) p.push(`valores: ${esc(v.enum.slice(0, 10).join(', '))}${v.enum.length > 10 ? '…' : ''}`);
+  return p.join(' · ');
 }
 
-async function abrirDetalhe(li, item) {
+function itemHtml(i, v) {
+  const mostraBlocos = i.categoria === 'exemplo' || (i.categoria === 'texto' && (String(i.antes || '').length + String(i.depois || '').length > 60));
+  let res = `<b>${esc(i.resumo)}</b>`;
+  if (!mostraBlocos && (i.mudanca === 'adicionado' || i.mudanca === 'removido') && typeof (i.depois ?? i.antes) === 'object' && !Array.isArray(i.depois ?? i.antes)) {
+    const extra = formatar(i.depois ?? i.antes);
+    if (extra) res += ` · ${extra}`;
+  }
+  const blocos = mostraBlocos
+    ? `<div class="antes-depois"><div class="a"><div class="lbl">${v.colA}</div><pre>${i.antes === undefined ? '—' : esc(json(i.antes))}</pre></div><div class="b"><div class="lbl">${v.colB}</div><pre>${i.depois === undefined ? '—' : esc(json(i.depois))}</pre></div></div>`
+    : '';
+  return `<div class="item"><span class="ic i-${i.impacto}" title="${IMPS.find((x) => x.id === i.impacto)?.t}"></span><span class="loc">${esc(i.local)}</span><div class="res">${res}${blocos}</div></div>`;
+}
+
+async function abrirDetalhe(li, o) {
   const jaAberto = li.classList.contains('aberto');
   $('lista').querySelectorAll('li.aberto').forEach((x) => { x.classList.remove('aberto'); x.querySelector('.det')?.remove(); });
   if (jaAberto) return;
   li.classList.add('aberto');
   const box = document.createElement('div');
   box.className = 'det';
-  box.innerHTML = '<p class="resumo">Carregando…</p>';
+  box.innerHTML = '<p class="muted" style="margin:8px 0 0;font-size:12.5px">Carregando…</p>';
   li.appendChild(box);
   const v = VIEWS[view];
+  const chave = `${view}|${o.operacao}`;
   try {
-    const base = `${v.url}${v.url.includes('?') ? '&' : '?'}method=${encodeURIComponent(item.metodo)}&path=${encodeURIComponent(item.path)}`;
-    let r = await api(base + (cat === 'soTextos' ? '&descricoes=1' : ''));
-    if (r.iguais && cat !== 'soTextos') r = await api(base + '&descricoes=1');
-    const linhas = [...r.soEmA.map((i) => [i.item, i, null]), ...r.soEmB.map((i) => [i.item, null, i]), ...r.diferentes.map((i) => [i.item, i.a, i.b])];
-    const resumo = r.resumoDiferente ? `<p class="resumo">Resumo: “${esc(r.resumoDiferente.a)}” → “${esc(r.resumoDiferente.b)}”</p>` : '';
-    const tabela = linhas.length
-      ? `<table class="tabela"><thead><tr><th>Item</th><th>${v.colA}</th><th>${v.colB}</th></tr></thead><tbody>${linhas.map(([k, a, b]) => `<tr><td>${esc(k)}</td><td>${formatar(a)}</td><td>${formatar(b)}</td></tr>`).join('')}</tbody></table>`
-      : '';
-    box.innerHTML = resumo + tabela || '<p class="resumo">Mudaram apenas exemplos.</p>';
+    let d = cacheOp.get(chave);
+    if (!d) {
+      d = await api(`${v.url}method=${encodeURIComponent(o.metodo)}&path=${encodeURIComponent(o.path)}`);
+      cacheOp.set(chave, d);
+    }
+    const itens = d.itens.filter((i) => (!f.impacto || i.impacto === f.impacto) && (!f.categoria || i.categoria === f.categoria));
+    const outros = d.itens.length - itens.length;
+    box.innerHTML = CATS.map((c) => {
+      const doGrupo = itens.filter((i) => i.categoria === c.id);
+      return doGrupo.length ? `<div class="grupo"><h4>${c.t} <span class="mini">${doGrupo.length}</span></h4><div class="itens">${doGrupo.map((i) => itemHtml(i, v)).join('')}</div></div>` : '';
+    }).join('') + (outros ? `<p class="muted" style="margin:10px 0 0;font-size:12.5px">+ ${plural(outros, 'diferença escondida', 'diferenças escondidas')} pelos filtros.</p>` : '');
   } catch (e) {
-    box.innerHTML = `<p class="resumo" style="color:var(--red)">${esc(e.message)}</p>`;
+    box.innerHTML = `<p style="color:var(--red);font-size:12.5px">${esc(e.message)}</p>`;
   }
 }
 
 $('views').onclick = (ev) => { const b = ev.target.closest('[data-view]'); if (b) abrirView(b.dataset.view); };
-$('cats').onclick = (ev) => { const b = ev.target.closest('[data-cat]'); if (b && !b.disabled) { cat = b.dataset.cat; mostrarTodas = false; renderCats(); renderLista(); } };
-$('filtro').oninput = renderLista;
+const aplicar = () => { mostrarTodas = false; renderFiltros(); renderLista(); };
+$('impactos').onclick = (ev) => { const b = ev.target.closest('[data-imp]'); if (b && !b.disabled) { f.impacto = f.impacto === b.dataset.imp ? null : b.dataset.imp; aplicar(); } };
+$('cats').onclick = (ev) => { const b = ev.target.closest('[data-cat]'); if (b && !b.disabled) { f.categoria = f.categoria === b.dataset.cat ? null : b.dataset.cat; aplicar(); } };
+$('situacoes').onclick = (ev) => { const b = ev.target.closest('[data-sit]'); if (b && !b.disabled) { f.situacao = b.dataset.sit || null; aplicar(); } };
+$('limpar').onclick = () => { f = { impacto: null, categoria: null, situacao: null, termo: '' }; $('filtro').value = ''; aplicar(); };
+$('filtro').oninput = () => { f.termo = $('filtro').value.trim().toLowerCase(); aplicar(); };
 $('lista').onclick = (ev) => {
   if (ev.target.id === 'mais') { mostrarTodas = true; renderLista(); return; }
-  const row = ev.target.closest('.row.click');
+  const row = ev.target.closest('.row');
   if (!row) return;
   const li = row.closest('li');
-  abrirDetalhe(li, dados.operacoes[cat][Number(li.dataset.n)]);
+  abrirDetalhe(li, dados.operacoes[Number(li.dataset.k)]);
 };
 
 // ================= carregar / ações =================
@@ -489,7 +580,7 @@ async function carregar({ recarregarView = false } = {}) {
   const semGravar = status.apis.find((a) => !a.armazenamento.gravavel);
   $('aviso').innerHTML = semGravar ? `<div class="aviso">${esc(semGravar.armazenamento.motivo)}</div>` : '';
   status.apis.forEach(renderApi);
-  if (recarregarView) cacheView.clear();
+  if (recarregarView) { cacheView.clear(); cacheOp.clear(); }
   if (!view) {
     const hml = status.apis.find((a) => a.apiId === HML);
     view = hml?.versaoAnterior ? 'mud-hml' : hml?.atual ? 'hml-prd' : 'mud-prd';

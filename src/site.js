@@ -3,8 +3,7 @@ import path from 'node:path';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { APIS, SERVER_VERSION, UPDATABLE_APIS } from './config.js';
-import { compareApis, compareOperation } from './compare.js';
-import { findOperation } from './openapi.js';
+import { diffOperacao, diffSpecs, semItens } from './compare.js';
 import { loadSpec } from './specs.js';
 import { summarize } from './spec-diff.js';
 import { ensureFresh, previousSpec, restoreBackup, specStatus, updateFromText, updateFromUrl, UpdateError } from './updater.js';
@@ -22,32 +21,16 @@ function nomeArquivo(v) {
   }
 }
 
-/** "POST /api/v1/x" → { metodo, path, resumo, tag } para a página mostrar. */
-function detalharOps(lista, ...specs) {
-  return lista.map((chave) => {
-    const [metodo, ...resto] = chave.split(' ');
-    const path = resto.join(' ');
-    const op = specs.map((s) => findOperation(s, metodo, path)).find(Boolean);
-    return { metodo, path, resumo: op?.operation.summary || '', tag: op?.operation.tags?.[0] || '' };
-  });
-}
-
-/** Resumo da comparação (listas de operações) ou, com method+path, o detalhe da operação. */
+/**
+ * Diferenças entre duas specs para a página: resumo + operações (sem os itens) ou,
+ * com method+path, a operação com todos os itens (categoria, impacto, antes → depois).
+ */
 function comparacao(specA, specB, query) {
   if (query.method && query.path) {
-    return compareOperation(specA, specB, String(query.method), String(query.path), { incluirDescricoes: query.descricoes === '1' });
+    return diffOperacao(specA, specB, String(query.method), String(query.path)) || { erro: 'Operação não encontrada.' };
   }
-  const r = compareApis(specA, specB);
-  return {
-    totalDiferencas: r.totalDiferencas,
-    operacoes: {
-      soEmA: detalharOps(r.operacoes.soEmA, specA),
-      soEmB: detalharOps(r.operacoes.soEmB, specB),
-      diferentes: detalharOps(r.operacoes.diferentes, specA, specB),
-      soTextos: detalharOps(r.operacoes.soTextos, specA, specB),
-    },
-    schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
-  };
+  const d = diffSpecs(specA, specB);
+  return { resumo: d.resumo, operacoes: d.operacoes.map(semItens) };
 }
 
 function specOf(apiId) {

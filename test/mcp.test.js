@@ -22,12 +22,12 @@ const call = async (name, args = {}) => {
 test('expõe as tools, prompts e resources esperados', async () => {
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(tools, [
-    'compare_apis', 'compare_previous_version', 'generate_example_payload', 'get_api_overview', 'get_operation_docs', 'get_operation_schema',
-    'get_operation_test_context', 'get_schema_definition', 'list_apis', 'list_operations',
-    'search_documentation', 'suggest_test_scenarios',
+    'compare_apis', 'compare_previous_version', 'generate_example_payload', 'get_api_overview', 'get_operation_docs',
+    'get_operation_examples', 'get_operation_schema', 'get_operation_test_context', 'get_schema_definition', 'get_schema_usages',
+    'list_apis', 'list_operations', 'list_schemas', 'search_documentation', 'suggest_test_scenarios',
   ]);
   const prompts = (await client.listPrompts()).prompts.map((p) => p.name).sort();
-  assert.deepEqual(prompts, ['casos_de_teste_operacao', 'plano_de_testes_api']);
+  assert.deepEqual(prompts, ['casos_de_teste_operacao', 'plano_de_testes_api', 'revisar_mudancas']);
   const resources = (await client.listResources()).resources.map((r) => r.uri);
   assert.ok(resources.includes('docs://index'));
   assert.ok(resources.includes('openapi://rhnet-hml'));
@@ -114,4 +114,25 @@ test('variante e exemplos nomeados no corpo', async () => {
   assert.equal(escolhido.corpo.tipo, 'contribuinte');
   const gerado = (await call('generate_example_payload', { ...args, modo: 'minimo', variante: 1 })).json;
   assert.equal(gerado.variantes.usada, 1);
+});
+
+test('busca indexada encontra campos, parâmetros, exemplos e respeita filtros', async () => {
+  const r = (await call('search_documentation', { query: 'banco_id', apiId: 'rhnet-hml' })).json;
+  assert.ok(r.totalItems > 1);
+  assert.equal(r.resultados[0].nome, 'banco_id', 'o nome exato vem primeiro');
+  assert.ok(r.contagemPorTipo.parametro >= 1);
+  const so = (await call('search_documentation', { query: 'banco_id', apiId: 'rhnet-hml', tipo: 'parametro', method: 'GET' })).json;
+  assert.ok(so.resultados.every((x) => x.tipo === 'parametro' && x.metodo === 'GET'));
+  const ex = (await call('search_documentation', { query: 'contribuinte_estrangeiro', apiId: 'rhnet-hml', tipo: 'exemplo' })).json;
+  assert.ok(ex.resultados.length >= 1);
+});
+
+test('schemas: lista, uso e exemplos de operação', async () => {
+  const l = (await call('list_schemas', { apiId: 'rhnet-hml', filtro: 'Banco' })).json;
+  const item = l.schemas.find((s) => s.nome === 'BancoStoreItem');
+  assert.ok(item.usadoPor >= 1);
+  const u = (await call('get_schema_usages', { apiId: 'rhnet-hml', schemaName: 'BancoStoreItem' })).json;
+  assert.ok(u.operacoes.some((o) => o.metodo === 'POST' && o.path === '/api/v1/bancos' && o.onde.includes('corpo')));
+  const e = (await call('get_operation_examples', { apiId: 'rhnet-hml', method: 'POST', path: '/api/v1/admissoes', onde: 'corpo' })).json;
+  assert.ok(e.totalItems >= 2);
 });

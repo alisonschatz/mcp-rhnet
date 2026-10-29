@@ -31,10 +31,9 @@ export const HTTP_HOST = process.env.MCP_HOST || (process.env.PORT ? '0.0.0.0' :
 export const MAX_RESPONSE_CHARS = Number(process.env.MCP_MAX_RESPONSE_CHARS || 16000);
 export const DEFAULT_PAGE_SIZE = 25;
 export const MAX_PAGE_SIZE = 50;
-export const MAX_SEARCH_MATCHES_PER_API = 5;
 
 export const SERVER_NAME = 'mcp-rhnet';
-export const SERVER_VERSION = '2.7.0';
+export const SERVER_VERSION = '2.8.0';
 
 // ---------------------------------------------------------------------------
 // Atualização da spec

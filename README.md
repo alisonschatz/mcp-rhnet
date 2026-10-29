@@ -24,11 +24,21 @@ O MCP passa a usar a versão nova na hora, sem deploy. Cada ambiente guarda só 
 
 ## Comparar homologação e produção
 
-A página separa as operações em: só em homologação, só em produção, diferentes no contrato (campos, tipos, obrigatoriedade, limites, respostas — inclusive em schemas usados pela operação) e com mudança só de texto (descrições, resumos, exemplos). Clique numa operação para ver campo a campo. Pela IA, por exemplo:
+A aba **Homologação × Produção** mostra o que muda quando homologação for para produção. As abas de mudanças mostram o que mudou da versão anterior para a atual em cada ambiente.
 
-> Compare POST /api/v1/admissoes entre rhnet-hml e rhnet-prd.
+Cada mudança tem um **impacto** e uma **categoria**:
 
-A tool `compare_apis` devolve parâmetros, campos do corpo e respostas que existem só em um ambiente ou que mudaram (tipo, obrigatoriedade, tamanho, enum…).
+| Impacto | Quando |
+|---|---|
+| Quebra | pode quebrar quem usa a API: campo/parâmetro obrigatório novo, campo da resposta removido, tipo mudou, enum perdeu valor, limite mais restrito, passou a exigir autenticação, operação removida |
+| Atenção | vale testar: campo opcional novo, campo novo na resposta, status novo, operação nova |
+| Documentação | só texto ou exemplo |
+
+Categorias: endpoint, segurança, parâmetros, corpo, resposta, exemplos e textos. Dá para filtrar por impacto, categoria, situação e busca. Clique numa operação para ver campo a campo, com antes/depois (exemplos inclusive). Pela IA, por exemplo:
+
+> Use o prompt revisar_mudancas para o rhnet-hml.
+
+> Compare POST /api/v1/admissoes entre rhnet-prd e rhnet-hml e liste só o que quebra.
 
 ## Conectar na IA
 
@@ -77,14 +87,16 @@ Localmente as specs enviadas ficam em `specs/` (fora do git; versão anterior em
 | `list_operations` | endpoints, com filtro por tag |
 | `get_operation_docs` | descrição funcional, parâmetros, respostas |
 | `get_operation_schema` · `get_schema_definition` | schemas |
-| `search_documentation` | busca em caminhos, descrições, parâmetros e schemas |
-| `compare_apis` | diferenças entre homologação e produção (geral ou de uma operação) |
-| `compare_previous_version` | o que mudou da versão anterior para a atual de um ambiente |
+| `search_documentation` | busca indexada (operação, parâmetro, campo, resposta, schema, exemplo), com filtros e paginação |
+| `list_schemas` · `get_schema_usages` | schemas da spec e quais operações usam cada um |
+| `get_operation_examples` | exemplos de requisição e resposta de uma operação |
+| `compare_apis` | homologação × produção com impacto e categoria (filtros: categoria, impacto, situação, tag, busca; paginado) |
+| `compare_previous_version` | o mesmo, entre a versão anterior e a atual de um ambiente |
 | `get_operation_test_context` | campos com restrições, segurança e respostas (paginado) |
 | `generate_example_payload` | payload válido (`completo`/`minimo`, `exemplo`, `variante`) |
 | `suggest_test_scenarios` | cenários de teste com status esperado e lacunas da spec |
 
-Prompts: `casos_de_teste_operacao` e `plano_de_testes_api`. Resources: `docs://index`, `openapi://rhnet-hml` e `openapi://rhnet-prd`.
+Prompts: `casos_de_teste_operacao`, `plano_de_testes_api` e `revisar_mudancas`. Resources: `docs://index`, `openapi://rhnet-hml` e `openapi://rhnet-prd`.
 
 ## Estrutura
 
@@ -92,7 +104,8 @@ Prompts: `casos_de_teste_operacao` e `plano_de_testes_api`. Resources: `docs://i
 src/
   site.html · site.js   página (/) e API usada por ela
   updater.js            valida, grava, restaura e baixa produção sozinho
-  compare.js            comparação entre ambientes
+  compare.js            comparação por impacto e categoria
+  mcp-qa.js             tools de comparação, busca, schemas e exemplos
   store/                Vercel Blob (produção) ou disco (local)
   mcp.js · openapi.js · testing.js · specs.js · validate.js · spec-diff.js
   web.js · app.js (Vercel) · http.js (local)

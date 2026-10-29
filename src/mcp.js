@@ -4,7 +4,6 @@ import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
   MAX_RESPONSE_CHARS,
-  MAX_SEARCH_MATCHES_PER_API,
   SERVER_NAME,
   SERVER_VERSION,
 } from './config.js';
@@ -23,8 +22,7 @@ import {
   shortenRefs,
 } from './openapi.js';
 import { deriveTestScenarios, examplePayload, testContext } from './testing.js';
-import { compareApis, compareOperation } from './compare.js';
-import { previousSpec } from './updater.js';
+import { registerQaTools } from './mcp-qa.js';
 
 // ---------------------------------------------------------------------------
 // Helpers de resposta
@@ -123,6 +121,9 @@ export function buildMcpServer() {
     }
   );
   const readOnly = { readOnlyHint: true, openWorldHint: false, idempotentHint: true };
+
+  // Comparação detalhada, busca, schemas, exemplos e o prompt revisar_mudancas (src/mcp-qa.js).
+  registerQaTools(server, { toolText, toolError, paginateFitting, PAGE_PARAMS, API_ID, readOnly });
 
   // ----- Navegação -----------------------------------------------------------
 
@@ -273,118 +274,6 @@ export function buildMcpServer() {
         }
         return toolText({ name: schemaName, schema: shortenRefs(schema) });
       })
-  );
-
-  server.registerTool(
-    'compare_previous_version',
-    {
-      title: 'O que mudou na última versão',
-      description:
-        'Compara a versão anterior com a atual de uma API (ex.: "rhnet-hml" depois que o QA enviou uma spec nova). Sem method/path: operações novas (soEmB), removidas (soEmA), alteradas no contrato (diferentes) e só de texto. ' +
-        'Com method e path: diferença campo a campo da operação.',
-      inputSchema: {
-        apiId: API_ID,
-        method: z.string().optional().describe('Método HTTP da operação'),
-        path: z.string().optional().describe('Caminho da operação'),
-        incluirDescricoes: z.boolean().optional().describe('Considerar também diferenças em descrições (padrão: não)'),
-      },
-      annotations: readOnly,
-    },
-    async ({ apiId, method, path: opPath, incluirDescricoes }) =>
-      withSpec(apiId, async (atual) => {
-        let anterior;
-        try {
-          anterior = await previousSpec(apiId);
-        } catch (e) {
-          return toolError(e.message);
-        }
-        if (!anterior) return toolText({ apiId, semAnterior: true, mensagem: 'Ainda não há versão anterior guardada para comparar.' });
-        const base = { apiId, a: `anterior (${anterior.salvoEm})`, b: 'atual' };
-        if (method && opPath) return toolText({ ...base, ...compareOperation(anterior.spec, atual, method, opPath, { incluirDescricoes }) });
-        return toolText({ ...base, ...compareApis(anterior.spec, atual) });
-      })
-  );
-
-  server.registerTool(
-    'compare_apis',
-    {
-      title: 'Comparar ambientes',
-      description:
-        'Compara duas APIs/ambientes (ex.: apiIdA "rhnet-hml" × apiIdB "rhnet-prd"). Sem method/path: lista operações e schemas que existem só em A, só em B ou que diferem. ' +
-        'Com method e path: diferença campo a campo da operação (parâmetros, corpo, respostas), paginada.',
-      inputSchema: {
-        apiIdA: API_ID,
-        apiIdB: API_ID,
-        method: z.string().optional().describe('Método HTTP da operação a comparar'),
-        path: z.string().optional().describe('Caminho da operação a comparar'),
-        incluirDescricoes: z.boolean().optional().describe('Considerar também diferenças em descrições (padrão: não)'),
-        ...PAGE_PARAMS,
-      },
-      annotations: readOnly,
-    },
-    async ({ apiIdA, apiIdB, method, path: opPath, incluirDescricoes, page, pageSize }) =>
-      withSpec(apiIdA, (specA) =>
-        withSpec(apiIdB, (specB) => {
-          if (!method || !opPath) {
-            const r = { a: apiIdA, b: apiIdB, ...compareApis(specA, specB) };
-            if (fitsResponse(r)) return toolText(r);
-            return toolText({
-              a: apiIdA,
-              b: apiIdB,
-              operacoes: r.operacoes,
-              schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
-              aviso: 'Lista de schemas omitida por tamanho; compare uma operação com method/path para ver o detalhe.',
-            });
-          }
-          const r = compareOperation(specA, specB, method, opPath, { incluirDescricoes });
-          if (!r.existeEmA || !r.existeEmB || r.iguais) return toolText({ a: apiIdA, b: apiIdB, ...r });
-          const { soEmA, soEmB, diferentes, ...header } = r;
-          const itens = [
-            ...soEmA.map((i) => ({ situacao: `só em ${apiIdA}`, ...i })),
-            ...soEmB.map((i) => ({ situacao: `só em ${apiIdB}`, ...i })),
-            ...diferentes.map((i) => ({ situacao: 'diferente', ...i })),
-          ];
-          return toolText(paginateFitting(itens, page || 1, pageSize || 40, (slice, meta) => ({ a: apiIdA, b: apiIdB, ...header, ...meta, diferencas: slice })));
-        })
-      )
-  );
-
-  server.registerTool(
-    'search_documentation',
-    {
-      title: 'Buscar na documentação',
-      description: 'Busca textual em caminhos, operationIds, resumos, descrições, parâmetros e nomes de schema de todas as APIs (ou de uma).',
-      inputSchema: {
-        query: z.string().min(2).describe('Termo a buscar, ex.: "cancelamento", "cpf"'),
-        apiId: API_ID.optional(),
-        ...PAGE_PARAMS,
-      },
-      annotations: readOnly,
-    },
-    async ({ query, apiId, page, pageSize }) => {
-      const needle = query.toLowerCase();
-      const hit = (...texts) => texts.some((t) => typeof t === 'string' && t.toLowerCase().includes(needle));
-      const results = [];
-      for (const id of apiId ? [apiId] : listApiIds()) {
-        const { spec } = loadSpec(id);
-        if (!spec) continue;
-        const matches = [];
-        for (const op of listOperations(spec)) {
-          const params = operationParameters(spec, op.pathItem, op.operation);
-          if (hit(op.path, op.operation.operationId, op.operation.summary, op.operation.description, ...params.map((p) => p.name), ...params.map((p) => p.description))) {
-            matches.push({ tipo: 'operacao', method: op.method.toUpperCase(), path: op.path, summary: op.operation.summary || null });
-          }
-        }
-        for (const name of listSchemaNames(spec)) {
-          const s = getSchemaByName(spec, name);
-          if (hit(name, s?.description, ...Object.keys(s?.properties || {}))) matches.push({ tipo: 'schema', nome: name });
-        }
-        if (matches.length) results.push({ apiId: id, totalMatches: matches.length, matches: matches.slice(0, MAX_SEARCH_MATCHES_PER_API) });
-      }
-      if (!results.length) return toolText({ message: `Nenhum resultado para "${query}".` });
-      const { items, meta } = paginate(results, page, pageSize);
-      return toolText({ ...meta, results: items });
-    }
   );
 
   // ----- Testes --------------------------------------------------------------

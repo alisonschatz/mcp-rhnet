@@ -75,16 +75,17 @@ test('envio atualiza o arquivo, guarda backup e o MCP enxerga sem reiniciar', as
   const st = await status();
   assert.ok(st.versaoAnterior);
   const mud = await fetch(`${base}/api/rhnet-hml/mudancas`).then((x) => x.json());
-  assert.deepEqual(mud.operacoes.soEmB.map((o) => `${o.metodo} ${o.path}`), ['GET /api/v1/novo']);
+  assert.deepEqual(mud.operacoes.filter((o) => o.situacao === 'nova').map((o) => `${o.metodo} ${o.path}`), ['GET /api/v1/novo']);
+  assert.equal(mud.resumo.operacoes.novas, 1);
   assert.equal(mud.anterior.operacoes, 135);
   const det = await fetch(`${base}/api/rhnet-hml/mudancas?method=GET&path=/api/v1/novo`).then((x) => x.json());
-  assert.equal(det.existeEmA, false);
+  assert.equal(det.situacao, 'nova');
   const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
   const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
   const c = new Client({ name: 't', version: '1' });
   await c.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
   const viaIa = JSON.parse((await c.callTool({ name: 'compare_previous_version', arguments: { apiId: 'rhnet-hml' } })).content[0].text);
-  assert.deepEqual(viaIa.operacoes.soEmB, ['GET /api/v1/novo']);
+  assert.deepEqual(viaIa.operacoes.map((o) => o.operacao), ['GET /api/v1/novo']);
   await c.close();
   assert.equal(st.ultimaMudanca.origem, 'arquivo');
 });
@@ -129,7 +130,7 @@ test('produção é baixada sozinha pelo servidor e só uma vez dentro do interv
 
 test('comparar ambientes pela API da página e pela tool do MCP', async () => {
   const d = await fetch(`${base}/api/comparar?a=rhnet-hml&b=rhnet-prd`).then((r) => r.json());
-  assert.ok(d.operacoes.soEmA.some((o) => o.metodo === 'GET' && o.path === '/api/v1/verbas' && o.resumo));
+  assert.ok(d.operacoes.some((o) => o.situacao === 'removida' && o.metodo === 'GET' && o.path === '/api/v1/verbas' && o.resumo && o.impacto === 'quebra'));
 
   const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
   const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
@@ -138,10 +139,12 @@ test('comparar ambientes pela API da página e pela tool do MCP', async () => {
   const ids = JSON.parse((await c.callTool({ name: 'list_apis', arguments: {} })).content[0].text).apis.map((a) => a.id);
   assert.deepEqual(ids, ['rhnet-hml', 'rhnet-prd']);
   const resumo = JSON.parse((await c.callTool({ name: 'compare_apis', arguments: { apiIdA: 'rhnet-hml', apiIdB: 'rhnet-prd' } })).content[0].text);
-  assert.ok(resumo.operacoes.soEmA.length >= 4);
+  assert.ok(resumo.resumo.operacoes.removidas >= 4);
   const op = JSON.parse((await c.callTool({ name: 'compare_apis', arguments: { apiIdA: 'rhnet-hml', apiIdB: 'rhnet-prd', method: 'POST', path: '/api/v1/verbas' } })).content[0].text);
-  assert.equal(op.existeEmB, false);
+  assert.equal(op.situacao, 'removida');
   const campos = JSON.parse((await c.callTool({ name: 'compare_apis', arguments: { apiIdA: 'rhnet-hml', apiIdB: 'rhnet-prd', method: 'POST', path: '/api/v1/bancos' } })).content[0].text);
-  assert.deepEqual(campos.diferencas.map((d) => [d.situacao, d.item]), [['só em rhnet-prd', 'corpo.dados[].campo_novo']]);
+  assert.deepEqual(campos.itens.map((d) => [d.categoria, d.mudanca, d.local, d.impacto]), [['corpo', 'adicionado', 'corpo.dados[].campo_novo', 'atencao']]);
+  const quebras = JSON.parse((await c.callTool({ name: 'compare_apis', arguments: { apiIdA: 'rhnet-hml', apiIdB: 'rhnet-prd', impacto: 'quebra' } })).content[0].text);
+  assert.ok(quebras.operacoes.every((o) => o.porImpacto.quebra > 0));
   await c.close();
 });
