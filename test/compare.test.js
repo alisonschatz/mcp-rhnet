@@ -103,3 +103,11 @@ test('diffSpecs: resumo, operações novas/removidas, filtros e cache', () => {
   assert.deepEqual(filtrarDiff(d, { situacao: 'nova' }).map((o) => o.operacao), ['GET /empresas']);
   assert.equal(diffSpecs(a, structuredClone(a)).operacoes.length, 0);
 });
+
+test('enum com rótulos (oneOf + const): valor mudou é contrato, título é texto', () => {
+  const mk = (r) => ({ openapi: '3.0.0', info: { title: 't', version: '1' }, paths: { '/x': { get: { responses: { 200: { description: 'ok', content: { 'application/json': { schema: { type: 'object', properties: { sexo: { oneOf: Object.entries(r).map(([k, t]) => ({ const: k, title: t })) } } } } } } } } } } });
+  const valores = diffOperacao(mk({ feminino: '0 - Feminino', masculino: '1 - Masculino' }), mk({ 0: '0 - Feminino', 1: '1 - Masculino' }), 'GET', '/x');
+  assert.deepEqual(valores.itens.map((i) => [i.categoria, i.impacto, i.propriedade]), [['resposta', 'quebra', 'enum']]);
+  const titulos = diffOperacao(mk({ a: 'A', b: 'B' }), mk({ a: 'Á', b: 'B' }), 'GET', '/x');
+  assert.deepEqual(titulos.itens.map((i) => [i.categoria, i.impacto, i.resumo]), [['texto', 'info', 'rótulos mudaram: a: A → Á']]);
+});

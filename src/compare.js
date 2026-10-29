@@ -94,8 +94,10 @@ function resumoPropriedade(prop, antes, depois) {
     const rem = [...a].filter((v) => !b.has(v));
     return [add.length && `valores novos: ${add.join(', ')}`, rem.length && `valores removidos: ${rem.join(', ')}`].filter(Boolean).join(' · ') || 'ordem dos valores mudou';
   }
-  if (antes === undefined) return `${nome} definido: ${curto(depois)}`;
-  if (depois === undefined) return `${nome} removido (era ${curto(antes)})`;
+  if (prop === 'enum' && antes === undefined) return `passou a aceitar só: ${curto(depois.join(', '))}`;
+  if (prop === 'enum' && depois === undefined) return `deixou de limitar os valores (eram ${curto(antes.join(', '))})`;
+  if (antes === undefined) return `passou a ter ${nome}: ${curto(depois)}`;
+  if (depois === undefined) return `deixou de ter ${nome} (era ${curto(antes)})`;
   return `${nome}: ${curto(antes)} → ${curto(depois)}`;
 }
 
@@ -175,6 +177,10 @@ function compararCampos(itens, mapaA, mapaB, { categoria, prefixo, lado }) {
     const props = new Set([...Object.keys(a), ...Object.keys(b)]);
     for (const prop of props) {
       if (IGNORAR.has(prop) || igual(a[prop], b[prop])) continue;
+      if (prop === 'rotulos') {
+        compararRotulos(itens, a.rotulos, b.rotulos, { categoria, local, lado });
+        continue;
+      }
       const cat = TEXTO.has(prop) ? 'texto' : EXEMPLO.has(prop) ? 'exemplo' : categoria;
       itens.push({ categoria: cat, impacto: impactoPropriedade(prop, a[prop], b[prop], lado), local, mudanca: 'alterado', propriedade: prop, antes: a[prop], depois: b[prop], resumo: resumoPropriedade(prop, a[prop], b[prop]) });
     }
@@ -183,6 +189,29 @@ function compararCampos(itens, mapaA, mapaB, { categoria, prefixo, lado }) {
     if (mapaA.has(campo)) continue;
     const impacto = lado === 'entrada' ? (b.obrigatorio ? 'quebra' : 'atencao') : 'atencao';
     itens.push({ categoria, impacto, local: `${prefixo}${campo}`, mudanca: 'adicionado', depois: b, resumo: `campo novo${b.obrigatorio ? ' obrigatório' : ' opcional'}` });
+  }
+}
+
+const listaRotulos = (r) => Object.entries(r).map(([v, t]) => (t ? `${v} = ${t}` : v)).join(', ');
+
+/**
+ * Enum documentado com oneOf + const/title. As chaves são os valores (já comparados como enum);
+ * aqui só entram os títulos, que são texto.
+ */
+function compararRotulos(itens, ra, rb, { categoria, local, lado }) {
+  if (!ra || !rb) {
+    const r = rb || ra;
+    itens.push({ categoria: 'texto', impacto: 'info', local, mudanca: 'alterado', propriedade: 'rotulos', antes: ra, depois: rb,
+      resumo: `${rb ? 'passou a documentar' : 'deixou de documentar'} os valores: ${curto(listaRotulos(r), 120)}` });
+    return;
+  }
+  const ka = Object.keys(ra);
+  const kb = Object.keys(rb);
+  if (!igual([...ka].sort(), [...kb].sort())) return; // valores mudaram: já sai no item de enum (contrato)
+  const mudados = ka.filter((k) => ra[k] !== rb[k]);
+  if (mudados.length) {
+    itens.push({ categoria: 'texto', impacto: 'info', local, mudanca: 'alterado', propriedade: 'rotulos', antes: ra, depois: rb,
+      resumo: `rótulos mudaram: ${curto(mudados.map((k) => `${k}: ${ra[k] || '—'} → ${rb[k] || '—'}`).join(' · '), 160)}` });
   }
 }
 

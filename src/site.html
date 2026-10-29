@@ -209,6 +209,9 @@
     .item .res { grid-column: 2; }
     .antes-depois { grid-template-columns: 1fr; }
   }
+.leitura { margin: 8px 0 2px; font-size: 12px; color: var(--text-2); }
+.leitura b { color: var(--text); font-weight: 600; }
+.onde { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--surface-2); border: 1px solid var(--line, rgba(127,127,127,.25)); color: var(--text-2); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -526,7 +529,9 @@ function itemHtml(i, v) {
   const blocos = mostraBlocos
     ? `<div class="antes-depois"><div class="a"><div class="lbl">${v.colA}</div><pre>${i.antes === undefined ? '—' : esc(json(i.antes))}</pre></div><div class="b"><div class="lbl">${v.colB}</div><pre>${i.depois === undefined ? '—' : esc(json(i.depois))}</pre></div></div>`
     : '';
-  return `<div class="item"><span class="ic i-${i.impacto}" title="${IMPS.find((x) => x.id === i.impacto)?.t}"></span><span class="loc">${esc(i.local)}</span><div class="res">${res}${blocos}</div></div>`;
+  const lado = !mostraBlocos && i.mudanca === 'alterado' && (i.antes === undefined) !== (i.depois === undefined)
+    ? ` <span class="onde">só em ${i.antes === undefined ? v.colB : v.colA}</span>` : '';
+  return `<div class="item"><span class="ic i-${i.impacto}" title="${IMPS.find((x) => x.id === i.impacto)?.t}"></span><span class="loc">${esc(i.local)}</span><div class="res">${res}${lado}${blocos}</div></div>`;
 }
 
 async function abrirDetalhe(li, o) {
@@ -548,7 +553,7 @@ async function abrirDetalhe(li, o) {
     }
     const itens = d.itens.filter((i) => (!f.impacto || i.impacto === f.impacto) && (!f.categoria || i.categoria === f.categoria));
     const outros = d.itens.length - itens.length;
-    box.innerHTML = CATS.map((c) => {
+    box.innerHTML = `<p class="leitura">Leitura: <b>${v.colA}</b> → <b>${v.colB}</b>. O que está à esquerda da seta é ${v.colA.toLowerCase()}; à direita, ${v.colB.toLowerCase()}.</p>` + CATS.map((c) => {
       const doGrupo = itens.filter((i) => i.categoria === c.id);
       return doGrupo.length ? `<div class="grupo"><h4>${c.t} <span class="mini">${doGrupo.length}</span></h4><div class="itens">${doGrupo.map((i) => itemHtml(i, v)).join('')}</div></div>` : '';
     }).join('') + (outros ? `<p class="muted" style="margin:10px 0 0;font-size:12.5px">+ ${plural(outros, 'diferença escondida', 'diferenças escondidas')} pelos filtros.</p>` : '');
