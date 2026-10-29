@@ -23,6 +23,7 @@ import {
   shortenRefs,
 } from './openapi.js';
 import { deriveTestScenarios, examplePayload, testContext } from './testing.js';
+import { compareApis, compareOperation } from './compare.js';
 
 // ---------------------------------------------------------------------------
 // Helpers de resposta
@@ -83,7 +84,7 @@ const VARIANTE = z.number().int().min(0).optional().describe('Índice da variant
 
 const fitsResponse = (value) => JSON.stringify(value, null, 2).length <= MAX_RESPONSE_CHARS || JSON.stringify(value).length <= MAX_RESPONSE_CHARS;
 
-const API_ID = z.string().describe('Id retornado por list_apis (nome do arquivo em specs/ sem .json)');
+const API_ID = z.string().describe('Id retornado por list_apis, ex.: "rhnet-hml" (homologação) ou "rhnet-prd" (produção)');
 const OPERATION_PARAMS = {
   apiId: API_ID,
   method: z.string().describe('Método HTTP, ex.: "POST"'),
@@ -114,7 +115,8 @@ export function buildMcpServer() {
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
       instructions:
-        'Servidor com as specs OpenAPI das APIs do time, voltado a documentação e criação de casos de teste. ' +
+        'Servidor com a spec OpenAPI do RH Net em dois ambientes: rhnet-hml (homologação) e rhnet-prd (produção). ' +
+        'Voltado a documentação e criação de casos de teste. Para diferenças entre ambientes use compare_apis. ' +
         'Fluxo sugerido: list_apis -> list_operations -> get_operation_test_context -> suggest_test_scenarios -> generate_example_payload. ' +
         'Os cenários sugeridos vêm só da spec: complemente com regras de negócio e aponte as lacunas encontradas.',
     }
@@ -270,6 +272,50 @@ export function buildMcpServer() {
         }
         return toolText({ name: schemaName, schema: shortenRefs(schema) });
       })
+  );
+
+  server.registerTool(
+    'compare_apis',
+    {
+      title: 'Comparar ambientes',
+      description:
+        'Compara duas APIs/ambientes (ex.: apiIdA "rhnet-hml" × apiIdB "rhnet-prd"). Sem method/path: lista operações e schemas que existem só em A, só em B ou que diferem. ' +
+        'Com method e path: diferença campo a campo da operação (parâmetros, corpo, respostas), paginada.',
+      inputSchema: {
+        apiIdA: API_ID,
+        apiIdB: API_ID,
+        method: z.string().optional().describe('Método HTTP da operação a comparar'),
+        path: z.string().optional().describe('Caminho da operação a comparar'),
+        incluirDescricoes: z.boolean().optional().describe('Considerar também diferenças em descrições (padrão: não)'),
+        ...PAGE_PARAMS,
+      },
+      annotations: readOnly,
+    },
+    async ({ apiIdA, apiIdB, method, path: opPath, incluirDescricoes, page, pageSize }) =>
+      withSpec(apiIdA, (specA) =>
+        withSpec(apiIdB, (specB) => {
+          if (!method || !opPath) {
+            const r = { a: apiIdA, b: apiIdB, ...compareApis(specA, specB) };
+            if (fitsResponse(r)) return toolText(r);
+            return toolText({
+              a: apiIdA,
+              b: apiIdB,
+              operacoes: r.operacoes,
+              schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
+              aviso: 'Lista de schemas omitida por tamanho; compare uma operação com method/path para ver o detalhe.',
+            });
+          }
+          const r = compareOperation(specA, specB, method, opPath, { incluirDescricoes });
+          if (!r.existeEmA || !r.existeEmB || r.iguais) return toolText({ a: apiIdA, b: apiIdB, ...r });
+          const { soEmA, soEmB, diferentes, ...header } = r;
+          const itens = [
+            ...soEmA.map((i) => ({ situacao: `só em ${apiIdA}`, ...i })),
+            ...soEmB.map((i) => ({ situacao: `só em ${apiIdB}`, ...i })),
+            ...diferentes.map((i) => ({ situacao: 'diferente', ...i })),
+          ];
+          return toolText(paginateFitting(itens, page || 1, pageSize || 40, (slice, meta) => ({ a: apiIdA, b: apiIdB, ...header, ...meta, diferencas: slice })));
+        })
+      )
   );
 
   server.registerTool(

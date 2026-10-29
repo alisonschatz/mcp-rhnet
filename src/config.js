@@ -34,17 +34,39 @@ export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_MATCHES_PER_API = 5;
 
 export const SERVER_NAME = 'mcp-rhnet';
-export const SERVER_VERSION = '2.2.0';
+export const SERVER_VERSION = '2.3.0';
 
 // ---------------------------------------------------------------------------
 // Atualização da spec
 // ---------------------------------------------------------------------------
 
-/** Link do JSON da spec do RH Net (só abre na VPN). A página abre este link. */
-export const RHNET_SPEC_URL = process.env.RHNET_SPEC_URL || 'https://api-rhnet-hml.sci.com.br/docs?api-docs.json';
+/**
+ * Ambientes do RH Net. Cada um vira uma API no MCP (o id é o apiId usado pela IA).
+ * - manual: a spec só abre na VPN, então é enviada pela página (arquivo JSON).
+ * - automatico: a spec é pública; o servidor baixa sozinho de tempos em tempos.
+ * storeKey: nome usado no armazenamento (mantém as versões já enviadas quando o id muda).
+ */
+export const APIS = {
+  'rhnet-hml': {
+    nome: 'Homologação',
+    specUrl: process.env.RHNET_HML_SPEC_URL || 'https://api-rhnet-hml.sci.com.br/docs?api-docs.json',
+    modo: 'manual',
+    storeKey: 'rhnet',
+  },
+  'rhnet-prd': {
+    nome: 'Produção',
+    specUrl: process.env.RHNET_PRD_SPEC_URL || 'https://api2.rhnetsocial.com.br/docs?api-docs.json',
+    modo: 'automatico',
+    storeKey: 'rhnet-prd',
+  },
+};
 
 /** APIs que podem ser atualizadas pela página. */
-export const UPDATABLE_APIS = ['rhnet'];
+export const UPDATABLE_APIS = Object.keys(APIS);
+
+/** De quanto em quanto tempo (minutos) as APIs automáticas são conferidas. 0 desliga. */
+export const SPEC_AUTO_UPDATE_MINUTES = Number(process.env.SPEC_AUTO_UPDATE_MINUTES ?? 60);
+export const SPEC_FETCH_TIMEOUT_MS = Number(process.env.SPEC_FETCH_TIMEOUT_MS || 20000);
 
 /** Quantas versões anteriores manter para restaurar. */
 export const SPEC_HISTORY_LIMIT = Math.max(1, Number(process.env.SPEC_HISTORY_LIMIT || 10));

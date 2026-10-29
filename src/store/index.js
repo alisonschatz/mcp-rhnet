@@ -1,4 +1,4 @@
-import { SPEC_SYNC_SECONDS, SPECS_DIR, UPDATABLE_APIS } from '../config.js';
+import { APIS, SPEC_SYNC_SECONDS, SPECS_DIR, UPDATABLE_APIS } from '../config.js';
 import { setSpecOverride } from '../specs.js';
 import { createBlobStore } from './blob-store.js';
 import { createFsStore } from './fs-store.js';
@@ -44,7 +44,7 @@ async function init() {
   const creds = findBlobCredentials();
   if (creds) {
     const sdk = await import('@vercel/blob');
-    store = createBlobStore({ client: withCredentials(sdk, creds.opts) });
+    store = createBlobStore({ client: withCredentials(sdk, creds.opts), keyFor: (id) => APIS[id]?.storeKey || id });
     store.descricao = `Vercel Blob (privado · ${creds.origem})`;
   } else if (process.env.VERCEL) {
     // Só os nomes (nunca os valores) para ajudar a diagnosticar.

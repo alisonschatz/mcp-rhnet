@@ -15,9 +15,10 @@ async function streamToText(stream) {
   return new Response(stream).text();
 }
 
-export function createBlobStore({ client }) {
-  const pointerPath = (apiId) => `${apiId}/atual.json`;
-  const versionPrefix = (apiId) => `${apiId}/versoes/`;
+export function createBlobStore({ client, keyFor = (apiId) => apiId }) {
+  // keyFor: pasta de cada API no Blob (permite renomear o apiId sem perder as versões guardadas).
+  const pointerPath = (apiId) => `${keyFor(apiId)}/atual.json`;
+  const versionPrefix = (apiId) => `${keyFor(apiId)}/versoes/`;
   const putOpts = { access: 'private', contentType: 'application/json', addRandomSuffix: false };
 
   async function readText(pathname, opts = {}) {
@@ -103,6 +104,7 @@ export function createBlobStore({ client }) {
       } catch {
         return null;
       }
+      state.meta = meta;
       if (!meta.versao || meta.versao === state.versao) return null;
       const v = await readText(meta.versao);
       if (!v?.text) return null;

@@ -1,14 +1,15 @@
 import zlib from 'node:zlib';
-import { SPEC_HISTORY_LIMIT, UPDATABLE_APIS } from './config.js';
+import { APIS, SPEC_AUTO_UPDATE_MINUTES, SPEC_FETCH_TIMEOUT_MS, SPEC_HISTORY_LIMIT, UPDATABLE_APIS } from './config.js';
 import { compareSpecs, diffCounts, summarize } from './spec-diff.js';
 import { loadSpec } from './specs.js';
-import { getStore, markSynced, storageInfo } from './store/index.js';
+import { getStore, markSynced, storageInfo, syncSpecs } from './store/index.js';
 import { validateSpec } from './validate.js';
 
 export { compareSpecs } from './spec-diff.js';
 
 /**
- * Atualização da spec com o arquivo enviado pela página.
+ * Atualização da spec: arquivo enviado pela página (homologação, que só abre na VPN) ou
+ * download pelo servidor (produção, pública — automático a cada SPEC_AUTO_UPDATE_MINUTES).
  * Fluxo: parse → valida → compara com a atual → grava no store (Vercel Blob ou disco),
  * guardando a anterior. Uma spec inválida nunca substitui a atual, e o MCP passa a usar
  * a versão nova sem reiniciar.
@@ -61,10 +62,16 @@ export async function specStatus(apiId) {
   const store = await getStore();
   const meta = store ? await store.readMeta(apiId) : { eventos: [] };
   const cur = await currentVersion(store, apiId);
+  const cfg = APIS[apiId];
   return {
     apiId,
+    nome: cfg.nome,
+    modo: cfg.modo,
+    specUrl: cfg.specUrl,
     atual: cur ? { ...summarize(cur.spec, cur.text), doBuild: Boolean(cur.doBuild) } : null,
     atualizadaEm: meta.ultimaAtualizacao || null,
+    verificadaEm: meta.ultimaVerificacao || null,
+    ultimoErro: meta.ultimoErro || null,
     armazenamento: await storageInfo(),
     eventos: (meta.eventos || []).filter((e) => e.tipo === 'atualizado'),
     backups: store ? await store.listBackups(apiId) : [],
@@ -81,7 +88,7 @@ async function exclusive(apiId, fn) {
   }
 }
 
-async function apply(store, apiId, spec, text, origem) {
+async function apply(store, apiId, spec, text, origem, { verificacao = false } = {}) {
   const { errors } = validateSpec(spec);
   const nova = summarize(spec, text);
   const cur = await currentVersion(store, apiId);
@@ -91,12 +98,24 @@ async function apply(store, apiId, spec, text, origem) {
 
   if (errors.length) return { ...base, status: 'invalida', mensagem: 'Spec inválida. Nada foi alterado.' };
   // Mesmo conteúdo: não grava. Exceção: a atual ainda é a do build e o store está vazio.
-  if (anterior?.hash === nova.hash && !cur?.doBuild) return { ...base, status: 'sem-mudancas', mensagem: 'Já estava atualizada.' };
+  if (anterior?.hash === nova.hash && !cur?.doBuild) {
+    if (verificacao) {
+      const meta = await store.readMeta(apiId);
+      meta.ultimaVerificacao = new Date().toISOString();
+      delete meta.ultimoErro;
+      await store.writeMeta(apiId, meta);
+    }
+    return { ...base, status: 'sem-mudancas', mensagem: 'Já estava atualizada.' };
+  }
 
   const { backup, versao } = await store.saveVersion(apiId, `${JSON.stringify(spec, null, 4)}\n`, { stamp: stamp(), hash: nova.hash });
   const agora = new Date().toISOString();
   const meta = await store.readMeta(apiId);
   meta.ultimaAtualizacao = agora;
+  if (verificacao) {
+    meta.ultimaVerificacao = agora;
+    delete meta.ultimoErro;
+  }
   if (versao) meta.versao = versao;
   meta.eventos = [{ data: agora, tipo: 'atualizado', origem, hash: nova.hash, backup, resumo: diffCounts(diff) }, ...(meta.eventos || [])].slice(0, MAX_EVENTS);
   await store.writeMeta(apiId, meta);
@@ -144,4 +163,70 @@ export function restoreBackup(apiId, arquivo) {
 export async function listBackups(apiId) {
   const store = await getStore();
   return store ? store.listBackups(apiId) : [];
+}
+
+// ---------------------------------------------------------------------------
+// Download pelo servidor (APIs com spec pública)
+// ---------------------------------------------------------------------------
+
+async function download(url) {
+  let res;
+  try {
+    res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(SPEC_FETCH_TIMEOUT_MS) });
+  } catch (e) {
+    throw new UpdateError(`Não foi possível baixar a spec (${e.cause?.code || e.name}).`);
+  }
+  if (!res.ok) throw new UpdateError(`A spec respondeu ${res.status}.`);
+  const text = await res.text();
+  const spec = tryParseSpec(text);
+  if (!spec) throw new UpdateError('O link não devolveu uma spec OpenAPI em JSON.');
+  return { spec, text };
+}
+
+/** Baixa a spec do link configurado e aplica se mudou. */
+export function updateFromUrl(apiId, { origem = 'automático' } = {}) {
+  checkApi(apiId);
+  return exclusive(apiId, async () => {
+    const store = await writableStore();
+    try {
+      const { spec, text } = await download(APIS[apiId].specUrl);
+      return await apply(store, apiId, spec, text, origem, { verificacao: true });
+    } catch (e) {
+      const meta = await store.readMeta(apiId);
+      meta.ultimaVerificacao = new Date().toISOString();
+      meta.ultimoErro = e.message;
+      await store.writeMeta(apiId, meta);
+      throw e;
+    }
+  });
+}
+
+const lastAutoCheck = new Map();
+
+/**
+ * Chamado antes de cada uso (MCP e página): sincroniza a versão guardada e, para as APIs
+ * automáticas, baixa a spec de novo se a última verificação passou do intervalo.
+ * Falhas não interrompem o MCP: a versão atual continua valendo.
+ */
+export async function ensureFresh() {
+  await syncSpecs();
+  if (!(SPEC_AUTO_UPDATE_MINUTES > 0)) return;
+  const store = await getStore();
+  if (!store) return;
+  const intervalo = SPEC_AUTO_UPDATE_MINUTES * 60_000;
+  const automaticas = UPDATABLE_APIS.filter((id) => APIS[id].modo === 'automatico');
+  await Promise.all(
+    automaticas.map(async (apiId) => {
+      if (Date.now() - (lastAutoCheck.get(apiId) || 0) < intervalo) return;
+      lastAutoCheck.set(apiId, Date.now());
+      const ultima = Date.parse((await store.readMeta(apiId)).ultimaVerificacao || '') || 0;
+      if (Date.now() - ultima < intervalo && loadSpec(apiId).spec) return lastAutoCheck.set(apiId, ultima);
+      try {
+        const r = await updateFromUrl(apiId);
+        if (r.status === 'atualizada') console.log(`[spec] ${apiId} atualizada automaticamente`);
+      } catch (e) {
+        console.error(`[spec] ${apiId}: ${e.message}`);
+      }
+    })
+  );
 }

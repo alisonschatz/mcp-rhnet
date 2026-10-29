@@ -52,8 +52,8 @@ test('JSON inválido -> erro de parse JSON-RPC', async () => {
 
 test('só existem / e /mcp: /mcp/health não existe mais', async () => {
   assert.equal((await fetch(`${base}/mcp/health`)).status, 404);
-  const st = await (await fetch(`${base}/api/rhnet/status`)).json();
-  assert.equal(st.atual.operacoes, 135);
+  const st = await (await fetch(`${base}/api/status`)).json();
+  assert.equal(st.apis.find((a) => a.apiId === 'rhnet-hml').atual.operacoes, 135);
   assert.match(st.versaoServidor, /^\d+\.\d+\.\d+$/);
 });
 
@@ -61,8 +61,8 @@ test('cliente MCP real via HTTP lê as specs do bundle', async () => {
   const client = new Client({ name: 'teste-http', version: '1.0.0' });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
   const r = await client.callTool({ name: 'list_apis', arguments: {} });
-  assert.ok(JSON.parse(r.content[0].text).apis.some((a) => a.id === 'rhnet'));
-  const cenarios = await client.callTool({ name: 'suggest_test_scenarios', arguments: { apiId: 'rhnet', method: 'POST', path: '/api/v1/bancos' } });
+  assert.ok(JSON.parse(r.content[0].text).apis.some((a) => a.id === 'rhnet-hml'));
+  const cenarios = await client.callTool({ name: 'suggest_test_scenarios', arguments: { apiId: 'rhnet-hml', method: 'POST', path: '/api/v1/bancos' } });
   assert.equal(JSON.parse(cenarios.content[0].text).statusSucesso, '201');
   await client.close();
 });

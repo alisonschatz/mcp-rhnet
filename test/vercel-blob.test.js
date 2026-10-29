@@ -1,6 +1,7 @@
 // Simula o deploy na Vercel com Vercel Blob (cliente em memória).
 process.env.VERCEL = '1';
 process.env.SPEC_SYNC_SECONDS = '0';
+process.env.SPEC_AUTO_UPDATE_MINUTES = '0';
 
 const { test, before, after } = await import('node:test');
 const assert = (await import('node:assert/strict')).default;
@@ -68,11 +69,11 @@ async function mcpCall(name, args) {
   return r.isError ? r.content[0].text : JSON.parse(r.content[0].text);
 }
 
-const specAtual = async () => (await fetch(`${base}/api/rhnet/status`)).json();
+const specAtual = async () => (await (await fetch(`${base}/api/status`)).json()).apis.find((a) => a.apiId === 'rhnet-hml');
 
 test('página em /', async () => {
   const html = await (await fetch(`${base}/`)).text();
-  assert.match(html, /Abrir spec do RH Net/);
+  assert.match(html, /Homologação/);
   assert.equal((await fetch(`${base}/favorito.js`)).status, 404);
 });
 
@@ -85,44 +86,44 @@ test('começa com a spec do deploy e busca pelo navegador', async () => {
 
 test('envio do arquivo (gzip) → MCP já usa a versão nova', async () => {
   const { default: bundle } = await import('../src/specs.bundle.js');
-  const nova = structuredClone(bundle.rhnet);
+  const nova = structuredClone(bundle['rhnet-hml']);
   nova.paths['/api/v1/teste-novo'] = { get: { summary: 'Novo', tags: ['Novo'], responses: { 200: { description: 'ok' }, 400: { description: 'erro' } } } };
-  const r = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/gzip', 'x-arquivo': encodeURIComponent('docs.json') }, body: zlib.gzipSync(JSON.stringify(nova)) });
+  const r = await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/gzip', 'x-arquivo': encodeURIComponent('docs.json') }, body: zlib.gzipSync(JSON.stringify(nova)) });
   const upd = await r.json();
   assert.equal(upd.status, 'atualizada');
   assert.deepEqual(upd.diff.operacoes.adicionadas, ['GET /api/v1/teste-novo']);
-  assert.equal((await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' })).totalItems, 1);
+  assert.equal((await mcpCall('list_operations', { apiId: 'rhnet-hml', tag: 'Novo' })).totalItems, 1);
 
   const st = await specAtual();
   assert.equal(st.atual.operacoes, 136);
   assert.ok(st.atualizadaEm);
   assert.equal(st.eventos[0].origem, 'docs.json');
 
-  const denovo = await (await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nova) })).json();
+  const denovo = await (await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nova) })).json();
   assert.equal(denovo.status, 'sem-mudancas');
 });
 
 test('outra instância (cache vazio) enxerga a versão do Blob', async () => {
   const { setSpecOverride } = await import('../src/specs.js');
   const { default: bundle } = await import('../src/specs.bundle.js');
-  setSpecOverride('rhnet', bundle.rhnet); // simula instância que só tem a spec do build
+  setSpecOverride('rhnet-hml', bundle['rhnet-hml']); // simula instância que só tem a spec do build
   useStore(createBlobStore({ client }));
-  const ops = await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' });
+  const ops = await mcpCall('list_operations', { apiId: 'rhnet-hml', tag: 'Novo' });
   assert.equal(ops.totalItems, 1);
 });
 
 test('restaurar a versão anterior e enviar conteúdo inválido', async () => {
   const { default: bundle } = await import('../src/specs.bundle.js');
-  const v2 = structuredClone(bundle.rhnet);
+  const v2 = structuredClone(bundle['rhnet-hml']);
   v2.info.version = '2.0.0';
-  await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: JSON.stringify(v2) });
+  await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: JSON.stringify(v2) });
   const st = await specAtual();
   assert.equal(st.backups.length, 1);
-  const r = await (await fetch(`${base}/api/rhnet/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) })).json();
+  const r = await (await fetch(`${base}/api/rhnet-hml/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) })).json();
   assert.equal(r.status, 'atualizada');
-  assert.equal((await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' })).totalItems, 1);
+  assert.equal((await mcpCall('list_operations', { apiId: 'rhnet-hml', tag: 'Novo' })).totalItems, 1);
 
-  const ruim = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: '<html>login</html>' });
+  const ruim = await fetch(`${base}/api/rhnet-hml/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: '<html>login</html>' });
   assert.equal(ruim.status, 400);
 });
 

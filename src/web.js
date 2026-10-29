@@ -3,7 +3,7 @@ import express from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { buildMcpServer } from './mcp.js';
 import { mountSiteRoutes } from './site.js';
-import { syncSpecs } from './store/index.js';
+import { ensureFresh } from './updater.js';
 
 const jsonRpcError = (res, status, code, message) => res.status(status).json({ jsonrpc: '2.0', error: { code, message }, id: null });
 
@@ -41,7 +41,7 @@ export function mountMcpRoutes(app, { siteFiles } = {}) {
       server.close().catch(() => {});
     });
     try {
-      await syncSpecs(); // com Vercel Blob, pega a versão mais recente da spec
+      await ensureFresh(); // versão mais recente guardada + atualização automática da produção
       await server.connect(transport);
       await transport.handleRequest(req, res, req.body);
     } catch (error) {

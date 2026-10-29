@@ -7,100 +7,126 @@
 <style>
   :root {
     --bg: #f5f6f8; --card: #fff; --text: #1b2130; --muted: #6b7385; --line: #e5e7ec;
-    --accent: #1f6feb; --on-accent: #fff; --ok: #12805c; --ok-bg: #e8f6ef; --err: #c0362c; --err-bg: #fdeceb;
+    --accent: #1f6feb; --ok: #12805c; --ok-bg: #e8f6ef; --err: #c0362c; --err-bg: #fdeceb;
     --chg: #9a6700; --chg-bg: #fff4d6; --soft: #f1f3f6;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0e1117; --card: #161b22; --text: #e6e8ec; --muted: #949cab; --line: #272e39;
-      --accent: #4c8dff; --on-accent: #0b0e13; --ok: #3ccf91; --ok-bg: #12291f; --err: #ff7b72; --err-bg: #2d1615;
+      --accent: #4c8dff; --ok: #3ccf91; --ok-bg: #12291f; --err: #ff7b72; --err-bg: #2d1615;
       --chg: #e3b341; --chg-bg: #2b2412; --soft: #1d232c;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+  main { max-width: 880px; margin: 0 auto; padding: 32px 16px 56px; }
   h1 { font-size: 22px; margin: 0 0 6px; }
-  h2 { font-size: 12px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 16px; }
+  h2 { font-size: 16px; margin: 0; }
+  h3 { font-size: 12px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  a { color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 16px; min-width: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .grid .card { margin-top: 0; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+  .tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
   .conector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
   code { font: 13px ui-monospace, Consolas, monospace; background: var(--soft); padding: 3px 7px; border-radius: 6px; color: var(--text); overflow-wrap: anywhere; }
   button, .btn { font: inherit; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  button:hover, .btn:hover { border-color: var(--accent); }
   button:disabled { opacity: .5; cursor: default; }
-  a { color: var(--accent); }
   .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 500; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .stat .v { font-size: 22px; font-weight: 600; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat .v { font-size: 20px; font-weight: 600; white-space: nowrap; }
   .stat .l { font-size: 12px; color: var(--muted); }
-  ol { margin: 0; padding-left: 20px; }
-  ol li { margin: 0 0 10px; padding-left: 4px; }
-  ol li:last-child { margin-bottom: 0; }
-  .drop { display: block; margin-top: 16px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 28px 14px; text-align: center; color: var(--muted); font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .acoes { margin-top: 16px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 14px; }
+  .info { font-size: 13px; color: var(--muted); margin-top: 12px; }
+  ol.info { padding-left: 18px; margin: 14px 0 0; }
+  .drop { display: block; margin-top: 12px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 18px 12px; text-align: center; color: var(--muted); font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
   .drop strong { color: var(--text); font-weight: 600; }
   .drop:hover, .drop.over { border-color: var(--accent); background: var(--soft); }
-  .drop.busy { pointer-events: none; opacity: .6; }
+  .busy { pointer-events: none; opacity: .6; }
   .fake-link { color: var(--accent); }
   kbd { font: 12px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; background: var(--card); }
-  .msg { margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+  .msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
   .msg.ok { background: var(--ok-bg); color: var(--ok); }
   .msg.err { background: var(--err-bg); color: var(--err); }
-  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+  .msg.neutral { background: var(--soft); color: var(--text); }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-right: 4px; white-space: nowrap; }
   .add { background: var(--ok-bg); color: var(--ok); } .del { background: var(--err-bg); color: var(--err); } .chg { background: var(--chg-bg); color: var(--chg); }
+  .cmp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
+  .cmp details { background: var(--soft); border-radius: 8px; padding: 10px 12px; }
+  .cmp summary { cursor: pointer; font-size: 14px; list-style: none; }
+  .cmp summary::-webkit-details-marker { display: none; }
+  .cmp .n { font-size: 20px; font-weight: 600; display: block; }
+  .cmp ul { margin: 8px 0 0; padding: 0; list-style: none; font: 12px ui-monospace, Consolas, monospace; max-height: 220px; overflow: auto; }
+  .cmp li { padding: 3px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   td { padding: 9px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
   tr:first-child td { border-top: 0; }
   td.r { text-align: right; white-space: nowrap; }
   .muted { color: var(--muted); }
+  details.rest { margin-top: 14px; }
+  details.rest summary { cursor: pointer; color: var(--muted); font-size: 14px; }
   .online { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
   .online::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
   .online:empty { display: none; }
   .online.off::before { background: var(--err); }
-  details { margin-top: 14px; }
-  summary { cursor: pointer; color: var(--muted); font-size: 14px; }
-  @media (max-width: 520px) { .stats { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 720px) { .grid, .cmp { grid-template-columns: 1fr; } td.origem { display: none; } }
 </style>
 </head>
 <body>
 <main>
   <h1>MCP RH Net</h1>
   <div class="conector">Conector: <code id="mcpUrl"></code><button class="link" id="copiar">Copiar</button><span class="online" id="online"></span></div>
+  <div id="aviso"></div>
+
+  <div class="grid">
+    <section class="card" id="card-rhnet-hml">
+      <div class="head"><h2>Homologação</h2><span class="tag">rhnet-hml · manual</span></div>
+      <div class="stats" data-stats></div>
+      <ol class="info">
+        <li>Com a VPN ligada, <a data-spec target="_blank" rel="noopener">abra a spec ↗</a></li>
+        <li>Salve com <kbd>Ctrl</kbd>+<kbd>S</kbd> e envie o arquivo:</li>
+      </ol>
+      <label class="drop" id="drop" for="arquivo">
+        <strong>Arraste o arquivo aqui</strong> ou <span class="fake-link">clique para selecionar</span>
+        <input type="file" id="arquivo" hidden>
+      </label>
+      <div data-resultado></div>
+    </section>
+
+    <section class="card" id="card-rhnet-prd">
+      <div class="head"><h2>Produção</h2><span class="tag">rhnet-prd · automático</span></div>
+      <div class="stats" data-stats></div>
+      <div class="info" data-verificada></div>
+      <div class="acoes">
+        <button id="btnPrd">Atualizar agora</button>
+        <a data-spec target="_blank" rel="noopener">Abrir spec ↗</a>
+      </div>
+      <div data-resultado></div>
+    </section>
+  </div>
 
   <section class="card">
-    <h2>Spec em uso</h2>
-    <div class="stats">
-      <div class="stat"><div class="v" id="ops">—</div><div class="l">operações</div></div>
-      <div class="stat"><div class="v" id="schemas">—</div><div class="l">schemas</div></div>
-      <div class="stat"><div class="v" id="quando">—</div><div class="l">atualizada em</div></div>
-    </div>
-    <div id="aviso"></div>
+    <h3>Homologação × Produção</h3>
+    <div id="comparacao" class="muted">—</div>
   </section>
 
   <section class="card">
-    <h2>Atualizar</h2>
-    <ol>
-      <li>Com a VPN ligada, <a class="btn" id="specLink" target="_blank" rel="noopener">Abrir spec do RH Net ↗</a></li>
-      <li>Salve o arquivo com <kbd>Ctrl</kbd>+<kbd>S</kbd>.</li>
-      <li>Envie o arquivo:</li>
-    </ol>
-    <label class="drop" id="drop" for="arquivo">
-      <strong>Arraste o arquivo aqui</strong> ou <span class="fake-link">clique para selecionar</span>
-      <input type="file" id="arquivo" hidden>
-    </label>
-    <div id="resultado"></div>
-  </section>
-
-  <section class="card">
-    <h2>Histórico</h2>
+    <h3>Histórico</h3>
     <table><tbody id="eventos"></tbody></table>
-    <details><summary>Restaurar versão anterior</summary><table><tbody id="backups"></tbody></table></details>
+    <details class="rest"><summary>Restaurar versão anterior</summary><table><tbody id="backups"></tbody></table></details>
   </section>
 </main>
 <script>
-const API = 'rhnet';
+const HML = 'rhnet-hml', PRD = 'rhnet-prd';
+const NOMES = { [HML]: 'Homologação', [PRD]: 'Produção' };
 const $ = (id) => document.getElementById(id);
-const drop = document.getElementById('drop');
+const card = (apiId) => $('card-' + apiId);
+const q = (apiId, sel) => card(apiId).querySelector(sel);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const data = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
+const dia = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : '—');
 const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB');
 
 $('mcpUrl').textContent = location.origin + '/mcp';
@@ -114,49 +140,80 @@ function mudancas(r) {
   if (o.adicionadas) p.push(`<span class="pill add">+${o.adicionadas} op</span>`);
   if (o.removidas) p.push(`<span class="pill del">−${o.removidas} op</span>`);
   if (o.alteradas) p.push(`<span class="pill chg">~${o.alteradas} op</span>`);
-  if (s.adicionados + s.removidos + s.alterados) p.push(`<span class="pill chg">${s.adicionados + s.removidos + s.alterados} schema</span>`);
+  const sc = s.adicionados + s.removidos + s.alterados;
+  if (sc) p.push(`<span class="pill chg">${sc} schema</span>`);
   return p.join('') || '<span class="muted">sem mudanças</span>';
 }
 
 async function api(path, opts) {
-  const r = await fetch('/api/' + API + path, opts);
+  const r = await fetch('/api' + path, opts);
   const body = await r.json().catch(() => ({ erro: 'Resposta inválida do servidor.' }));
   if (!r.ok) throw new Error(body.erro || 'Falha.');
   return body;
 }
 
-async function carregar() {
-  const st = await api('/status');
-  $('specLink').href = st.specUrl;
-  $('online').className = 'online';
-  $('online').textContent = `Online · v${st.versaoServidor}`;
-  $('ops').textContent = st.atual?.operacoes ?? '—';
-  $('schemas').textContent = st.atual?.schemas ?? '—';
-  $('quando').textContent = st.atualizadaEm ? data(st.atualizadaEm) : 'deploy';
-  $('aviso').innerHTML = st.armazenamento.gravavel ? '' : `<div class="msg err">${esc(st.armazenamento.motivo)}</div>`;
-  $('eventos').innerHTML = st.eventos.slice(0, 10).map((e) =>
-    `<tr><td>${data(e.data)}</td><td>${mudancas(e.resumo)}</td><td class="r muted">${esc(e.origem)}</td></tr>`).join('') ||
-    '<tr><td class="muted">Nenhuma atualização ainda.</td></tr>';
-  $('backups').innerHTML = st.backups.map((b) =>
-    `<tr><td>${data(b.salvoEm)}</td><td class="muted">${kb(b.tamanho)}</td><td class="r"><button data-arq="${esc(b.arquivo)}">Restaurar</button></td></tr>`).join('') ||
-    '<tr><td class="muted">Nenhuma versão anterior.</td></tr>';
-}
-
-function resultado(r) {
-  if (r.status === 'invalida') {
-    $('resultado').innerHTML = `<div class="msg err">${esc(r.mensagem)}<br>${r.erros.slice(0, 5).map(esc).join('<br>')}</div>`;
-  } else {
-    $('resultado').innerHTML = `<div class="msg ok">✔ ${esc(r.mensagem)} ${r.status === 'atualizada' ? mudancas(r.resumo) : ''}</div>`;
+function renderApi(st) {
+  const a = st.atual;
+  q(st.apiId, '[data-stats]').innerHTML =
+    `<div class="stat"><div class="v">${a?.operacoes ?? '—'}</div><div class="l">operações</div></div>` +
+    `<div class="stat"><div class="v">${a?.schemas ?? '—'}</div><div class="l">schemas</div></div>` +
+    `<div class="stat" title="${st.atualizadaEm ? data(st.atualizadaEm) : ''}"><div class="v">${st.atualizadaEm ? dia(st.atualizadaEm) : a ? 'deploy' : '—'}</div><div class="l">atualizada em</div></div>`;
+  card(st.apiId).querySelectorAll('[data-spec]').forEach((el) => (el.href = st.specUrl));
+  const v = q(st.apiId, '[data-verificada]');
+  if (v) {
+    v.innerHTML = st.ultimoErro
+      ? `<span style="color:var(--err)">Falha na última verificação (${data(st.verificadaEm)}): ${esc(st.ultimoErro)}</span>`
+      : `Confere sozinha a cada hora · última: ${data(st.verificadaEm)}`;
   }
 }
 
-async function acao(fn) {
-  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
-  drop.classList.add('busy');
-  $('resultado').innerHTML = '<div class="msg" style="background:var(--soft)">Enviando…</div>';
-  try { resultado(await fn()); }
-  catch (e) { $('resultado').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
-  finally { drop.classList.remove('busy'); document.querySelectorAll('button').forEach((b) => (b.disabled = false)); carregar().catch(() => {}); }
+async function carregarComparacao() {
+  try {
+    const d = await api(`/comparar?a=${HML}&b=${PRD}`);
+    const bloco = (titulo, cls, ops) =>
+      `<details><summary><span class="n">${ops.length}</span><span class="pill ${cls}">${titulo}</span></summary>${ops.length ? `<ul>${ops.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>` : ''}</details>`;
+    $('comparacao').className = '';
+    $('comparacao').innerHTML = d.totalDiferencas === 0
+      ? '<div class="msg ok" style="margin:0">✔ As duas specs são iguais.</div>'
+      : `<div class="cmp">${bloco('só em homologação', 'add', d.operacoes.soEmA)}${bloco('só em produção', 'del', d.operacoes.soEmB)}${bloco('diferentes', 'chg', d.operacoes.diferentes)}</div>
+         <div class="info">Operações. Detalhe campo a campo pela IA: <i>“compare POST /api/v1/… entre rhnet-hml e rhnet-prd”</i>.</div>`;
+  } catch (e) {
+    $('comparacao').className = 'muted';
+    $('comparacao').textContent = e.message;
+  }
+}
+
+async function carregar() {
+  const s = await api('/status');
+  $('online').className = 'online';
+  $('online').textContent = `Online · v${s.versaoServidor}`;
+  const semGravar = s.apis.find((a) => !a.armazenamento.gravavel);
+  $('aviso').innerHTML = semGravar ? `<div class="msg err">${esc(semGravar.armazenamento.motivo)}</div>` : '';
+  s.apis.forEach(renderApi);
+  const eventos = s.apis.flatMap((a) => a.eventos.map((e) => ({ ...e, api: a.apiId }))).sort((x, y) => (x.data < y.data ? 1 : -1));
+  $('eventos').innerHTML = eventos.slice(0, 12).map((e) =>
+    `<tr><td>${data(e.data)}</td><td><span class="tag">${NOMES[e.api]}</span></td><td>${mudancas(e.resumo)}</td><td class="r muted origem">${esc(e.origem)}</td></tr>`).join('') ||
+    '<tr><td class="muted">Nenhuma atualização ainda.</td></tr>';
+  const backups = s.apis.flatMap((a) => a.backups.map((b) => ({ ...b, api: a.apiId }))).sort((x, y) => (x.salvoEm < y.salvoEm ? 1 : -1));
+  $('backups').innerHTML = backups.map((b) =>
+    `<tr><td>${data(b.salvoEm)}</td><td><span class="tag">${NOMES[b.api]}</span></td><td class="muted">${kb(b.tamanho)}</td><td class="r"><button data-api="${b.api}" data-arq="${esc(b.arquivo)}">Restaurar</button></td></tr>`).join('') ||
+    '<tr><td class="muted">Nenhuma versão anterior.</td></tr>';
+  carregarComparacao();
+}
+
+function resultado(apiId, r) {
+  const el = q(apiId, '[data-resultado]');
+  if (r.status === 'invalida') el.innerHTML = `<div class="msg err">${esc(r.mensagem)}<br>${r.erros.slice(0, 5).map(esc).join('<br>')}</div>`;
+  else el.innerHTML = `<div class="msg ok">✔ ${esc(r.mensagem)} ${r.status === 'atualizada' ? mudancas(r.resumo) : ''}</div>`;
+}
+
+async function acao(apiId, fn) {
+  const c = card(apiId);
+  c.classList.add('busy');
+  q(apiId, '[data-resultado]').innerHTML = '<div class="msg neutral">Aguarde…</div>';
+  try { resultado(apiId, await fn()); }
+  catch (e) { q(apiId, '[data-resultado]').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  finally { c.classList.remove('busy'); carregar().catch(() => {}); }
 }
 
 async function enviarArquivo(file) {
@@ -165,20 +222,24 @@ async function enviarArquivo(file) {
     body = await new Response(file.stream().pipeThrough(new CompressionStream('gzip'))).blob();
     tipo = 'application/gzip';
   }
-  return api('/enviar', { method: 'POST', headers: { 'Content-Type': tipo, 'x-arquivo': encodeURIComponent(file.name) }, body });
+  return api(`/${HML}/enviar`, { method: 'POST', headers: { 'Content-Type': tipo, 'x-arquivo': encodeURIComponent(file.name) }, body });
 }
 
-$('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; if (f) acao(() => enviarArquivo(f)); };
+const drop = $('drop');
+const enviar = (f) => f && acao(HML, () => enviarArquivo(f));
+$('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; enviar(f); };
 drop.ondragover = (ev) => { ev.preventDefault(); drop.classList.add('over'); };
 drop.ondragleave = () => drop.classList.remove('over');
-drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) acao(() => enviarArquivo(f)); };
-// Soltar o arquivo em qualquer lugar da página também envia (e evita o navegador abrir o arquivo).
+drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); enviar(ev.dataTransfer.files[0]); };
+// Soltar o arquivo em qualquer lugar da página também envia para homologação.
 window.addEventListener('dragover', (ev) => ev.preventDefault());
-window.addEventListener('drop', (ev) => { if (ev.defaultPrevented) return; ev.preventDefault(); const f = ev.dataTransfer?.files[0]; if (f) acao(() => enviarArquivo(f)); });
+window.addEventListener('drop', (ev) => { if (ev.defaultPrevented) return; ev.preventDefault(); enviar(ev.dataTransfer?.files[0]); });
+
+$('btnPrd').onclick = () => acao(PRD, () => api(`/${PRD}/atualizar`, { method: 'POST' }));
 $('backups').onclick = (ev) => {
-  const arq = ev.target.dataset?.arq;
-  if (arq && confirm('Restaurar esta versão?')) {
-    acao(() => api('/restaurar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) }));
+  const { api: apiId, arq } = ev.target.dataset || {};
+  if (arq && confirm(`Restaurar esta versão de ${NOMES[apiId]}?`)) {
+    acao(apiId, () => api(`/${apiId}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) }));
   }
 };
 
