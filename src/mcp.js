@@ -87,7 +87,7 @@ const API_ID = z.string().describe('Id retornado por list_apis (nome do arquivo 
 const OPERATION_PARAMS = {
   apiId: API_ID,
   method: z.string().describe('Método HTTP, ex.: "POST"'),
-  path: z.string().describe('Caminho exatamente como retornado por list_operations, ex.: "/pedidos/{id}"'),
+  path: z.string().describe('Caminho exatamente como retornado por list_operations, ex.: "/api/v1/bancos"'),
 };
 
 /** Carrega spec + operação ou devolve o erro pronto para a tool. */
@@ -258,7 +258,7 @@ export function buildMcpServer() {
     {
       title: 'Definição de um schema',
       description: 'Retorna um schema nomeado (components/schemas), permitindo navegar por objetos aninhados um nível por vez.',
-      inputSchema: { apiId: API_ID, schemaName: z.string().describe('Nome do schema, ex.: "Pedido"') },
+      inputSchema: { apiId: API_ID, schemaName: z.string().describe('Nome do schema, ex.: "BancoStoreItem"') },
       annotations: readOnly,
     },
     async ({ apiId, schemaName }) =>
@@ -426,7 +426,7 @@ export function buildMcpServer() {
       inputSchema: {
         ...OPERATION_PARAMS,
         modo: z.enum(['completo', 'minimo']).optional().describe('Padrão "completo"'),
-        exemplo: z.string().optional().describe('Nome de um exemplo declarado na spec, ex.: "funcionario_estrangeiro"'),
+        exemplo: z.string().optional().describe('Nome de um exemplo declarado na spec, ex.: "contribuinte_estrangeiro"'),
         variante: VARIANTE,
       },
       annotations: readOnly,

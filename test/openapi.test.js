@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { deref, findOperation, flattenFields, inlineSchema, operationParameters } from '../src/openapi.js';
 import { buildExample, deriveTestScenarios, examplePayload } from '../src/testing.js';
 
-const pedidos = JSON.parse(fs.readFileSync(new URL('../specs/exemplo-pedidos.json', import.meta.url)));
+const pedidos = JSON.parse(fs.readFileSync(new URL('./fixtures/pedidos.json', import.meta.url)));
 const ciclica = JSON.parse(fs.readFileSync(new URL('./fixtures/ciclica.json', import.meta.url)));
 
 test('parâmetros de path-item com $ref são resolvidos', () => {

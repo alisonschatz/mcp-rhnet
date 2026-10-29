@@ -1,146 +1,133 @@
-# mcp-apis-time
+# mcp-rhnet
 
-Servidor MCP que expõe as specs OpenAPI do time para uma IA (Claude, Copilot, Cursor...) navegar pela documentação e **criar casos de teste** das APIs.
+Servidor MCP que expõe a spec OpenAPI do **RH Net** para uma IA (Claude, Copilot, Cursor...) navegar pela documentação e **criar casos de teste** da API.
 
-As specs ficam versionadas no próprio repositório, em `specs/`. Não há build: o servidor lê os JSON direto da pasta e recarrega automaticamente quando um arquivo muda.
+Deploy na Vercel com uma tela em **`/admin`**: abra o link, veja se a spec mudou e clique em **Atualizar agora**. O MCP passa a usar a versão nova na hora, sem redeploy e sem commit.
 
+## Como funciona
+
+```
+Seu navegador (na VPN)                       Vercel                              IA
+───────────────────────                      ──────                              ──
+1. abre https://SEU-PROJETO.vercel.app/admin
+2. a página baixa a spec do RH Net  ───────▶ 3. valida, compara e guarda  ◀────── /mcp usa sempre
+   (pela SUA rede/VPN)                          no Vercel Blob                     a versão mais nova
+```
+
+O RH Net só abre pela VPN, e a Vercel não está na VPN. Por isso quem baixa a spec é o **seu navegador**, que envia o conteúdo para o servidor. O servidor nunca precisa alcançar a rede interna.
+
+- Ao abrir `/admin`, a página já confere sozinha se há versão nova e mostra o que mudou: operações e schemas novos, removidos e alterados.
+- **Atualizar agora** grava a versão nova. A anterior fica guardada e pode ser **restaurada** com um clique.
+- Uma spec inválida nunca substitui a atual.
+
+### O favorito "⟳ Atualizar MCP RH Net" (hoje é o caminho principal)
+
+A spec fica em `https://api-rhnet-hml.sci.com.br/docs?api-docs.json`, e esse servidor não libera leitura por outros sites (CORS). Por isso a página da Vercel não consegue baixá-la direto. O favorito contorna isso:
+
+1. Em `/admin`, arraste o botão **⟳ Atualizar MCP RH Net** para a barra de favoritos (uma vez).
+2. Com a VPN ligada, clique no favorito: ele abre a spec do RH Net. Clique nele de novo nessa página: ele lê a spec e envia para o MCP. Aparece "✔ Spec atualizada" ou "✔ A spec já estava atualizada".
+
+Sem o favorito, também dá para usar **Abrir o JSON em outra aba**, salvar com Ctrl+S e arrastar o arquivo em `/admin`.
+
+Se o time do RH Net liberar CORS na rota da documentação (`Access-Control-Allow-Origin: https://SEU-PROJETO.vercel.app`), a própria página `/admin` passa a conferir e atualizar sozinha, sem o favorito.
+
+## Deploy na Vercel (uma vez)
+
+1. **Blob Store**: no projeto da Vercel, vá em *Storage → Create → Blob*, escolha acesso **Private** e conecte ao projeto. Isso cria a variável `BLOB_READ_WRITE_TOKEN` sozinho.
+2. **Variáveis** (*Settings → Environment Variables*):
+   - `ADMIN_TOKEN`: uma senha longa. É o que a tela pede para entrar. Sem ela, `/admin` fica desligada.
+   - `RHNET_SPEC_URL` (opcional): já vem configurado com `https://api-rhnet-hml.sci.com.br/docs?api-docs.json`.
+3. **Redeploy**. O build continua o mesmo (`npm run build` valida e empacota `specs/rhnet.json`).
+4. Abra `https://SEU-PROJETO.vercel.app/admin`, entre com o token e arraste o favorito para a barra.
+
+A spec do repositório (`specs/rhnet.json`) é só o ponto de partida. Depois da primeira atualização pela tela, vale a versão guardada no Blob. Não é preciso commitar a spec a cada mudança, mas pode commitar de vez em quando para o repositório não ficar muito defasado.
+
+A URL do MCP não muda: `https://SEU-PROJETO.vercel.app/mcp`.
+
+## Rodando local
+
+```bash
+npm install
+npm start          # MCP em http://127.0.0.1:3001/mcp · tela em http://127.0.0.1:3001/admin
+npm test
+```
+
+Localmente a spec fica na pasta `specs/` (backups em `specs/.historico/`) e quem baixa é o próprio servidor, porque sua máquina está na VPN. Também dá para atualizar pelo terminal:
+
+```bash
+npm run spec:verificar
+npm run spec:atualizar                                  # baixa e aplica
+npm run spec:atualizar -- --arquivo C:/Downloads/api-docs.json
+```
+
+Com `BLOB_READ_WRITE_TOKEN` no `.env` (copie de *Storage → Blob → .env.local* na Vercel), o `spec:atualizar` grava **direto no Blob da Vercel**. É outro jeito de atualizar o site, sem abrir a tela.
+
+## Outro host (Docker / servidor interno)
+
+```bash
+docker build -t mcp-rhnet . && docker run -p 3001:3001 -e ADMIN_TOKEN=... mcp-rhnet
+```
+
+Se o host estiver na rede interna, use `SPEC_FETCH_MODE=servidor` para o próprio servidor baixar a spec. Aí dá até para ligar a atualização automática com `SPEC_AUTO_UPDATE_MINUTES=60`. Monte um volume em `/app/specs` para não perder as versões ao recriar o container.
+
+## Configuração
+
+| Variável | Para quê |
+|---|---|
+| `ADMIN_TOKEN` | Senha da tela `/admin` (obrigatória fora da máquina local). |
+| `BLOB_READ_WRITE_TOKEN` | Criada pela Vercel ao conectar o Blob Store. Com ela, a spec fica no Blob. |
+| `RHNET_SPEC_URL` | Link do JSON da spec. Sem ela, vale a última URL usada na tela. |
+| `SPEC_FETCH_MODE` | `navegador` (padrão na Vercel) ou `servidor` (padrão local/Docker). |
+| `SPEC_SYNC_SECONDS` | Com Blob: a cada quantos segundos cada instância confere se há versão nova (15). |
+| `SPEC_HISTORY_LIMIT` | Quantas versões anteriores manter (10). |
+| `SPEC_AUTO_UPDATE_MINUTES` | Só no modo `servidor`: atualização automática (0 = desligada). |
+| `RHNET_SPEC_TOKEN` / `RHNET_SPEC_COOKIE` / `RHNET_SPEC_HEADERS` | Só no modo `servidor`, se a URL exigir login. |
+| `SPECS_DIR`, `PORT`/`MCP_PORT`, `MCP_HOST`, `MCP_MAX_RESPONSE_CHARS` | Servidor. |
+
+## Conectando na IA
+
+| Cliente | Como |
+|---|---|
+| claude.ai (conector personalizado) | URL `https://SEU-PROJETO.vercel.app/mcp` |
+| Claude Code | `claude mcp add --transport http rhnet https://SEU-PROJETO.vercel.app/mcp` |
+| VS Code / Cursor / Claude Desktop | `url` do servidor (ver `examples/`) ou stdio local apontando para `src/stdio.js` |
+
+O endpoint `/mcp` é público (só leitura da documentação). A tela `/admin` exige o `ADMIN_TOKEN`.
 
 ## Estrutura
 
 ```
-specs/                  ← coloque aqui os JSON OpenAPI (um arquivo por API)
+specs/rhnet.json          ← spec inicial (a do build)
 src/
-  config.js             ← pasta das specs, porta, limites
-  specs.js              ← descoberta e cache dos arquivos
-  openapi.js            ← resolução de $ref, allOf, parâmetros, respostas, segurança
-  testing.js            ← payloads de exemplo e cenários de teste derivados da spec
-  mcp.js                ← tools, prompts e resources do MCP
-  web.js                ← rotas HTTP (endpoint /mcp público)
-  app.js                ← entrypoint da Vercel
-  http.js               ← servidor HTTP de longa duração (local, Docker, Render...)
-  stdio.js              ← transporte stdio (Claude Desktop, VS Code, Cursor, Claude Code)
-scripts/
-  validate-specs.js     ← validação das specs
-  build-bundle.js       ← empacota as specs para a Vercel
-vercel.json · Dockerfile
-test/                   ← testes com node:test
-examples/               ← configs de cliente prontas
+  admin.html · admin.js   ← tela /admin
+  updater.js              ← valida, compara, grava, restaura
+  fetcher.js              ← download pelo servidor (modo "servidor")
+  spec-diff.js            ← resumo e diff entre versões
+  store/                  ← onde a spec é guardada: disco (fs-store) ou Vercel Blob (blob-store)
+  specs.js                ← leitura da spec usada pelo MCP
+  openapi.js · testing.js · mcp.js · validate.js
+  web.js · app.js (Vercel) · http.js (local/Docker) · stdio.js
+scripts/                  ← build-bundle, validate-specs, update-spec
+test/                     ← node:test (inclui simulação da Vercel com Blob em memória)
 ```
 
-## Começando
-
-```bash
-npm install
-npm run validate   # confere as specs
-npm test
-npm start          # HTTP em http://127.0.0.1:3001/mcp
-```
-
-Para inspecionar as ferramentas no navegador: `npm run inspector`.
-
-## Adicionando uma API
-
-1. Exporte o OpenAPI da API (JSON, OpenAPI 3.x) e salve como `specs/<id>.json`. O nome do arquivo vira o `apiId` (ex.: `specs/faturamento.json` → `faturamento`). Use só letras, números, `.`, `_` e `-`.
-2. Rode `npm run validate`. Erros bloqueiam; avisos indicam o que melhorar na spec para gerar testes melhores.
-3. Commit. O servidor em execução já enxerga a nova API, sem reiniciar.
-
-Quanto mais rica a spec, melhores os testes: `required`, `enum`, `minLength`/`maxLength`, `minimum`/`maximum`, `pattern`, `format`, exemplos e respostas 4xx documentadas viram cenários automaticamente.
-
-## Conectando na IA
-
-**Claude Desktop** — edite `claude_desktop_config.json` (modelo em `examples/`) apontando para o caminho absoluto de `src/stdio.js`.
-
-**VS Code (Copilot agent mode)** — copie `examples/vscode-mcp.json` para `.vscode/mcp.json` do repositório.
-
-**Claude Code** — `claude mcp add apis-time -- node /caminho/para/mcp-apis-time/src/stdio.js`
-
-**HTTP local** — rode `npm start` e aponte o cliente para `http://127.0.0.1:3001/mcp`.
-
-**Servidor hospedado** — veja a seção abaixo. Com a URL pública:
-
-| Cliente | Como conectar |
-|---|---|
-| claude.ai (conector personalizado) | URL `https://SEU-PROJETO.vercel.app/mcp` — sem OAuth, sem token |
-| Claude Code | `claude mcp add --transport http apis-time https://SEU-PROJETO.vercel.app/mcp` |
-| Claude Desktop / VS Code / Cursor | só a `url` (ver `examples/vscode-mcp.json`) |
-
-## Deploy
-
-### Vercel
-
-1. Suba o repositório no GitHub e importe em [vercel.com/new](https://vercel.com/new). O Express é detectado sozinho (`src/app.js`), e o `vercel.json` manda rodar `npm run build`, que valida e empacota as specs.
-2. Não há variável obrigatória. Teste: `https://SEU-PROJETO.vercel.app/mcp/health`.
-
-Cada push na `main` com spec nova gera deploy automático. Se o build falhar, é spec inválida — rode `npm run validate` local.
-
-Use a URL de produção: as URLs de *preview* da Vercel ficam atrás do login da Vercel por padrão e a IA não consegue acessá-las.
-
-### Qualquer host com Docker (Render, Railway, Fly.io, Azure, infra interna)
-
-```bash
-docker build -t mcp-apis-time .
-docker run -p 3001:3001 mcp-apis-time
-```
-
-Ou, sem Docker, comando de start `npm start` — a porta vem de `PORT`, que essas plataformas já definem.
-
-### Acesso
-
-O endpoint `/mcp` é **público, sem autenticação**: quem tiver a URL consegue ler as specs. Isso é intencional (o servidor só lê documentação, não chama as APIs), mas lembre que as specs descrevem endpoints e campos internos. Se um dia precisar restringir, hospede só na rede interna/VPN ou coloque um proxy com autenticação na frente.
-
-Variáveis de ambiente (todas opcionais): `SPECS_DIR`, `PORT`/`MCP_PORT` (3001), `MCP_HOST` (127.0.0.1 local, 0.0.0.0 quando `PORT` existe), `MCP_MAX_RESPONSE_CHARS` (16000).
-
-## Ferramentas
-
-Navegação (mesmas do servidor original do portal):
+## Ferramentas MCP
 
 | Tool | Para quê |
 |---|---|
 | `list_apis` | APIs disponíveis |
-| `get_api_overview` | descrição, servidores, tags, esquemas de segurança |
+| `get_api_overview` | descrição, servidores, tags, segurança |
 | `list_operations` | endpoints, com filtro por tag |
 | `get_operation_docs` | descrição funcional, parâmetros, respostas |
-| `get_operation_schema` | schemas resolvidos em um nível |
-| `get_schema_definition` | navegar em schemas aninhados |
+| `get_operation_schema` · `get_schema_definition` | schemas |
 | `search_documentation` | busca em caminhos, descrições, parâmetros e schemas |
+| `get_operation_test_context` | campos achatados com restrições, segurança e respostas (paginado) |
+| `generate_example_payload` | payload válido (`completo`/`minimo`, `exemplo`, `variante`) |
+| `suggest_test_scenarios` | checklist de cenários com status esperado e lacunas da spec |
 
-Testes:
-
-| Tool | Para quê |
-|---|---|
-| `get_operation_test_context` | visão achatada: cada campo com caminho (`cliente.endereco.cep`, `itens[].sku`), obrigatoriedade, restrições e rótulos de enum; segurança; campos das respostas. Em operações grandes vem resumida — navegue com `secao` (`requisicao`/`respostas`), `status`, `prefixo` e `page` |
-| `generate_example_payload` | payload válido (modo `completo` ou `minimo`) usando exemplos da spec ou gerando pelo schema; já conhece CPF, CNPJ, CEP e telefone. Escolha um exemplo nomeado com `exemplo` ou a variante do corpo (oneOf) com `variante` |
-| `suggest_test_scenarios` | checklist determinístico de cenários: positivos, segurança, recurso inexistente, validação, valores-limite, erros documentados, idempotência — com status esperado e **lacunas da spec** |
-
-Prompts prontos (aparecem como comandos `/` em vários clientes):
-
-- `casos_de_teste_operacao` — casos completos de um endpoint, no formato escolhido (gherkin, tabela, jest, postman, restassured) e com espaço para regras de negócio.
-- `plano_de_testes_api` — plano priorizado cobrindo a API inteira.
-
-Resources: `docs://index` (índice) e `openapi://{apiId}` (spec bruta).
-
-## Como usar para criar testes
-
-Exemplo de pedido para a IA:
-
-> Use o prompt casos_de_teste_operacao para POST /pedidos da API exemplo-pedidos, formato gherkin. Regra de negócio: pedidos acima de R$ 10.000 exigem aprovação e retornam status PENDENTE_APROVACAO.
-
-A IA vai buscar o contexto, gerar os payloads base, percorrer o checklist e escrever os casos, complementando com a regra informada e listando o que a spec deixa em aberto.
-
-Os cenários de `suggest_test_scenarios` descrevem uma **alteração** sobre o payload base (`remover` campo, `definir` valor, `omitir-corpo`...). Valores `{"$gerar": "string", "tamanho": N}` representam strings longas sem inflar a resposta.
-
-## Diferenças em relação ao servidor do portal
-
-- Lê os JSON de `specs/` diretamente; não precisa de `portal.config.json` nem dos `.md` de `llms/`.
-- Resolve `$ref` em parâmetros, requestBodies e responses (não só em schemas) e mescla `allOf`.
-- Parâmetros declarados no path-item são herdados pelas operações.
-- Respostas grandes são compactadas antes de truncar, para continuarem JSON válido.
-- Transporte stdio além do HTTP e deploy na Vercel.
-- Respostas grandes nunca chegam truncadas: são resumidas ou paginadas automaticamente.
+Prompts: `casos_de_teste_operacao` e `plano_de_testes_api`. Resources: `docs://index` e `openapi://rhnet`.
 
 ## Limitações
 
-- Somente JSON e `$ref` locais (`#/...`). Refs para outros arquivos aparecem como aviso no `validate`.
-- Swagger 2.0 funciona parcialmente; converta com `npx swagger2openapi entrada.json -o specs/saida.json`.
-- Em `oneOf`/`anyOf` no corpo, as ferramentas listam as variantes e usam a 0 por padrão (escolha com `variante`); em campos aninhados usa a primeira e sinaliza no campo. Enums no formato `oneOf` de valores com `title` são tratados como enum com rótulos.
+- Somente JSON e `$ref` locais (`#/...`).
 - Os cenários vêm só da spec: regras de negócio precisam ser informadas à IA.

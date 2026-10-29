@@ -29,29 +29,34 @@ test('expõe as tools, prompts e resources esperados', async () => {
   assert.deepEqual(prompts, ['casos_de_teste_operacao', 'plano_de_testes_api']);
   const resources = (await client.listResources()).resources.map((r) => r.uri);
   assert.ok(resources.includes('docs://index'));
-  assert.ok(resources.includes('openapi://exemplo-pedidos'));
+  assert.ok(resources.includes('openapi://rhnet'));
+});
+
+test('só a API do RH Net é exposta', async () => {
+  const apis = (await call('list_apis')).json;
+  assert.deepEqual(apis.apis.map((a) => a.id), ['rhnet']);
 });
 
 test('fluxo de navegação', async () => {
-  const apis = (await call('list_apis')).json;
-  assert.ok(apis.apis.some((a) => a.id === 'exemplo-pedidos'));
-  const ops = (await call('list_operations', { apiId: 'exemplo-pedidos', tag: 'Pedidos' })).json;
+  const ops = (await call('list_operations', { apiId: 'rhnet', tag: 'Bancos' })).json;
   assert.equal(ops.totalItems, 4);
-  const schema = (await call('get_operation_schema', { apiId: 'exemplo-pedidos', method: 'post', path: '/pedidos' })).json;
-  assert.deepEqual(schema.requestBody.schema.properties.cliente, { $ref: 'Cliente' });
-  const def = (await call('get_schema_definition', { apiId: 'exemplo-pedidos', schemaName: 'Cliente' })).json;
-  assert.deepEqual(def.schema.properties.endereco, { $ref: 'Endereco' });
+  const schema = (await call('get_operation_schema', { apiId: 'rhnet', method: 'post', path: '/api/v1/bancos' })).json;
+  assert.deepEqual(schema.requestBody.schema.properties.dados.items, { $ref: 'BancoStoreItem' });
+  const def = (await call('get_schema_definition', { apiId: 'rhnet', schemaName: 'BancoStoreItem' })).json;
+  assert.equal(def.schema.type, 'object');
 });
 
 test('erros amigáveis', async () => {
   const semApi = await call('list_operations', { apiId: '../package' });
   assert.equal(semApi.isError, true);
-  const semOp = await call('get_operation_docs', { apiId: 'exemplo-pedidos', method: 'PUT', path: '/pedidos/{id}' });
-  assert.match(semOp.content[0].text, /GET, DELETE/);
+  const exemploRemovido = await call('list_operations', { apiId: 'exemplo-pedidos' });
+  assert.equal(exemploRemovido.isError, true);
+  const semOp = await call('get_operation_docs', { apiId: 'rhnet', method: 'PATCH', path: '/api/v1/bancos' });
+  assert.match(semOp.content[0].text, /GET, POST, PUT, DELETE/);
 });
 
 test('suggest_test_scenarios pagina e filtra, e cada página é JSON válido', async () => {
-  const args = { apiId: 'exemplo-pedidos', method: 'POST', path: '/pedidos', pageSize: 30 };
+  const args = { apiId: 'rhnet', method: 'POST', path: '/api/v1/admissoes', pageSize: 30 };
   const p1 = (await call('suggest_test_scenarios', args)).json;
   assert.ok(p1.totalPages >= 2);
   for (let page = 2; page <= p1.totalPages; page++) {
@@ -62,8 +67,8 @@ test('suggest_test_scenarios pagina e filtra, e cada página é JSON válido', a
 });
 
 test('prompt monta instruções com a operação', async () => {
-  const p = await client.getPrompt({ name: 'casos_de_teste_operacao', arguments: { apiId: 'exemplo-pedidos', method: 'post', path: '/pedidos', formato: 'jest' } });
-  assert.match(p.messages[0].content.text, /POST \/pedidos/);
+  const p = await client.getPrompt({ name: 'casos_de_teste_operacao', arguments: { apiId: 'rhnet', method: 'post', path: '/api/v1/bancos', formato: 'jest' } });
+  assert.match(p.messages[0].content.text, /POST \/api\/v1\/bancos/);
   assert.match(p.messages[0].content.text, /jest/);
 });
 

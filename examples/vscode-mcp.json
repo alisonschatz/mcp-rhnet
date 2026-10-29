@@ -1,13 +1,13 @@
 {
   "servers": {
-    "apis-time-local": {
+    "rhnet-local": {
       "type": "stdio",
       "command": "node",
       "args": ["${workspaceFolder}/src/stdio.js"]
     },
-    "apis-time-vercel": {
+    "rhnet-http": {
       "type": "http",
-      "url": "https://SEU-PROJETO.vercel.app/mcp"
+      "url": "http://127.0.0.1:3001/mcp"
     }
   }
 }

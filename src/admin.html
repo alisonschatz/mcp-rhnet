@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP RH Net · Spec</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #667085; --line: #e4e7ec;
+    --accent: #1f6feb; --accent-text: #ffffff; --ok: #12805c; --ok-bg: #e7f6ef; --warn: #9a6700; --warn-bg: #fff6dd;
+    --err: #c0362c; --err-bg: #fdeceb; --add: #12805c; --del: #c0362c; --chg: #9a6700; --code: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218; --card: #171b23; --text: #e6e8ec; --muted: #98a2b3; --line: #2a303b;
+      --accent: #4c8dff; --accent-text: #0b0e13; --ok: #3ccf91; --ok-bg: #12291f; --warn: #e3b341; --warn-bg: #2b2412;
+      --err: #ff7b72; --err-bg: #2d1615; --add: #3ccf91; --del: #ff7b72; --chg: #e3b341; --code: #11151c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 16px 60px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 13px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .sub { color: var(--muted); font-size: 13px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat .v { font-size: 19px; font-weight: 600; }
+  .stat .l { color: var(--muted); font-size: 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type=url], input[type=password] { flex: 1 1 320px; min-width: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; }
+  button, .btn { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .msg { border-radius: 8px; padding: 12px 14px; margin-top: 14px; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); }
+  .msg.err { background: var(--err-bg); color: var(--err); }
+  .msg.info { background: var(--code); color: var(--text); }
+  .msg .d { color: var(--text); margin-top: 4px; font-size: 13px; }
+  .msg .acoes { margin-top: 10px; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .pill.add { background: var(--ok-bg); color: var(--add); } .pill.del { background: var(--err-bg); color: var(--del); } .pill.chg { background: var(--warn-bg); color: var(--chg); }
+  ul.ops { list-style: none; padding: 0; margin: 6px 0 12px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; max-height: 240px; overflow: auto; }
+  ul.ops li { padding: 3px 0; border-bottom: 1px dashed var(--line); overflow-wrap: anywhere; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  td.o { overflow-wrap: anywhere; max-width: 340px; }
+  code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 12px; overflow-wrap: anywhere; }
+  .tablewrap { overflow-x: auto; }
+  details summary { cursor: pointer; color: var(--muted); }
+  .drop { border: 1.5px dashed var(--line); border-radius: 10px; padding: 16px; text-align: center; color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .drop.over { border-color: var(--accent); color: var(--text); }
+  .t-atualizado { color: var(--ok); } .t-erro { color: var(--err); } .t-verificado { color: var(--warn); } .t-sem-mudancas { color: var(--muted); }
+  .hidden { display: none !important; }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: s .8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Spec do RH Net</h1>
+      <div class="sub">Confira se há versão nova da documentação e atualize o MCP com um clique. Precisa estar na VPN.</div>
+    </div>
+    <div class="sub" id="armaz"></div>
+  </header>
+
+  <section class="card hidden" id="login">
+    <h2>Acesso</h2>
+    <form class="row" id="loginForm">
+      <input type="password" id="tokenInput" placeholder="Token de administração (ADMIN_TOKEN)" autocomplete="current-password" aria-label="Token">
+      <button class="primary" type="submit">Entrar</button>
+    </form>
+    <div class="hint" id="loginErro"></div>
+  </section>
+
+  <div id="app" class="hidden">
+    <section class="card">
+      <h2>Situação</h2>
+      <div id="situacao"><div class="msg info"><span class="spin"></span>Verificando…</div></div>
+    </section>
+
+    <section class="card">
+      <h2>Versão em uso pelo MCP</h2>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="card">
+      <h2>Origem da spec</h2>
+      <div class="row">
+        <input type="url" id="url" placeholder="URL do JSON da spec" aria-label="URL da spec">
+        <button id="btnVerificar">Verificar agora</button>
+      </div>
+      <div class="hint" id="fonteInfo"></div>
+      <div class="drop" id="drop">Ou arraste aqui o arquivo JSON da spec · <label for="arquivo" style="color:var(--accent);cursor:pointer">escolher arquivo</label>
+        <input type="file" id="arquivo" accept=".json,application/json" class="hidden">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Histórico</h2>
+      <div class="tablewrap"><table><thead><tr><th>Quando</th><th>Evento</th><th>Mudanças</th><th>Origem</th></tr></thead><tbody id="eventos"></tbody></table></div>
+      <details style="margin-top:14px"><summary>Versões anteriores (restaurar)</summary>
+        <div class="tablewrap"><table><thead><tr><th>Versão</th><th>Tamanho</th><th></th></tr></thead><tbody id="backups"></tbody></table></div>
+      </details>
+    </section>
+  </div>
+</main>
+<script>
+const API = 'rhnet';
+const $ = (id) => document.getElementById(id);
+const fmtData = (iso) => iso ? new Date(iso).toLocaleString('pt-BR') : '—';
+const fmtTam = (b) => b == null ? '—' : b > 1048576 ? (b / 1048576).toFixed(2) + ' MB' : Math.round(b / 1024) + ' KB';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let token = '';
+try { token = localStorage.getItem('rhnetAdminToken') || ''; } catch {}
+let status = null;      // status da API rhnet vindo do servidor
+let candidata = null;   // { texto, url, origem, quando } baixada pelo navegador e ainda não aplicada
+let ocupado = false;
+
+class Falha extends Error { constructor(m, dica, extra) { super(m); this.dica = dica; Object.assign(this, extra); } }
+
+async function api(path, opts = {}) {
+  const headers = { ...(opts.headers || {}) };
+  if (token) headers['x-admin-token'] = token;
+  const r = await fetch('/admin/api' + path, { ...opts, headers });
+  const body = await r.json().catch(() => ({ erro: `Resposta inválida do servidor (${r.status}).` }));
+  if (r.status === 401 && body.precisaToken) throw new Falha(body.erro, null, { precisaToken: true });
+  if (!r.ok) throw new Falha(body.erro || 'Falha', body.dica);
+  return body;
+}
+
+// ---------- login ----------
+function pedirLogin(msg) {
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginErro').textContent = msg || '';
+  $('tokenInput').focus();
+}
+$('loginForm').onsubmit = (ev) => {
+  ev.preventDefault();
+  token = $('tokenInput').value.trim();
+  try { localStorage.setItem('rhnetAdminToken', token); } catch {}
+  iniciar();
+};
+
+// ---------- renderização ----------
+const stat = (v, l) => `<div class="stat"><div class="v">${esc(v)}</div><div class="l">${esc(l)}</div></div>`;
+const TIPOS = { atualizado: 'Atualizado', erro: 'Erro', verificado: 'Nova versão encontrada', 'sem-mudancas': 'Sem mudanças' };
+
+function resumoTxt(r) {
+  if (!r) return '';
+  const o = r.operacoes, s = r.schemas, p = [];
+  if (o.adicionadas) p.push(`<span class="pill add">+${o.adicionadas} op</span>`);
+  if (o.removidas) p.push(`<span class="pill del">−${o.removidas} op</span>`);
+  if (o.alteradas) p.push(`<span class="pill chg">~${o.alteradas} op</span>`);
+  if (s.adicionados) p.push(`<span class="pill add">+${s.adicionados} schema</span>`);
+  if (s.removidos) p.push(`<span class="pill del">−${s.removidos} schema</span>`);
+  if (s.alterados) p.push(`<span class="pill chg">~${s.alterados} schema</span>`);
+  return p.join(' ') || '<span class="sub">—</span>';
+}
+
+function renderStatus() {
+  const st = status, a = st.atual;
+  $('armaz').textContent = st.armazenamento.gravavel ? `Armazenamento: ${st.armazenamento.descricao}` : 'Armazenamento não configurado';
+  $('stats').innerHTML = a
+    ? stat(a.operacoes, 'operações') + stat(a.schemas, 'schemas') +
+      stat(st.ultimaAtualizacao ? fmtData(st.ultimaAtualizacao) : (a.doBuild ? 'versão do deploy' : fmtData(a.modificadoEm)), 'atualizada em') +
+      stat(fmtData(st.ultimaVerificacao), 'última verificação') + stat(a.hash.slice(0, 10), 'hash do conteúdo') + stat(fmtTam(a.tamanho), 'tamanho')
+    : `<div class="sub">${esc(st.erro || 'Nenhuma spec ainda.')}</div>`;
+  if (st.fonte) {
+    if (!$('url').value) $('url').value = st.fonte.url;
+    $('url').disabled = st.fonte.urlFixadaNoAmbiente;
+    $('fonteInfo').innerHTML = (st.modoBusca === 'navegador'
+      ? 'A spec é baixada <b>pelo seu navegador</b> (pela sua VPN) e enviada ao servidor. '
+      : 'A spec é baixada <b>pelo servidor</b>. ') +
+      (st.fonte.urlFixadaNoAmbiente ? 'URL definida em <code>RHNET_SPEC_URL</code>.' : 'A última URL que funcionou fica salva.');
+  }
+  $('eventos').innerHTML = st.eventos.slice(0, 20).map((e) => `<tr><td>${fmtData(e.data)}</td><td class="t-${esc(e.tipo)}">${esc(TIPOS[e.tipo] || e.tipo)}${e.mensagem ? `<div class="sub">${esc(e.mensagem)}</div>` : ''}</td><td>${resumoTxt(e.resumo)}</td><td class="o">${esc(e.origem || '')}</td></tr>`).join('') || '<tr><td colspan="4" class="sub">Nenhuma atualização ainda.</td></tr>';
+  $('backups').innerHTML = st.backups.map((b) => `<tr><td><code>${esc(b.arquivo)}</code><div class="sub">${fmtData(b.salvoEm)}</div></td><td>${fmtTam(b.tamanho)}</td><td><button data-restaurar="${esc(b.arquivo)}">Restaurar</button></td></tr>`).join('') || '<tr><td colspan="3" class="sub">Nenhuma versão anterior ainda.</td></tr>';
+}
+
+function lista(titulo, cls, itens) {
+  if (!itens?.length) return '';
+  return `<div><span class="pill ${cls}">${esc(titulo)} (${itens.length})</span><ul class="ops">${itens.map((i) => `<li>${esc(i)}</li>`).join('')}</ul></div>`;
+}
+
+function situacao(html) { $('situacao').innerHTML = html; }
+function carregando(txt) { situacao(`<div class="msg info"><span class="spin"></span>${esc(txt)}</div>`); }
+
+function mostrarResultado(r) {
+  const d = r.diff;
+  let html;
+  if (r.status === 'sem-mudancas') {
+    html = `<div class="msg ok"><strong>✔ A spec está atualizada.</strong><div class="d">A versão da API é a mesma que o MCP já usa.</div></div>`;
+  } else if (r.status === 'nova-versao') {
+    html = `<div class="msg warn"><strong>Há uma versão nova da spec.</strong>
+      <div class="d">Operações: ${r.anterior?.operacoes ?? '—'} → ${r.nova.operacoes} · Schemas: ${r.anterior?.schemas ?? '—'} → ${r.nova.schemas} · ${resumoTxt(r.resumo)}</div>
+      <div class="acoes"><button class="primary" id="btnAplicar">Atualizar agora</button></div></div>`;
+  } else if (r.status === 'atualizada') {
+    html = `<div class="msg ok"><strong>✔ ${esc(r.mensagem)}</strong>
+      <div class="d">Operações: ${r.anterior?.operacoes ?? '—'} → ${r.nova.operacoes} · Schemas: ${r.anterior?.schemas ?? '—'} → ${r.nova.schemas}</div></div>`;
+  } else {
+    html = `<div class="msg err"><strong>${esc(r.mensagem)}</strong><ul class="ops">${(r.erros || []).slice(0, 50).map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>`;
+  }
+  if (d && r.status !== 'sem-mudancas' && r.status !== 'invalida') {
+    html += '<div style="margin-top:14px">' +
+      lista('Operações novas', 'add', d.operacoes.adicionadas) + lista('Operações removidas', 'del', d.operacoes.removidas) + lista('Operações alteradas', 'chg', d.operacoes.alteradas) +
+      lista('Schemas novos', 'add', d.schemas.adicionadas) + lista('Schemas removidos', 'del', d.schemas.removidas) + lista('Schemas alterados', 'chg', d.schemas.alteradas) + '</div>';
+  }
+  situacao(html);
+  const b = $('btnAplicar');
+  if (b) b.onclick = () => executar(() => aplicar());
+}
+
+function mostrarFalha(e) {
+  if (e.precisaToken) return pedirLogin(e.message);
+  let html = `<div class="msg err"><strong>${esc(e.message)}</strong>${e.dica ? `<div class="d">${e.dica}</div>` : ''}`;
+  if (e.abrirUrl) html += `<div class="acoes row"><a class="btn" href="${esc(e.abrirUrl)}" target="_blank" rel="noopener">Abrir o JSON em outra aba</a><span class="sub">Salve com Ctrl+S e arraste o arquivo no quadro abaixo.</span></div>`;
+  situacao(html + '</div>');
+}
+
+// ---------- ações ----------
+async function gzip(texto) {
+  if (typeof CompressionStream === 'undefined') return { body: texto, gz: false };
+  const stream = new Blob([texto]).stream().pipeThrough(new CompressionStream('gzip'));
+  return { body: await new Response(stream).blob(), gz: true };
+}
+
+async function hashConteudo(texto) {
+  const canon = JSON.stringify(JSON.parse(texto));
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canon));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Baixa a spec pelo navegador (usa a VPN de quem está na página). */
+async function baixarNoNavegador(url) {
+  let r;
+  try {
+    r = await fetch(url, { cache: 'no-store', credentials: 'omit' });
+  } catch {
+    throw new Falha('Seu navegador não conseguiu ler a spec.',
+      'Confira se a <b>VPN</b> está conectada. Se estiver, o servidor do RH Net não permite que outro site leia o arquivo (CORS) — use o botão abaixo e arraste o arquivo, ou peça ao time do RH Net para liberar CORS desta URL para este site, que aí fica a um clique.',
+      { abrirUrl: url });
+  }
+  if (!r.ok) throw new Falha(`O RH Net respondeu ${r.status} ao baixar a spec.`, r.status === 401 || r.status === 403 ? 'A URL pede login. Confira se é o link do JSON da documentação.' : null, { abrirUrl: url });
+  const texto = await r.text();
+  try { const j = JSON.parse(texto); if (!j.openapi && !j.swagger) throw 0; }
+  catch { throw new Falha('A URL não devolveu o JSON da spec (veio outra coisa, talvez uma página).', 'Use o link direto do arquivo JSON da documentação.', { abrirUrl: url }); }
+  return texto;
+}
+
+async function enviar(texto, { aplicar, origem, url }) {
+  const { body, gz } = await gzip(texto);
+  return api(`/${API}/enviar?aplicar=${aplicar ? 1 : 0}`, {
+    method: 'POST',
+    headers: { 'Content-Type': gz ? 'application/gzip' : 'text/plain', 'x-origem': encodeURIComponent(origem || ''), ...(url ? { 'x-url': encodeURIComponent(url) } : {}) },
+    body,
+  });
+}
+
+const urlAtual = () => ($('url').value || '').trim();
+
+async function verificar() {
+  const url = urlAtual();
+  if (status.modoBusca === 'servidor') {
+    carregando('O servidor está baixando a spec…');
+    candidata = null;
+    return mostrarResultado(await api(`/${API}/verificar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify($('url').disabled ? {} : { url }) }));
+  }
+  if (!url) throw new Falha('Informe a URL do JSON da spec.');
+  carregando('Baixando a spec pela sua rede (VPN)…');
+  const texto = await baixarNoNavegador(url);
+  candidata = { texto, url, origem: url, quando: Date.now() };
+  // Mesmo conteúdo da versão em uso? Não precisa nem enviar.
+  if (status.atual && (await hashConteudo(texto)) === status.atual.hash) {
+    return mostrarResultado({ status: 'sem-mudancas' });
+  }
+  carregando('Comparando com a versão em uso…');
+  mostrarResultado(await enviar(texto, { aplicar: false, origem: url, url }));
+}
+
+async function aplicar() {
+  if (status.modoBusca === 'servidor' && !candidata) {
+    carregando('Atualizando…');
+    return mostrarResultado(await api(`/${API}/atualizar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify($('url').disabled ? {} : { url: urlAtual() }) }));
+  }
+  if (!candidata || Date.now() - candidata.quando > 10 * 60_000) {
+    candidata = { texto: await baixarNoNavegador(urlAtual()), url: urlAtual(), origem: urlAtual(), quando: Date.now() };
+  }
+  carregando('Atualizando…');
+  const r = await enviar(candidata.texto, { aplicar: true, origem: candidata.origem, url: candidata.url });
+  candidata = null;
+  mostrarResultado(r);
+}
+
+async function viaArquivo(file) {
+  const texto = await file.text();
+  candidata = { texto, url: null, origem: `arquivo: ${file.name}`, quando: Date.now() };
+  carregando('Comparando o arquivo com a versão em uso…');
+  mostrarResultado(await enviar(texto, { aplicar: false, origem: candidata.origem }));
+}
+
+async function executar(fn) {
+  if (ocupado) return;
+  ocupado = true;
+  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
+  try { await fn(); } catch (e) { mostrarFalha(e); }
+  finally {
+    ocupado = false;
+    document.querySelectorAll('button').forEach((b) => (b.disabled = false));
+    if (!status?.armazenamento.gravavel) bloquear();
+    await recarregarStatus().catch(() => {});
+  }
+}
+
+function bloquear() {
+  document.querySelectorAll('#app button').forEach((b) => (b.disabled = true));
+}
+
+async function recarregarStatus() {
+  const s = await api('/status');
+  status = s.apis.find((a) => a.apiId === API);
+  renderStatus();
+}
+
+$('btnVerificar').onclick = () => executar(verificar);
+$('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; if (f) executar(() => viaArquivo(f)); };
+const drop = $('drop');
+drop.ondragover = (ev) => { ev.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) executar(() => viaArquivo(f)); };
+$('backups').onclick = (ev) => {
+  const arq = ev.target.dataset?.restaurar;
+  if (arq && confirm(`Restaurar ${arq}? A versão atual também fica guardada.`)) {
+    executar(async () => { carregando('Restaurando…'); mostrarResultado(await api(`/${API}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) })); });
+  }
+};
+
+async function iniciar() {
+  try {
+    await recarregarStatus();
+  } catch (e) {
+    if (e.precisaToken) return pedirLogin(token ? e.message : '');
+    $('app').classList.remove('hidden');
+    return mostrarFalha(e);
+  }
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  if (!status.armazenamento.gravavel) {
+    situacao(`<div class="msg err"><strong>O servidor ainda não consegue guardar a spec.</strong><div class="d">${esc(status.armazenamento.motivo || '')}</div></div>`);
+    return bloquear();
+  }
+  executar(verificar); // ao abrir a página, já confere se há versão nova
+}
+
+iniciar();
+</script>
+</body>
+</html>

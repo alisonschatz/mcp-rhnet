@@ -2,3 +2,5 @@ node_modules
 .git
 .vercel
 test
+.env
+specs/.historico

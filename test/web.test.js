@@ -35,7 +35,7 @@ const post = (path, headers = {}) =>
 test('/mcp é público: responde 200 sem nenhum token', async () => {
   const r = await post('/mcp');
   assert.equal(r.status, 200);
-  assert.equal((await r.json()).result.serverInfo.name, 'apis-time-testes');
+  assert.equal((await r.json()).result.serverInfo.name, 'mcp-rhnet');
 });
 
 test('GET /mcp -> 405 com Allow: POST', async () => {
@@ -62,8 +62,8 @@ test('cliente MCP real via HTTP lê as specs do bundle', async () => {
   const client = new Client({ name: 'teste-http', version: '1.0.0' });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
   const r = await client.callTool({ name: 'list_apis', arguments: {} });
-  assert.ok(JSON.parse(r.content[0].text).apis.some((a) => a.id === 'exemplo-pedidos'));
-  const cenarios = await client.callTool({ name: 'suggest_test_scenarios', arguments: { apiId: 'exemplo-pedidos', method: 'DELETE', path: '/pedidos/{id}' } });
-  assert.equal(JSON.parse(cenarios.content[0].text).statusSucesso, '204');
+  assert.ok(JSON.parse(r.content[0].text).apis.some((a) => a.id === 'rhnet'));
+  const cenarios = await client.callTool({ name: 'suggest_test_scenarios', arguments: { apiId: 'rhnet', method: 'POST', path: '/api/v1/bancos' } });
+  assert.equal(JSON.parse(cenarios.content[0].text).statusSucesso, '201');
   await client.close();
 });

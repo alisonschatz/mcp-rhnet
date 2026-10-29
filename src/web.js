@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { SERVER_NAME, SERVER_VERSION } from './config.js';
 import { buildMcpServer } from './mcp.js';
 import { listApiIds } from './specs.js';
+import { syncSpecs } from './store/index.js';
 
 const jsonRpcError = (res, status, code, message) => res.status(status).json({ jsonrpc: '2.0', error: { code, message }, id: null });
 
@@ -11,12 +12,13 @@ const jsonRpcError = (res, status, code, message) => res.status(status).json({ j
  * Registra as rotas do MCP em um app Express (usado pelo servidor local e pela Vercel).
  * O endpoint /mcp é público: não há token nem outra autenticação.
  */
-export function mountMcpRoutes(app) {
+export function mountMcpRoutes(app, { extraRoutes } = {}) {
   app.disable('x-powered-by');
   app.use(
     cors({
       origin: '*',
-      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID'],
+      // x-admin-token/x-origem/x-url: o favorito "Atualizar MCP" envia a spec a partir da página do RH Net.
+      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID', 'x-admin-token', 'x-origem', 'x-url'],
       exposedHeaders: ['Mcp-Session-Id', 'Mcp-Protocol-Version'],
     })
   );
@@ -31,6 +33,7 @@ export function mountMcpRoutes(app) {
       server.close().catch(() => {});
     });
     try {
+      await syncSpecs(); // com Vercel Blob, pega a versão mais recente da spec
       await server.connect(transport);
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
@@ -44,7 +47,9 @@ export function mountMcpRoutes(app) {
   app.delete('/mcp', methodNotAllowed);
 
   app.get('/mcp/health', (_req, res) => res.json({ status: 'ok', versao: SERVER_VERSION, apis: listApiIds().length }));
-  app.get('/', (_req, res) => res.json({ servico: SERVER_NAME, endpoint: '/mcp', health: '/mcp/health' }));
+  // Rotas adicionais (ex.: tela /admin no servidor local) entram antes do tratador de erros.
+  extraRoutes?.(app);
+  app.get('/', (_req, res) => res.json({ servico: SERVER_NAME, endpoint: '/mcp', health: '/mcp/health', ...(extraRoutes ? { admin: '/admin' } : {}) }));
 
   app.use((err, _req, res, _next) => {
     console.error('[mcp] erro não tratado:', err);

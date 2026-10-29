@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "apis-time-local": {
+    "rhnet": {
       "command": "node",
-      "args": ["C:/caminho/para/mcp-apis-time/src/stdio.js"]
+      "args": ["C:/alison/mcp-rhnet/src/stdio.js"]
     }
   }
 }

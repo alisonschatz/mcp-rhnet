@@ -1,14 +1,14 @@
 {
-  "name": "mcp-apis-time",
-  "version": "1.1.0",
-  "description": "Servidor MCP com as specs OpenAPI do time, para documentação e criação de casos de teste",
+  "name": "mcp-rhnet",
+  "version": "2.0.0",
+  "description": "Servidor MCP com a spec OpenAPI do RH Net, para documentação e criação de casos de teste",
   "type": "module",
   "private": true,
   "engines": {
     "node": ">=20"
   },
   "bin": {
-    "mcp-apis-time": "src/stdio.js"
+    "mcp-rhnet": "src/stdio.js"
   },
   "scripts": {
     "start": "node src/http.js",
@@ -17,10 +17,13 @@
     "build": "node scripts/validate-specs.js && node scripts/build-bundle.js",
     "validate": "node scripts/validate-specs.js",
     "inspector": "npx @modelcontextprotocol/inspector node src/stdio.js",
-    "test": "node --test"
+    "test": "node --test",
+    "spec:atualizar": "node scripts/update-spec.js",
+    "spec:verificar": "node scripts/update-spec.js --verificar"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",
+    "@vercel/blob": "^2.8.2",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "zod": "^4.6.5"
