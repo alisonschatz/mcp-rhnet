@@ -24,7 +24,7 @@ O MCP passa a usar a versão nova na hora, sem deploy. Cada ambiente guarda só 
 
 ## Comparar homologação e produção
 
-A página mostra as operações que existem só em homologação, só em produção e as que estão diferentes — inclusive quando a diferença está num schema usado pela operação. Clique numa operação diferente para ver campo a campo. Pela IA, por exemplo:
+A página separa as operações em: só em homologação, só em produção, diferentes no contrato (campos, tipos, obrigatoriedade, limites, respostas — inclusive em schemas usados pela operação) e com mudança só de texto (descrições, resumos, exemplos). Clique numa operação para ver campo a campo. Pela IA, por exemplo:
 
 > Compare POST /api/v1/admissoes entre rhnet-hml e rhnet-prd.
 

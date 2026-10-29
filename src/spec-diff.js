@@ -20,7 +20,15 @@ export function summarize(spec, text) {
  * Hash de uma operação que inclui os schemas/parâmetros referenciados ($ref), direta ou
  * indiretamente: uma mudança num schema usado pela operação conta como mudança nela.
  */
-function operationHasher(spec) {
+const TEXTOS = new Set(['description', 'summary', 'example', 'examples', 'externalDocs', 'x-example']);
+// Remove textos de cada objeto, exceto de mapas de propriedades/parâmetros (onde "description"
+// pode ser o nome de um campo de verdade).
+const MAPAS = new Set(['properties', 'paths', 'schemas', 'parameters', 'responses', 'requestBodies', 'headers', 'content']);
+const semTextos = (k, v) =>
+  v && typeof v === 'object' && !Array.isArray(v) && !MAPAS.has(k) ? Object.fromEntries(Object.entries(v).filter(([c]) => !TEXTOS.has(c))) : v;
+const stringify = (v, ignorarTextos) => JSON.stringify(v, ignorarTextos ? semTextos : undefined);
+
+function operationHasher(spec, ignorarTextos) {
   const refHash = new Map();
   const collect = (node, refs) => {
     if (Array.isArray(node)) node.forEach((n) => collect(n, refs));
@@ -33,21 +41,21 @@ function operationHasher(spec) {
     }
   };
   const hashRef = (ref) => {
-    if (!refHash.has(ref)) refHash.set(ref, sha256(JSON.stringify(resolvePointer(spec, ref) ?? null)));
+    if (!refHash.has(ref)) refHash.set(ref, sha256(stringify(resolvePointer(spec, ref) ?? null, ignorarTextos)));
     return refHash.get(ref);
   };
   return (op) => {
     const own = { shared: op.pathItem?.parameters, op: op.operation };
     const refs = new Set();
     collect(own, refs);
-    return sha256(JSON.stringify({ own, deps: [...refs].sort().map((r) => [r, hashRef(r)]) }));
+    return sha256(stringify({ own, deps: [...refs].sort().map((r) => [r, hashRef(r)]) }, ignorarTextos));
   };
 }
 
-function operationMap(spec) {
+function operationMap(spec, ignorarTextos = false) {
   const map = new Map();
   if (!spec?.paths) return map;
-  const hashOf = operationHasher(spec);
+  const hashOf = operationHasher(spec, ignorarTextos);
   for (const op of listOperations(spec)) {
     const key = `${op.method.toUpperCase()} ${op.path}`;
     map.set(key, { hash: hashOf(op), summary: op.operation.summary || '', tag: op.operation.tags?.[0] || '' });
@@ -68,9 +76,13 @@ function diffKeys(oldMap, newMap) {
 }
 
 /** O que mudou entre duas specs: operações e schemas adicionados, removidos e alterados. */
-export function compareSpecs(oldSpec, newSpec) {
-  const ops = diffKeys(operationMap(oldSpec), operationMap(newSpec));
-  const schemaMap = (s) => new Map(Object.entries(s?.components?.schemas || {}).map(([k, v]) => [k, { hash: sha256(JSON.stringify(v)) }]));
+/**
+ * ignorarTextos: descrições, resumos e exemplos não contam como diferença (só o contrato:
+ * campos, tipos, obrigatoriedade, limites, enums, respostas...).
+ */
+export function compareSpecs(oldSpec, newSpec, { ignorarTextos = false } = {}) {
+  const ops = diffKeys(operationMap(oldSpec, ignorarTextos), operationMap(newSpec, ignorarTextos));
+  const schemaMap = (s) => new Map(Object.entries(s?.components?.schemas || {}).map(([k, v]) => [k, { hash: sha256(stringify(v, ignorarTextos)) }]));
   const schemas = diffKeys(schemaMap(oldSpec), schemaMap(newSpec));
   const total = ops.adicionadas.length + ops.removidas.length + ops.alteradas.length + schemas.adicionadas.length + schemas.removidas.length + schemas.alteradas.length;
   return { operacoes: ops, schemas, totalMudancas: total };

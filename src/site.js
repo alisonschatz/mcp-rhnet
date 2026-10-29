@@ -96,6 +96,7 @@ export function mountSiteRoutes(app, { files } = {}) {
           soEmA: detalharOps(r.operacoes.soEmA, specA),
           soEmB: detalharOps(r.operacoes.soEmB, specB),
           diferentes: detalharOps(r.operacoes.diferentes, specA, specB),
+          soTextos: detalharOps(r.operacoes.soTextos, specA, specB),
         },
         schemas: { soEmA: r.schemas.soEmA.length, soEmB: r.schemas.soEmB.length, diferentes: r.schemas.diferentes.length },
       };

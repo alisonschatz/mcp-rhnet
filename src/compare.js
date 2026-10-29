@@ -8,9 +8,12 @@ import { compareSpecs } from './spec-diff.js';
  */
 
 export function compareApis(specA, specB) {
-  const d = compareSpecs(specA, specB);
+  const d = compareSpecs(specA, specB, { ignorarTextos: true });
+  // Operações em que só descrições/resumos/exemplos mudaram ficam à parte.
+  const contrato = new Set(d.operacoes.alteradas);
+  const soTextos = compareSpecs(specA, specB).operacoes.alteradas.filter((k) => !contrato.has(k));
   return {
-    operacoes: { soEmB: d.operacoes.adicionadas, soEmA: d.operacoes.removidas, diferentes: d.operacoes.alteradas },
+    operacoes: { soEmB: d.operacoes.adicionadas, soEmA: d.operacoes.removidas, diferentes: d.operacoes.alteradas, soTextos },
     schemas: { soEmB: d.schemas.adicionadas, soEmA: d.schemas.removidas, diferentes: d.schemas.alteradas },
     totalDiferencas: d.totalMudancas,
   };
