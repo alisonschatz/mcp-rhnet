@@ -98,11 +98,12 @@
 
   /* ---------- painel de comparação ---------- */
   .painel { margin-top: 16px; }
-  .tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tabs { display: flex; gap: 2px; padding: 0 12px; box-shadow: inset 0 -1px 0 var(--line); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
   .tabs button { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 12px; border: 0; background: none; color: var(--text-2); font: 500 13.5px inherit; cursor: pointer; white-space: nowrap; }
   .tabs button:hover { color: var(--text); }
   .tabs button.on { color: var(--text); }
-  .tabs button.on::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--text); }
+  .tabs button.on::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 0; height: 2px; border-radius: 2px; background: var(--text); }
   .tabs .dot { width: 7px; height: 7px; border-radius: 50%; }
   .tabs .n { font-size: 11.5px; color: var(--muted); font-weight: 600; }
   .corpo { padding: 18px 20px 20px; }
@@ -112,7 +113,8 @@
   .versoes { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
   .versoes .seta { color: var(--line); }
   .ctrl { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
-  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; }
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--gray-bg); border-radius: 9px; scrollbar-width: none; }
+  .seg::-webkit-scrollbar { display: none; }
   .seg button { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 500 12.5px inherit; cursor: pointer; white-space: nowrap; }
   .seg button:hover:not([disabled]) { color: var(--text); }
   .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
@@ -332,8 +334,8 @@ const VIEWS = {
     cats: [
       { id: 'soEmA', t: 'Só em homologação', cls: 'green', ajuda: 'Ainda não chegaram em produção.' },
       { id: 'soEmB', t: 'Só em produção', cls: 'red', ajuda: 'Existem em produção e não existem mais em homologação.' },
-      { id: 'diferentes', t: 'Diferentes', cls: 'amber', ajuda: 'O contrato é diferente entre os ambientes. Clique para ver campo a campo.' },
-      { id: 'soTextos', t: 'Só textos', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
+      { id: 'diferentes', t: 'Diferentes', um: 'diferente', cls: 'amber', ajuda: 'O contrato é diferente entre os ambientes. Clique para ver campo a campo.' },
+      { id: 'soTextos', t: 'Só textos', um: 'só texto', cls: '', ajuda: 'Mudaram apenas descrições, resumos ou exemplos.' },
     ],
   },
 };

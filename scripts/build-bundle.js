@@ -23,4 +23,4 @@ const header = '// Gerado por scripts/build-bundle.js — não editar.\n';
 const read = (f) => fs.readFileSync(path.join(src, f), 'utf8');
 fs.writeFileSync(path.join(src, 'specs.bundle.js'), `${header}export default ${JSON.stringify(bundle)};\n`);
 fs.writeFileSync(path.join(src, 'site.bundle.js'), `${header}export default ${JSON.stringify({ page: read('site.html') })};\n`);
-console.log(`✔ ${Object.keys(bundle).length} spec(s), e a página empacotadas`);
+console.log(`✔ ${Object.keys(bundle).length} spec(s) e a página empacotadas`);
