@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "rhnet": {
-      "command": "node",
-      "args": ["C:/alison/mcp-rhnet/src/stdio.js"]
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp-rhnet.vercel.app/mcp"]
     }
   }
 }

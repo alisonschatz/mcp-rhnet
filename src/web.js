@@ -1,18 +1,23 @@
 import cors from 'cors';
 import express from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { SERVER_NAME, SERVER_VERSION } from './config.js';
+import { SERVER_VERSION } from './config.js';
 import { buildMcpServer } from './mcp.js';
 import { listApiIds } from './specs.js';
+import { mountSiteRoutes } from './site.js';
 import { syncSpecs } from './store/index.js';
 
 const jsonRpcError = (res, status, code, message) => res.status(status).json({ jsonrpc: '2.0', error: { code, message }, id: null });
 
 /**
- * Registra as rotas do MCP em um app Express (usado pelo servidor local e pela Vercel).
- * O endpoint /mcp é público: não há token nem outra autenticação.
+ * Monta o app (Vercel e servidor local):
+ * - /mcp         endpoint MCP (público, stateless)
+ * - /            página para atualizar a spec
+ * - /favorito.js script do favorito
+ * - /api/...     usada pela página e pelo favorito
+ * `siteFiles` traz a página e o favorito empacotados (Vercel); localmente são lidos do disco.
  */
-export function mountMcpRoutes(app, { extraRoutes } = {}) {
+export function mountMcpRoutes(app, { siteFiles } = {}) {
   app.disable('x-powered-by');
   // Vercel Blob conectado via OIDC (variável BLOB_STORE_ID): a Vercel manda o token OIDC em cada
   // requisição. Guardamos para o SDK do Blob usar mesmo fora do contexto da requisição.
@@ -24,8 +29,8 @@ export function mountMcpRoutes(app, { extraRoutes } = {}) {
   app.use(
     cors({
       origin: '*',
-      // x-admin-token/x-origem/x-url: o favorito "Atualizar MCP" envia a spec a partir da página do RH Net.
-      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID', 'x-admin-token', 'x-origem', 'x-url'],
+      // x-origem: o favorito envia a spec a partir da página do RH Net (outra origem).
+      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID', 'x-origem'],
       exposedHeaders: ['Mcp-Session-Id', 'Mcp-Protocol-Version'],
     })
   );
@@ -54,9 +59,7 @@ export function mountMcpRoutes(app, { extraRoutes } = {}) {
   app.delete('/mcp', methodNotAllowed);
 
   app.get('/mcp/health', (_req, res) => res.json({ status: 'ok', versao: SERVER_VERSION, apis: listApiIds().length }));
-  // Rotas adicionais (ex.: tela /admin no servidor local) entram antes do tratador de erros.
-  extraRoutes?.(app);
-  app.get('/', (_req, res) => res.json({ servico: SERVER_NAME, endpoint: '/mcp', health: '/mcp/health', ...(extraRoutes ? { admin: '/admin' } : {}) }));
+  mountSiteRoutes(app, { files: siteFiles });
 
   app.use((err, _req, res, _next) => {
     console.error('[mcp] erro não tratado:', err);

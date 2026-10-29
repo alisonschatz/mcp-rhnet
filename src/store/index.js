@@ -1,4 +1,4 @@
-import { SPEC_SYNC_SECONDS, SPEC_SOURCES, SPECS_DIR } from '../config.js';
+import { SPEC_SYNC_SECONDS, SPECS_DIR, UPDATABLE_APIS } from '../config.js';
 import { setSpecOverride } from '../specs.js';
 import { createBlobStore } from './blob-store.js';
 import { createFsStore } from './fs-store.js';
@@ -96,7 +96,7 @@ export async function syncSpecs({ force = false } = {}) {
   if (polling) return polling;
   polling = (async () => {
     lastPoll = Date.now();
-    for (const apiId of Object.keys(SPEC_SOURCES)) {
+    for (const apiId of UPDATABLE_APIS) {
       try {
         if (!pollState.has(apiId)) pollState.set(apiId, {});
         const text = await store.pollCurrent(apiId, pollState.get(apiId));

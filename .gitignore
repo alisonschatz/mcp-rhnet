@@ -3,7 +3,7 @@ node_modules/
 *.log
 .DS_Store
 src/specs.bundle.js
-src/admin-page.bundle.js
+src/site.bundle.js
 .vercel
 *.tmp
 # backups e registro das atualizações da spec (ficam só na máquina)

@@ -1,6 +1,5 @@
-// Simula o deploy na Vercel com Vercel Blob (cliente em memória) e a tela /admin com token.
+// Simula o deploy na Vercel com Vercel Blob (cliente em memória).
 process.env.VERCEL = '1';
-process.env.ADMIN_TOKEN = 'segredo-vercel';
 process.env.SPEC_SYNC_SECONDS = '0';
 
 const { test, before, after } = await import('node:test');
@@ -50,7 +49,7 @@ function fakeBlobClient() {
 const client = fakeBlobClient();
 let server;
 let base;
-const H = { 'x-admin-token': 'segredo-vercel' };
+const H = {};
 
 before(async () => {
   execFileSync(process.execPath, ['scripts/build-bundle.js'], { stdio: 'ignore' });
@@ -69,44 +68,47 @@ async function mcpCall(name, args) {
   return r.isError ? r.content[0].text : JSON.parse(r.content[0].text);
 }
 
-const specAtual = async () => (await (await fetch(`${base}/admin/api/status`, { headers: H })).json()).apis[0];
+const specAtual = async () => (await fetch(`${base}/api/rhnet/status`)).json();
 
-test('sem token a tela pede login; /admin entrega a página', async () => {
-  assert.equal((await fetch(`${base}/admin/api/status`)).status, 401);
-  const page = await (await fetch(`${base}/admin`)).text();
-  assert.match(page, /Spec do RH Net/);
+test('página em / e favorito em /favorito.js com o link da spec', async () => {
+  assert.match(await (await fetch(`${base}/`)).text(), /MCP RH Net/);
+  const fav = await fetch(`${base}/favorito.js`, { headers: { Origin: 'https://api-rhnet-hml.sci.com.br' } });
+  assert.match(fav.headers.get('content-type'), /javascript/);
+  assert.equal(fav.headers.get('access-control-allow-origin'), '*');
+  const js = await fav.text();
+  assert.match(js, /const SPEC = 'https:\/\/api-rhnet-hml\.sci\.com\.br\/docs\?api-docs\.json'/);
+  assert.ok(!js.includes('__SPEC_URL__'));
 });
 
 test('começa com a spec do deploy e busca pelo navegador', async () => {
   const st = await specAtual();
   assert.equal(st.armazenamento.tipo, 'vercel-blob');
-  assert.equal(st.modoBusca, 'navegador');
   assert.equal(st.atual.doBuild, true);
   assert.equal(st.atual.operacoes, 135);
 });
 
-test('navegador envia (gzip) → diff → atualizar → MCP já usa a versão nova', async () => {
+test('favorito envia (gzip) com CORS → MCP já usa a versão nova', async () => {
   const { default: bundle } = await import('../src/specs.bundle.js');
   const nova = structuredClone(bundle.rhnet);
   nova.paths['/api/v1/teste-novo'] = { get: { summary: 'Novo', tags: ['Novo'], responses: { 200: { description: 'ok' }, 400: { description: 'erro' } } } };
-  const gz = zlib.gzipSync(JSON.stringify(nova));
-  const send = (aplicar) =>
-    fetch(`${base}/admin/api/rhnet/enviar?aplicar=${aplicar}`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/gzip', 'x-url': encodeURIComponent('https://rhnet-hml.sci.com.br/x.json') }, body: gz }).then((r) => r.json());
+  const origem = { Origin: 'https://api-rhnet-hml.sci.com.br' };
 
-  const check = await send(0);
-  assert.equal(check.status, 'nova-versao');
-  assert.deepEqual(check.diff.operacoes.adicionadas, ['GET /api/v1/teste-novo']);
-  assert.equal(client.ops.put, 0, 'verificar não grava nada no Blob');
+  const pre = await fetch(`${base}/api/rhnet/enviar`, { method: 'OPTIONS', headers: { ...origem, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,x-origem' } });
+  assert.match(pre.headers.get('access-control-allow-headers') || '', /x-origem/i);
 
-  const upd = await send(1);
+  const r = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...origem, 'Content-Type': 'application/gzip', 'x-origem': 'favorito' }, body: zlib.gzipSync(JSON.stringify(nova)) });
+  const upd = await r.json();
   assert.equal(upd.status, 'atualizada');
-  const ops = await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' });
-  assert.equal(ops.totalItems, 1);
+  assert.deepEqual(upd.diff.operacoes.adicionadas, ['GET /api/v1/teste-novo']);
+  assert.equal((await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' })).totalItems, 1);
 
   const st = await specAtual();
   assert.equal(st.atual.operacoes, 136);
-  assert.equal(st.fonte.url, 'https://rhnet-hml.sci.com.br/x.json', 'lembra a URL usada');
-  assert.ok(st.eventos.some((e) => e.tipo === 'atualizado'));
+  assert.ok(st.atualizadaEm);
+  assert.equal(st.eventos[0].origem, 'favorito');
+
+  const denovo = await (await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nova) })).json();
+  assert.equal(denovo.status, 'sem-mudancas');
 });
 
 test('outra instância (cache vazio) enxerga a versão do Blob', async () => {
@@ -122,14 +124,14 @@ test('restaurar a versão anterior e enviar conteúdo inválido', async () => {
   const { default: bundle } = await import('../src/specs.bundle.js');
   const v2 = structuredClone(bundle.rhnet);
   v2.info.version = '2.0.0';
-  await fetch(`${base}/admin/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: JSON.stringify(v2) });
+  await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: JSON.stringify(v2) });
   const st = await specAtual();
   assert.equal(st.backups.length, 1);
-  const r = await (await fetch(`${base}/admin/api/rhnet/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) })).json();
-  assert.equal(r.aplicada, true);
+  const r = await (await fetch(`${base}/api/rhnet/restaurar`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: st.backups[0].arquivo }) })).json();
+  assert.equal(r.status, 'atualizada');
   assert.equal((await mcpCall('list_operations', { apiId: 'rhnet', tag: 'Novo' })).totalItems, 1);
 
-  const ruim = await fetch(`${base}/admin/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: '<html>login</html>' });
+  const ruim = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: '<html>login</html>' });
   assert.equal(ruim.status, 400);
 });
 

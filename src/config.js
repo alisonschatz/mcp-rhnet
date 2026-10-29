@@ -35,60 +35,20 @@ export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_MATCHES_PER_API = 5;
 
 export const SERVER_NAME = 'mcp-rhnet';
-export const SERVER_VERSION = '2.0.0';
+export const SERVER_VERSION = '2.1.0';
 
 // ---------------------------------------------------------------------------
-// Atualização automática da spec
+// Atualização da spec
 // ---------------------------------------------------------------------------
 
-function parseHeaders(raw) {
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    console.error('[config] RHNET_SPEC_HEADERS não é um JSON válido; ignorado.');
-    return {};
-  }
-}
+/** Link do JSON da spec do RH Net (só abre na VPN). O favorito da página usa este link. */
+export const RHNET_SPEC_URL = process.env.RHNET_SPEC_URL || 'https://api-rhnet-hml.sci.com.br/docs?api-docs.json';
 
-/**
- * De onde cada API é baixada. Hoje só o RH Net (exige VPN).
- * A URL pode apontar direto para o JSON ou para a página do Swagger UI: nesse caso
- * o atualizador procura o link do JSON dentro da página.
- */
-export const SPEC_SOURCES = {
-  rhnet: {
-    url: process.env.RHNET_SPEC_URL || 'https://api-rhnet-hml.sci.com.br/docs?api-docs.json',
-    urlFromEnv: Boolean(process.env.RHNET_SPEC_URL),
-    headers: {
-      ...(process.env.RHNET_SPEC_TOKEN ? { Authorization: `Bearer ${process.env.RHNET_SPEC_TOKEN}` } : {}),
-      ...(process.env.RHNET_SPEC_COOKIE ? { Cookie: process.env.RHNET_SPEC_COOKIE } : {}),
-      ...parseHeaders(process.env.RHNET_SPEC_HEADERS),
-    },
-  },
-};
+/** APIs que podem ser atualizadas pela página. */
+export const UPDATABLE_APIS = ['rhnet'];
 
-/** Intervalo da verificação automática em minutos (0 = desligada). */
-export const SPEC_AUTO_UPDATE_MINUTES = Number(process.env.SPEC_AUTO_UPDATE_MINUTES || 0);
+/** Quantas versões anteriores manter para restaurar. */
 export const SPEC_HISTORY_LIMIT = Math.max(1, Number(process.env.SPEC_HISTORY_LIMIT || 10));
-export const SPEC_FETCH_TIMEOUT_MS = Number(process.env.SPEC_FETCH_TIMEOUT_MS || 60000);
+
 /** Com Vercel Blob: de quanto em quanto tempo cada instância confere se há versão nova. */
 export const SPEC_SYNC_SECONDS = Number(process.env.SPEC_SYNC_SECONDS || 15);
-
-/**
- * Quem baixa a spec quando se clica em "Atualizar":
- * - "navegador": a página baixa usando a rede de quem está usando (a VPN do seu computador)
- *   e envia ao servidor. Padrão na Vercel, que não alcança a VPN.
- * - "servidor": o próprio servidor baixa. Padrão local/Docker em rede interna.
- */
-export const SPEC_FETCH_MODE = process.env.SPEC_FETCH_MODE || (process.env.VERCEL ? 'navegador' : 'servidor');
-
-/**
- * Tela /admin. Com ADMIN_TOKEN ela fica sempre ligada (exige o token). Sem token, só
- * quando o servidor ouve apenas na máquina local. Na Vercel/host público sem token,
- * a tela aparece só com a instrução de configurar o token.
- */
-export const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
-const LOCAL_ONLY = !process.env.VERCEL && ['127.0.0.1', 'localhost', '::1'].includes(HTTP_HOST);
-export const ADMIN_ENABLED = process.env.ADMIN_ENABLED === '0' ? false : Boolean(ADMIN_TOKEN) || LOCAL_ONLY;

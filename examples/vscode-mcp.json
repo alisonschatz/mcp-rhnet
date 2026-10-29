@@ -1,13 +1,8 @@
 {
   "servers": {
-    "rhnet-local": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["${workspaceFolder}/src/stdio.js"]
-    },
-    "rhnet-http": {
+    "rhnet": {
       "type": "http",
-      "url": "http://127.0.0.1:3001/mcp"
+      "url": "https://mcp-rhnet.vercel.app/mcp"
     }
   }
 }

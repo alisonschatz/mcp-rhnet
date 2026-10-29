@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP RH Net</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1b2130; --muted: #6b7385; --line: #e5e7ec;
+    --accent: #1f6feb; --on-accent: #fff; --ok: #12805c; --ok-bg: #e8f6ef; --err: #c0362c; --err-bg: #fdeceb;
+    --chg: #9a6700; --chg-bg: #fff4d6; --soft: #f1f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1117; --card: #161b22; --text: #e6e8ec; --muted: #949cab; --line: #272e39;
+      --accent: #4c8dff; --on-accent: #0b0e13; --ok: #3ccf91; --ok-bg: #12291f; --err: #ff7b72; --err-bg: #2d1615;
+      --chg: #e3b341; --chg-bg: #2b2412; --soft: #1d232c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 12px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .conector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
+  code { font: 13px ui-monospace, Consolas, monospace; background: var(--soft); padding: 3px 7px; border-radius: 6px; color: var(--text); overflow-wrap: anywhere; }
+  button, .btn { font: inherit; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  button:disabled { opacity: .5; cursor: default; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); cursor: grab; }
+  a { color: var(--accent); }
+  .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 500; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat .v { font-size: 22px; font-weight: 600; }
+  .stat .l { font-size: 12px; color: var(--muted); }
+  ol { margin: 0; padding-left: 20px; }
+  ol li { margin: 0 0 12px; padding-left: 4px; }
+  ol li:last-child { margin-bottom: 0; }
+  .drop { margin-top: 16px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; color: var(--muted); font-size: 14px; }
+  .drop.over { border-color: var(--accent); color: var(--text); }
+  .msg { margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.err { background: var(--err-bg); color: var(--err); }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+  .add { background: var(--ok-bg); color: var(--ok); } .del { background: var(--err-bg); color: var(--err); } .chg { background: var(--chg-bg); color: var(--chg); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td { padding: 9px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tr:first-child td { border-top: 0; }
+  td.r { text-align: right; white-space: nowrap; }
+  .muted { color: var(--muted); }
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+  @media (max-width: 520px) { .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>MCP RH Net</h1>
+  <div class="conector">Conector: <code id="mcpUrl"></code><button class="link" id="copiar">Copiar</button></div>
+
+  <section class="card">
+    <h2>Spec em uso</h2>
+    <div class="stats">
+      <div class="stat"><div class="v" id="ops">—</div><div class="l">operações</div></div>
+      <div class="stat"><div class="v" id="schemas">—</div><div class="l">schemas</div></div>
+      <div class="stat"><div class="v" id="quando">—</div><div class="l">atualizada em</div></div>
+    </div>
+    <div id="aviso"></div>
+  </section>
+
+  <section class="card">
+    <h2>Atualizar</h2>
+    <ol>
+      <li>Arraste para a barra de favoritos: <a class="btn primary" id="favorito" href="#">⟳ Atualizar MCP RH Net</a></li>
+      <li>Com a VPN ligada, abra a <a id="specLink" target="_blank" rel="noopener">spec do RH Net</a> e clique no favorito.</li>
+    </ol>
+    <div class="drop" id="drop">Ou arraste o arquivo JSON aqui · <label for="arquivo" style="color:var(--accent);cursor:pointer">escolher</label>
+      <input type="file" id="arquivo" accept=".json,application/json" hidden>
+    </div>
+    <div id="resultado"></div>
+  </section>
+
+  <section class="card">
+    <h2>Histórico</h2>
+    <table><tbody id="eventos"></tbody></table>
+    <details><summary>Restaurar versão anterior</summary><table><tbody id="backups"></tbody></table></details>
+  </section>
+</main>
+<script>
+const API = 'rhnet';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const data = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
+const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB');
+
+$('mcpUrl').textContent = location.origin + '/mcp';
+$('copiar').onclick = async () => {
+  try { await navigator.clipboard.writeText(location.origin + '/mcp'); $('copiar').textContent = 'Copiado'; setTimeout(() => ($('copiar').textContent = 'Copiar'), 1500); } catch {}
+};
+$('favorito').href = `javascript:import('${location.origin}/favorito.js?v='+Date.now()).catch(()=>alert('Não foi possível carregar o MCP RH Net.'));void 0`;
+$('favorito').onclick = (ev) => ev.preventDefault();
+
+function mudancas(r) {
+  if (!r) return '';
+  const o = r.operacoes, s = r.schemas, p = [];
+  if (o.adicionadas) p.push(`<span class="pill add">+${o.adicionadas} op</span>`);
+  if (o.removidas) p.push(`<span class="pill del">−${o.removidas} op</span>`);
+  if (o.alteradas) p.push(`<span class="pill chg">~${o.alteradas} op</span>`);
+  if (s.adicionados + s.removidos + s.alterados) p.push(`<span class="pill chg">${s.adicionados + s.removidos + s.alterados} schema</span>`);
+  return p.join('') || '<span class="muted">sem mudanças</span>';
+}
+
+async function api(path, opts) {
+  const r = await fetch('/api/' + API + path, opts);
+  const body = await r.json().catch(() => ({ erro: 'Resposta inválida do servidor.' }));
+  if (!r.ok) throw new Error(body.erro || 'Falha.');
+  return body;
+}
+
+async function carregar() {
+  const st = await api('/status');
+  $('specLink').href = st.specUrl;
+  $('ops').textContent = st.atual?.operacoes ?? '—';
+  $('schemas').textContent = st.atual?.schemas ?? '—';
+  $('quando').textContent = st.atualizadaEm ? data(st.atualizadaEm) : 'deploy';
+  $('aviso').innerHTML = st.armazenamento.gravavel ? '' : `<div class="msg err">${esc(st.armazenamento.motivo)}</div>`;
+  $('eventos').innerHTML = st.eventos.slice(0, 10).map((e) =>
+    `<tr><td>${data(e.data)}</td><td>${mudancas(e.resumo)}</td><td class="r muted">${esc(e.origem)}</td></tr>`).join('') ||
+    '<tr><td class="muted">Nenhuma atualização ainda.</td></tr>';
+  $('backups').innerHTML = st.backups.map((b) =>
+    `<tr><td>${data(b.salvoEm)}</td><td class="muted">${kb(b.tamanho)}</td><td class="r"><button data-arq="${esc(b.arquivo)}">Restaurar</button></td></tr>`).join('') ||
+    '<tr><td class="muted">Nenhuma versão anterior.</td></tr>';
+}
+
+function resultado(r) {
+  if (r.status === 'invalida') {
+    $('resultado').innerHTML = `<div class="msg err">${esc(r.mensagem)}<br>${r.erros.slice(0, 5).map(esc).join('<br>')}</div>`;
+  } else {
+    $('resultado').innerHTML = `<div class="msg ok">✔ ${esc(r.mensagem)} ${r.status === 'atualizada' ? mudancas(r.resumo) : ''}</div>`;
+  }
+}
+
+async function acao(fn) {
+  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
+  $('resultado').innerHTML = '';
+  try { resultado(await fn()); }
+  catch (e) { $('resultado').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  finally { document.querySelectorAll('button').forEach((b) => (b.disabled = false)); carregar().catch(() => {}); }
+}
+
+async function enviarArquivo(file) {
+  let body = file, tipo = 'application/json';
+  if (typeof CompressionStream !== 'undefined') {
+    body = await new Response(file.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+    tipo = 'application/gzip';
+  }
+  return api('/enviar', { method: 'POST', headers: { 'Content-Type': tipo }, body });
+}
+
+$('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; if (f) acao(() => enviarArquivo(f)); };
+const drop = $('drop');
+drop.ondragover = (ev) => { ev.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) acao(() => enviarArquivo(f)); };
+$('backups').onclick = (ev) => {
+  const arq = ev.target.dataset?.arq;
+  if (arq && confirm('Restaurar esta versão?')) {
+    acao(() => api('/restaurar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) }));
+  }
+};
+// Ao voltar para a aba (depois de usar o favorito), mostra a versão nova.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar().catch(() => {}); });
+
+carregar().catch((e) => ($('aviso').innerHTML = `<div class="msg err">${esc(e.message)}</div>`));
+</script>
+</body>
+</html>

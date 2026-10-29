@@ -1,6 +1,6 @@
 {
   "name": "mcp-rhnet",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Servidor MCP com a spec OpenAPI do RH Net, para documentação e criação de casos de teste",
   "type": "module",
   "private": true,
@@ -17,9 +17,7 @@
     "build": "node scripts/validate-specs.js && node scripts/build-bundle.js",
     "validate": "node scripts/validate-specs.js",
     "inspector": "npx @modelcontextprotocol/inspector node src/stdio.js",
-    "test": "node --test",
-    "spec:atualizar": "node scripts/update-spec.js",
-    "spec:verificar": "node scripts/update-spec.js --verificar"
+    "test": "node --test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.1",
