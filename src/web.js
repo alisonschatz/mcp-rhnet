@@ -14,6 +14,13 @@ const jsonRpcError = (res, status, code, message) => res.status(status).json({ j
  */
 export function mountMcpRoutes(app, { extraRoutes } = {}) {
   app.disable('x-powered-by');
+  // Vercel Blob conectado via OIDC (variável BLOB_STORE_ID): a Vercel manda o token OIDC em cada
+  // requisição. Guardamos para o SDK do Blob usar mesmo fora do contexto da requisição.
+  app.use((req, _res, next) => {
+    const oidc = req.headers['x-vercel-oidc-token'];
+    if (typeof oidc === 'string' && oidc) process.env.VERCEL_OIDC_TOKEN = oidc;
+    next();
+  });
   app.use(
     cors({
       origin: '*',

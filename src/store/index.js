@@ -12,14 +12,47 @@ import { createFsStore } from './fs-store.js';
 let store = null;
 let readOnlyReason = null;
 
+/**
+ * Acha as credenciais do Blob. Ao conectar o store a Vercel cria BLOB_READ_WRITE_TOKEN, mas
+ * se foi definido um prefixo na conexão o nome muda (ex.: MCP_RHNET_READ_WRITE_TOKEN).
+ */
+export function findBlobCredentials(env = process.env) {
+  if (env.BLOB_READ_WRITE_TOKEN) return { opts: {}, origem: 'BLOB_READ_WRITE_TOKEN' };
+  for (const [k, v] of Object.entries(env)) {
+    if (/READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(v || '')) return { opts: { token: v }, origem: k };
+  }
+  if (env.BLOB_STORE_ID) return { opts: {}, origem: 'BLOB_STORE_ID' };
+  for (const [k, v] of Object.entries(env)) {
+    if (/BLOB.*STORE_ID$|STORE_ID$/.test(k) && /^store_/.test(v || '')) return { opts: { storeId: v }, origem: k };
+  }
+  return null;
+}
+
+/** Repassa as credenciais encontradas para cada chamada do SDK. */
+function withCredentials(sdk, opts) {
+  if (!Object.keys(opts).length) return sdk;
+  return {
+    put: (p, body, o = {}) => sdk.put(p, body, { ...o, ...opts }),
+    get: (p, o = {}) => sdk.get(p, { ...o, ...opts }),
+    list: (o = {}) => sdk.list({ ...o, ...opts }),
+    del: (u, o = {}) => sdk.del(u, { ...o, ...opts }),
+  };
+}
+
 async function init() {
   if (store || readOnlyReason) return;
-  if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
-    const client = await import('@vercel/blob');
-    store = createBlobStore({ client });
+  const creds = findBlobCredentials();
+  if (creds) {
+    const sdk = await import('@vercel/blob');
+    store = createBlobStore({ client: withCredentials(sdk, creds.opts) });
+    store.descricao = `Vercel Blob (privado · ${creds.origem})`;
   } else if (process.env.VERCEL) {
+    // Só os nomes (nunca os valores) para ajudar a diagnosticar.
+    const nomes = Object.keys(process.env).filter((k) => /BLOB|STORE/i.test(k));
     readOnlyReason =
-      'Na Vercel a spec precisa de um armazenamento: crie um Blob Store em Storage → Blob e conecte ao projeto (isso cria a variável BLOB_READ_WRITE_TOKEN). Depois faça um redeploy.';
+      'Este deploy não recebeu a variável do Blob (BLOB_READ_WRITE_TOKEN). Confira em Settings do projeto → Environment Variables se ela existe para Production; ' +
+      'se existir, faça um Redeploy (Deployments → ⋯ → Redeploy), porque variáveis novas só valem para deploys feitos depois delas.' +
+      (nomes.length ? ` Variáveis parecidas encontradas: ${nomes.join(', ')}.` : ' Nenhuma variável BLOB_* chegou a este deploy.');
   } else {
     store = createFsStore({ specsDir: SPECS_DIR });
   }

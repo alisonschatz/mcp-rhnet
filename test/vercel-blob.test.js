@@ -132,3 +132,11 @@ test('restaurar a versão anterior e enviar conteúdo inválido', async () => {
   const ruim = await fetch(`${base}/admin/api/rhnet/enviar`, { method: 'POST', headers: { ...H, 'Content-Type': 'text/plain' }, body: '<html>login</html>' });
   assert.equal(ruim.status, 400);
 });
+
+test('acha a variável do Blob mesmo com prefixo personalizado', async () => {
+  const { findBlobCredentials } = await import('../src/store/index.js');
+  assert.equal(findBlobCredentials({ BLOB_READ_WRITE_TOKEN: 'x' }).origem, 'BLOB_READ_WRITE_TOKEN');
+  const pref = findBlobCredentials({ MCP_RHNET_READ_WRITE_TOKEN: 'vercel_blob_rw_abc_123' });
+  assert.deepEqual(pref, { opts: { token: 'vercel_blob_rw_abc_123' }, origem: 'MCP_RHNET_READ_WRITE_TOKEN' });
+  assert.equal(findBlobCredentials({ OUTRA: '1' }), null);
+});

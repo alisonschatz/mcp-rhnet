@@ -102,6 +102,16 @@
       </div>
     </section>
 
+    <section class="card" id="favoritoCard">
+      <h2>Atualizar com um clique (favorito)</h2>
+      <div class="sub" style="color:var(--text)">O servidor do RH Net não deixa este site ler a spec direto (CORS). O favorito resolve: ele roda na página do RH Net, lê a spec por lá e envia para cá.</div>
+      <ol class="sub" style="margin:10px 0 0 18px;padding:0;color:var(--text)">
+        <li>Arraste este botão para a barra de favoritos: <a class="btn" id="favorito" href="#" title="Arraste para a barra de favoritos">⟳ Atualizar MCP RH Net</a></li>
+        <li>Para atualizar, clique no favorito (com a VPN ligada). Ele abre a spec do RH Net; clique no favorito de novo nessa página e pronto.</li>
+      </ol>
+      <div class="hint">O favorito leva o seu token de acesso a esta tela: não compartilhe. Se trocar o ADMIN_TOKEN, arraste de novo.</div>
+    </section>
+
     <section class="card">
       <h2>Histórico</h2>
       <div class="tablewrap"><table><thead><tr><th>Quando</th><th>Evento</th><th>Mudanças</th><th>Origem</th></tr></thead><tbody id="eventos"></tbody></table></div>
@@ -221,8 +231,8 @@ function mostrarResultado(r) {
 
 function mostrarFalha(e) {
   if (e.precisaToken) return pedirLogin(e.message);
-  let html = `<div class="msg err"><strong>${esc(e.message)}</strong>${e.dica ? `<div class="d">${e.dica}</div>` : ''}`;
-  if (e.abrirUrl) html += `<div class="acoes row"><a class="btn" href="${esc(e.abrirUrl)}" target="_blank" rel="noopener">Abrir o JSON em outra aba</a><span class="sub">Salve com Ctrl+S e arraste o arquivo no quadro abaixo.</span></div>`;
+  let html = `<div class="msg ${e.cors ? 'warn' : 'err'}"><strong>${esc(e.message)}</strong>${e.dica ? `<div class="d">${e.dica}</div>` : ''}`;
+  if (e.abrirUrl) html += `<div class="acoes row"><a class="btn" href="${esc(e.abrirUrl)}" target="_blank" rel="noopener">Abrir o JSON em outra aba</a><span class="sub">Salve com Ctrl+S e arraste o arquivo no quadro abaixo — ou use o favorito "Atualizar MCP RH Net" (mais abaixo), que faz isso com um clique.</span></div>`;
   situacao(html + '</div>');
 }
 
@@ -245,9 +255,9 @@ async function baixarNoNavegador(url) {
   try {
     r = await fetch(url, { cache: 'no-store', credentials: 'omit' });
   } catch {
-    throw new Falha('Seu navegador não conseguiu ler a spec.',
-      'Confira se a <b>VPN</b> está conectada. Se estiver, o servidor do RH Net não permite que outro site leia o arquivo (CORS) — use o botão abaixo e arraste o arquivo, ou peça ao time do RH Net para liberar CORS desta URL para este site, que aí fica a um clique.',
-      { abrirUrl: url });
+    throw new Falha('Este site não consegue ler a spec direto do RH Net.',
+      'Com a VPN ligada, isso acontece porque o servidor do RH Net não libera a leitura por outros sites (CORS). Use o favorito <b>⟳ Atualizar MCP RH Net</b> (mais abaixo): ele atualiza com um clique na página da spec. Se a VPN estiver desligada, ligue e tente de novo.',
+      { abrirUrl: url, cors: true });
   }
   if (!r.ok) throw new Falha(`O RH Net respondeu ${r.status} ao baixar a spec.`, r.status === 401 || r.status === 403 ? 'A URL pede login. Confira se é o link do JSON da documentação.' : null, { abrirUrl: url });
   const texto = await r.text();
@@ -343,6 +353,44 @@ $('backups').onclick = (ev) => {
   }
 };
 
+/**
+ * Favorito (bookmarklet). Na página do RH Net (mesma origem da spec, então sem CORS) ele baixa a
+ * spec e envia para esta tela. Fora dela, abre o link da spec.
+ */
+function montarFavorito() {
+  const specUrl = urlAtual();
+  if (!specUrl) return;
+  const cfg = { site: location.origin, token, spec: specUrl, api: API };
+  const codigo = async (cfg) => {
+    const caixa = (txt, cor) => {
+      let d = document.getElementById('__mcp_rhnet');
+      if (!d) { d = document.createElement('div'); d.id = '__mcp_rhnet'; document.body.appendChild(d); }
+      d.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;max-width:420px;padding:14px 16px;border-radius:10px;font:14px/1.45 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);color:#fff;background:' + cor;
+      d.textContent = txt;
+    };
+    const alvo = new URL(cfg.spec);
+    if (location.origin !== alvo.origin) { location.href = cfg.spec; return; }
+    try {
+      caixa('Lendo a spec do RH Net…', '#1f6feb');
+      const texto = await (await fetch(cfg.spec, { cache: 'no-store' })).text();
+      const j = JSON.parse(texto);
+      if (!j.openapi && !j.swagger) throw new Error('O link não devolveu a spec OpenAPI.');
+      caixa('Enviando para o MCP…', '#1f6feb');
+      let body = texto, tipo = 'text/plain';
+      if (typeof CompressionStream !== 'undefined') { body = await new Response(new Blob([texto]).stream().pipeThrough(new CompressionStream('gzip'))).blob(); tipo = 'application/gzip'; }
+      const r = await fetch(cfg.site + '/admin/api/' + cfg.api + '/enviar?aplicar=1', { method: 'POST', headers: { 'Content-Type': tipo, 'x-admin-token': cfg.token, 'x-origem': encodeURIComponent('favorito: ' + cfg.spec), 'x-url': encodeURIComponent(cfg.spec) }, body });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.erro || ('Falha ' + r.status));
+      const o = res.resumo && res.resumo.operacoes;
+      const det = res.status === 'atualizada' && o ? ' (+' + o.adicionadas + ' / −' + o.removidas + ' / ~' + o.alteradas + ' operações)' : '';
+      caixa((res.status === 'sem-mudancas' ? '✔ A spec já estava atualizada.' : res.status === 'atualizada' ? '✔ Spec atualizada no MCP' + det + '.' : res.mensagem), res.status === 'invalida' ? '#c0362c' : '#12805c');
+    } catch (e) {
+      caixa('✖ ' + e.message, '#c0362c');
+    }
+  };
+  $('favorito').href = 'javascript:(' + codigo.toString() + ')(' + JSON.stringify(cfg) + ');void 0';
+}
+
 async function iniciar() {
   try {
     await recarregarStatus();
@@ -353,6 +401,9 @@ async function iniciar() {
   }
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
+  montarFavorito();
+  $('url').addEventListener('change', montarFavorito);
+  $('favorito').onclick = (ev) => { ev.preventDefault(); alert('Arraste este botão para a barra de favoritos do navegador.'); };
   if (!status.armazenamento.gravavel) {
     situacao(`<div class="msg err"><strong>O servidor ainda não consegue guardar a spec.</strong><div class="d">${esc(status.armazenamento.motivo || '')}</div></div>`);
     return bloquear();
