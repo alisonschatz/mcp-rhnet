@@ -8,7 +8,7 @@ import { validateSpec } from './validate.js';
 export { compareSpecs } from './spec-diff.js';
 
 /**
- * Atualização da spec com o conteúdo enviado pela página (favorito ou arquivo).
+ * Atualização da spec com o arquivo enviado pela página.
  * Fluxo: parse → valida → compara com a atual → grava no store (Vercel Blob ou disco),
  * guardando a anterior. Uma spec inválida nunca substitui a atual, e o MCP passa a usar
  * a versão nova sem reiniciar.

@@ -13,9 +13,8 @@ const jsonRpcError = (res, status, code, message) => res.status(status).json({ j
  * Monta o app (Vercel e servidor local):
  * - /mcp         endpoint MCP (público, stateless)
  * - /            página para atualizar a spec
- * - /favorito.js script do favorito
- * - /api/...     usada pela página e pelo favorito
- * `siteFiles` traz a página e o favorito empacotados (Vercel); localmente são lidos do disco.
+ * - /api/...     usada pela página
+ * `siteFiles` traz a página empacotada (Vercel); localmente ela é lida do disco.
  */
 export function mountMcpRoutes(app, { siteFiles } = {}) {
   app.disable('x-powered-by');
@@ -29,8 +28,7 @@ export function mountMcpRoutes(app, { siteFiles } = {}) {
   app.use(
     cors({
       origin: '*',
-      // x-origem: o favorito envia a spec a partir da página do RH Net (outra origem).
-      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID', 'x-origem'],
+      allowedHeaders: ['Content-Type', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version', 'Last-Event-ID'],
       exposedHeaders: ['Mcp-Session-Id', 'Mcp-Protocol-Version'],
     })
   );

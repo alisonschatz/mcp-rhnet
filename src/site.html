@@ -27,17 +27,20 @@
   code { font: 13px ui-monospace, Consolas, monospace; background: var(--soft); padding: 3px 7px; border-radius: 6px; color: var(--text); overflow-wrap: anywhere; }
   button, .btn { font: inherit; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
   button:disabled { opacity: .5; cursor: default; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); cursor: grab; }
   a { color: var(--accent); }
   .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 500; }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .stat .v { font-size: 22px; font-weight: 600; }
   .stat .l { font-size: 12px; color: var(--muted); }
   ol { margin: 0; padding-left: 20px; }
-  ol li { margin: 0 0 12px; padding-left: 4px; }
+  ol li { margin: 0 0 10px; padding-left: 4px; }
   ol li:last-child { margin-bottom: 0; }
-  .drop { margin-top: 16px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; color: var(--muted); font-size: 14px; }
-  .drop.over { border-color: var(--accent); color: var(--text); }
+  .drop { display: block; margin-top: 16px; border: 1.5px dashed var(--line); border-radius: 10px; padding: 28px 14px; text-align: center; color: var(--muted); font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop strong { color: var(--text); font-weight: 600; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--soft); }
+  .drop.busy { pointer-events: none; opacity: .6; }
+  .fake-link { color: var(--accent); }
+  kbd { font: 12px ui-monospace, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; background: var(--card); }
   .msg { margin-top: 14px; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
   .msg.ok { background: var(--ok-bg); color: var(--ok); }
   .msg.err { background: var(--err-bg); color: var(--err); }
@@ -71,12 +74,14 @@
   <section class="card">
     <h2>Atualizar</h2>
     <ol>
-      <li>Arraste para a barra de favoritos: <a class="btn primary" id="favorito" href="#">⟳ Atualizar MCP RH Net</a></li>
-      <li>Com a VPN ligada, abra a <a id="specLink" target="_blank" rel="noopener">spec do RH Net</a> e clique no favorito.</li>
+      <li>Com a VPN ligada, <a class="btn" id="specLink" target="_blank" rel="noopener">Abrir spec do RH Net ↗</a></li>
+      <li>Salve o arquivo com <kbd>Ctrl</kbd>+<kbd>S</kbd>.</li>
+      <li>Envie o arquivo:</li>
     </ol>
-    <div class="drop" id="drop">Ou arraste o arquivo JSON aqui · <label for="arquivo" style="color:var(--accent);cursor:pointer">escolher</label>
-      <input type="file" id="arquivo" accept=".json,application/json" hidden>
-    </div>
+    <label class="drop" id="drop" for="arquivo">
+      <strong>Arraste o arquivo aqui</strong> ou <span class="fake-link">clique para selecionar</span>
+      <input type="file" id="arquivo" hidden>
+    </label>
     <div id="resultado"></div>
   </section>
 
@@ -89,6 +94,7 @@
 <script>
 const API = 'rhnet';
 const $ = (id) => document.getElementById(id);
+const drop = document.getElementById('drop');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const data = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
 const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB');
@@ -97,8 +103,6 @@ $('mcpUrl').textContent = location.origin + '/mcp';
 $('copiar').onclick = async () => {
   try { await navigator.clipboard.writeText(location.origin + '/mcp'); $('copiar').textContent = 'Copiado'; setTimeout(() => ($('copiar').textContent = 'Copiar'), 1500); } catch {}
 };
-$('favorito').href = `javascript:import('${location.origin}/favorito.js?v='+Date.now()).catch(()=>alert('Não foi possível carregar o MCP RH Net.'));void 0`;
-$('favorito').onclick = (ev) => ev.preventDefault();
 
 function mudancas(r) {
   if (!r) return '';
@@ -142,10 +146,11 @@ function resultado(r) {
 
 async function acao(fn) {
   document.querySelectorAll('button').forEach((b) => (b.disabled = true));
-  $('resultado').innerHTML = '';
+  drop.classList.add('busy');
+  $('resultado').innerHTML = '<div class="msg" style="background:var(--soft)">Enviando…</div>';
   try { resultado(await fn()); }
   catch (e) { $('resultado').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
-  finally { document.querySelectorAll('button').forEach((b) => (b.disabled = false)); carregar().catch(() => {}); }
+  finally { drop.classList.remove('busy'); document.querySelectorAll('button').forEach((b) => (b.disabled = false)); carregar().catch(() => {}); }
 }
 
 async function enviarArquivo(file) {
@@ -154,22 +159,22 @@ async function enviarArquivo(file) {
     body = await new Response(file.stream().pipeThrough(new CompressionStream('gzip'))).blob();
     tipo = 'application/gzip';
   }
-  return api('/enviar', { method: 'POST', headers: { 'Content-Type': tipo }, body });
+  return api('/enviar', { method: 'POST', headers: { 'Content-Type': tipo, 'x-arquivo': encodeURIComponent(file.name) }, body });
 }
 
 $('arquivo').onchange = (ev) => { const f = ev.target.files[0]; ev.target.value = ''; if (f) acao(() => enviarArquivo(f)); };
-const drop = $('drop');
 drop.ondragover = (ev) => { ev.preventDefault(); drop.classList.add('over'); };
 drop.ondragleave = () => drop.classList.remove('over');
 drop.ondrop = (ev) => { ev.preventDefault(); drop.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) acao(() => enviarArquivo(f)); };
+// Soltar o arquivo em qualquer lugar da página também envia (e evita o navegador abrir o arquivo).
+window.addEventListener('dragover', (ev) => ev.preventDefault());
+window.addEventListener('drop', (ev) => { if (ev.defaultPrevented) return; ev.preventDefault(); const f = ev.dataTransfer?.files[0]; if (f) acao(() => enviarArquivo(f)); });
 $('backups').onclick = (ev) => {
   const arq = ev.target.dataset?.arq;
   if (arq && confirm('Restaurar esta versão?')) {
     acao(() => api('/restaurar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ arquivo: arq }) }));
   }
 };
-// Ao voltar para a aba (depois de usar o favorito), mostra a versão nova.
-document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar().catch(() => {}); });
 
 carregar().catch((e) => ($('aviso').innerHTML = `<div class="msg err">${esc(e.message)}</div>`));
 </script>

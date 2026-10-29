@@ -7,12 +7,11 @@ Servidor MCP com a spec OpenAPI do **RH Net**, para a IA consultar a documentaç
 
 ## Atualizar a spec
 
-1. Na página, arraste o botão **⟳ Atualizar MCP RH Net** para a barra de favoritos (uma vez só).
-2. Com a VPN ligada, abra a [spec do RH Net](https://api-rhnet-hml.sci.com.br/docs?api-docs.json) e clique no favorito.
+1. Com a VPN ligada, clique em **Abrir spec do RH Net** na página.
+2. Salve o arquivo com Ctrl+S.
+3. Arraste o arquivo na página (ou clique para selecionar).
 
-O MCP passa a usar a versão nova na hora, sem deploy. Também dá para arrastar o arquivo JSON na página. As versões anteriores ficam no histórico e podem ser restauradas.
-
-O favorito precisa rodar na página da spec porque o RH Net só abre pela VPN e não deixa outros sites lerem o arquivo.
+O MCP passa a usar a versão nova na hora, sem deploy. As versões anteriores ficam no histórico e podem ser restauradas.
 
 ## Conectar na IA
 
@@ -61,7 +60,6 @@ Prompts: `casos_de_teste_operacao` e `plano_de_testes_api`. Resources: `docs://i
 specs/rhnet.json        spec inicial
 src/
   site.html · site.js   página (/) e API usada por ela
-  favorito.js           script do favorito
   updater.js            valida, compara, grava e restaura versões
   store/                Vercel Blob (produção) ou disco (local)
   mcp.js · openapi.js · testing.js · specs.js · validate.js · spec-diff.js

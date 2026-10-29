@@ -41,7 +41,7 @@ export const SERVER_VERSION = '2.1.0';
 // Atualização da spec
 // ---------------------------------------------------------------------------
 
-/** Link do JSON da spec do RH Net (só abre na VPN). O favorito da página usa este link. */
+/** Link do JSON da spec do RH Net (só abre na VPN). A página abre este link. */
 export const RHNET_SPEC_URL = process.env.RHNET_SPEC_URL || 'https://api-rhnet-hml.sci.com.br/docs?api-docs.json';
 
 /** APIs que podem ser atualizadas pela página. */

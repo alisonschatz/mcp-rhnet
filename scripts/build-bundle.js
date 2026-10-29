@@ -2,7 +2,7 @@
 /**
  * Gera, para deploy serverless (Vercel):
  * - src/specs.bundle.js  as specs de specs/ (versão inicial; as atualizações vão para o Blob)
- * - src/site.bundle.js   a página (/) e o script do favorito
+ * - src/site.bundle.js   a página (/)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,5 +22,5 @@ for (const id of listApiIds()) {
 const header = '// Gerado por scripts/build-bundle.js — não editar.\n';
 const read = (f) => fs.readFileSync(path.join(src, f), 'utf8');
 fs.writeFileSync(path.join(src, 'specs.bundle.js'), `${header}export default ${JSON.stringify(bundle)};\n`);
-fs.writeFileSync(path.join(src, 'site.bundle.js'), `${header}export default ${JSON.stringify({ page: read('site.html'), favorito: read('favorito.js') })};\n`);
-console.log(`✔ ${Object.keys(bundle).length} spec(s), página e favorito empacotados`);
+fs.writeFileSync(path.join(src, 'site.bundle.js'), `${header}export default ${JSON.stringify({ page: read('site.html') })};\n`);
+console.log(`✔ ${Object.keys(bundle).length} spec(s), e a página empacotadas`);

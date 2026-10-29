@@ -70,14 +70,10 @@ async function mcpCall(name, args) {
 
 const specAtual = async () => (await fetch(`${base}/api/rhnet/status`)).json();
 
-test('página em / e favorito em /favorito.js com o link da spec', async () => {
-  assert.match(await (await fetch(`${base}/`)).text(), /MCP RH Net/);
-  const fav = await fetch(`${base}/favorito.js`, { headers: { Origin: 'https://api-rhnet-hml.sci.com.br' } });
-  assert.match(fav.headers.get('content-type'), /javascript/);
-  assert.equal(fav.headers.get('access-control-allow-origin'), '*');
-  const js = await fav.text();
-  assert.match(js, /const SPEC = 'https:\/\/api-rhnet-hml\.sci\.com\.br\/docs\?api-docs\.json'/);
-  assert.ok(!js.includes('__SPEC_URL__'));
+test('página em /', async () => {
+  const html = await (await fetch(`${base}/`)).text();
+  assert.match(html, /Abrir spec do RH Net/);
+  assert.equal((await fetch(`${base}/favorito.js`)).status, 404);
 });
 
 test('começa com a spec do deploy e busca pelo navegador', async () => {
@@ -87,16 +83,11 @@ test('começa com a spec do deploy e busca pelo navegador', async () => {
   assert.equal(st.atual.operacoes, 135);
 });
 
-test('favorito envia (gzip) com CORS → MCP já usa a versão nova', async () => {
+test('envio do arquivo (gzip) → MCP já usa a versão nova', async () => {
   const { default: bundle } = await import('../src/specs.bundle.js');
   const nova = structuredClone(bundle.rhnet);
   nova.paths['/api/v1/teste-novo'] = { get: { summary: 'Novo', tags: ['Novo'], responses: { 200: { description: 'ok' }, 400: { description: 'erro' } } } };
-  const origem = { Origin: 'https://api-rhnet-hml.sci.com.br' };
-
-  const pre = await fetch(`${base}/api/rhnet/enviar`, { method: 'OPTIONS', headers: { ...origem, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,x-origem' } });
-  assert.match(pre.headers.get('access-control-allow-headers') || '', /x-origem/i);
-
-  const r = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { ...origem, 'Content-Type': 'application/gzip', 'x-origem': 'favorito' }, body: zlib.gzipSync(JSON.stringify(nova)) });
+  const r = await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/gzip', 'x-arquivo': encodeURIComponent('docs.json') }, body: zlib.gzipSync(JSON.stringify(nova)) });
   const upd = await r.json();
   assert.equal(upd.status, 'atualizada');
   assert.deepEqual(upd.diff.operacoes.adicionadas, ['GET /api/v1/teste-novo']);
@@ -105,7 +96,7 @@ test('favorito envia (gzip) com CORS → MCP já usa a versão nova', async () =
   const st = await specAtual();
   assert.equal(st.atual.operacoes, 136);
   assert.ok(st.atualizadaEm);
-  assert.equal(st.eventos[0].origem, 'favorito');
+  assert.equal(st.eventos[0].origem, 'docs.json');
 
   const denovo = await (await fetch(`${base}/api/rhnet/enviar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nova) })).json();
   assert.equal(denovo.status, 'sem-mudancas');

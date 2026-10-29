@@ -10,12 +10,21 @@ const DIR = path.dirname(fileURLToPath(import.meta.url));
 const readLocal = (name) => fs.readFileSync(path.join(DIR, name), 'utf8');
 
 /**
- * Página principal (/) para atualizar a spec, o script do favorito e a API usada pelos dois.
- * `files` vem do bundle na Vercel; localmente os arquivos são lidos do disco.
+ * Página principal (/) para atualizar a spec enviando o arquivo JSON, e a API usada por ela.
+ * `files` vem do bundle na Vercel; localmente a página é lida do disco.
  */
+/** Nome do arquivo enviado, só para o histórico. */
+function nomeArquivo(v) {
+  try {
+    const nome = decodeURIComponent(v || '').replace(/[^\w .()\-À-ÿ]/g, '').slice(0, 80);
+    return nome || 'arquivo';
+  } catch {
+    return 'arquivo';
+  }
+}
+
 export function mountSiteRoutes(app, { files } = {}) {
   const page = () => files?.page ?? readLocal('site.html');
-  const favorito = () => (files?.favorito ?? readLocal('favorito.js')).replaceAll('__SPEC_URL__', RHNET_SPEC_URL);
 
   const handle = (fn) => async (req, res) => {
     try {
@@ -28,7 +37,6 @@ export function mountSiteRoutes(app, { files } = {}) {
   };
 
   app.get('/', (_req, res) => res.set('Cache-Control', 'no-store').type('html').send(page()));
-  app.get('/favorito.js', (_req, res) => res.set('Cache-Control', 'no-store').type('text/javascript').send(favorito()));
 
   app.get(
     '/api/:apiId/status',
@@ -41,7 +49,7 @@ export function mountSiteRoutes(app, { files } = {}) {
   app.post(
     '/api/:apiId/enviar',
     express.raw({ type: () => true, limit: '25mb' }),
-    handle(async (req) => updateFromText(req.params.apiId, req.body, { origem: req.get('x-origem') === 'favorito' ? 'favorito' : 'arquivo' }))
+    handle(async (req) => updateFromText(req.params.apiId, req.body, { origem: nomeArquivo(req.get('x-arquivo')) }))
   );
   app.post('/api/:apiId/restaurar', handle(async (req) => restoreBackup(req.params.apiId, String(req.body?.arquivo || ''))));
   return app;

@@ -45,7 +45,7 @@ test('compara operações e schemas', () => {
 });
 
 test('página, status e armazenamento em disco', async () => {
-  assert.match(await (await fetch(base)).text(), /Atualizar MCP RH Net/);
+  assert.match(await (await fetch(base)).text(), /Abrir spec do RH Net/);
   const st = await status();
   assert.equal(st.armazenamento.tipo, 'disco');
   assert.equal(st.atual.operacoes, 135);
